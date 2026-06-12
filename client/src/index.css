@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background-color: #faf7f2;
+    color: #342f28;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: 'Playfair Display', serif;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f0e9d8;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #9a7340;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #7d5c33;
+  }
+}
+
+@layer components {
+  /* Buttons */
+  .btn-primary {
+    @apply bg-forest-600 hover:bg-forest-700 text-white font-accent font-semibold tracking-widest uppercase text-sm px-8 py-3 rounded-full transition-all duration-300 shadow-forest hover:shadow-glow hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-secondary {
+    @apply bg-earth-600 hover:bg-earth-700 text-white font-accent font-semibold tracking-widest uppercase text-sm px-8 py-3 rounded-full transition-all duration-300 shadow-earth hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-outline {
+    @apply border-2 border-forest-600 text-forest-600 hover:bg-forest-600 hover:text-white font-accent font-semibold tracking-widest uppercase text-sm px-8 py-3 rounded-full transition-all duration-300 hover:-translate-y-0.5;
+  }
+
+  .btn-ghost {
+    @apply text-earth-700 hover:text-earth-900 font-accent font-semibold tracking-wider uppercase text-sm transition-colors duration-200 underline-offset-4 hover:underline;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white rounded-3xl shadow-card overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-earth;
+  }
+
+  .card-glass {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl overflow-hidden;
+  }
+
+  /* Section headings */
+  .section-label {
+    @apply font-accent text-xs tracking-[0.25em] uppercase text-forest-600 mb-2;
+  }
+
+  .section-title {
+    @apply font-display text-4xl md:text-5xl text-stone-900 leading-tight;
+  }
+
+  .section-subtitle {
+    @apply font-body text-stone-500 text-lg leading-relaxed max-w-xl;
+  }
+
+  /* Inputs */
+  .input-field {
+    @apply w-full bg-earth-50 border border-earth-200 rounded-xl px-4 py-3 text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-forest-400 focus:border-transparent transition-all duration-200;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-accent font-semibold tracking-wider uppercase;
+  }
+
+  .badge-forest {
+    @apply badge bg-forest-100 text-forest-700;
+  }
+
+  .badge-earth {
+    @apply badge bg-earth-100 text-earth-700;
+  }
+
+  .badge-amber {
+    @apply badge bg-amber-100 text-amber-800;
+  }
+
+  /* Skeleton loader */
+  .skeleton {
+    @apply bg-gradient-to-r from-earth-100 via-earth-200 to-earth-100 bg-[length:200%_100%] animate-shimmer rounded-xl;
+  }
+
+  /* Nav link */
+  .nav-link {
+    @apply font-accent text-sm tracking-wider uppercase text-stone-600 hover:text-forest-700 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-forest-600 after:transition-all after:duration-300 hover:after:w-full;
+  }
+
+  /* Hero overlay */
+  .hero-overlay {
+    @apply absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60;
+  }
+
+  /* Divider */
+  .divider-earth {
+    @apply w-16 h-1 bg-gradient-to-r from-forest-500 to-earth-500 rounded-full my-4;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .perspective {
+    perspective: 1000px;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+}
+
+/* Swiper overrides */
+.swiper-pagination-bullet {
+  background: #9a7340 !important;
+  opacity: 0.5;
+}
+
+.swiper-pagination-bullet-active {
+  background: #5c3d1e !important;
+  opacity: 1;
+  transform: scale(1.3);
+}
+
+/* Smooth page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
