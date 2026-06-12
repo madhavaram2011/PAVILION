@@ -1,0 +1,29 @@
+# Node modules
+node_modules/
+
+# Environment files (keep examples only)
+.env
+.env.local
+.env.*.local
+
+# Build outputs and caches
+client/dist/
+dist/
+build_output.txt
+build_errors.log
+*.tsbuildinfo
+
+# Logs
+logs
+*.log
+
+# OS / editor
+.DS_Store
+.vscode/
+!.vscode/extensions.json
+.idea/
+
+# Other
+coverage/
+.cache/
+/.parcel-cache/
