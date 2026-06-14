@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion'
 import { FiArrowRight, FiStar, FiClock, FiUsers } from 'react-icons/fi'
 import { GiCompass, GiLotusFlower } from 'react-icons/gi'
-import { MOCK_TOURS } from '../utils/mockData'
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 const INDIA_DESTINATIONS = [
@@ -560,7 +559,19 @@ function BestTimeSection() {
 
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 export default function HomePage() {
-  const featured = MOCK_TOURS.filter((t: any) => t.isFeatured).slice(0, 3)
+  const [featuredTours, setFeaturedTours] = useState<any[]>([])
+
+  // Fetch featured tours from API
+  useEffect(() => {
+    fetch('http://localhost:5000/api/tours/featured')
+      .then(r => r.json())
+      .then(data => {
+        setFeaturedTours((data.data?.tours || []).slice(0, 3))
+      })
+      .catch(() => {})
+  }, [])
+
+  const featured = featuredTours
 
   return (
     <div style={{ minHeight:'100vh', background:'#FFF8F0', color:'#2C1A0E', fontFamily:'"Crimson Text", Georgia, serif', overflowX:'hidden' }}>

@@ -5,8 +5,8 @@ import { FiArrowRight, FiClock, FiUsers, FiStar, FiMapPin, FiWind, FiCompass, Fi
 import { GiCompass, GiSunrise } from 'react-icons/gi'
 
 // ─── TOUR DATA ────────────────────────────────────────────────────────────────
-// Structured for seamless backend swap: replace TOURS with API response
-const TOURS = [
+// Fetched from API - keeping this for reference only
+const TOURS_PLACEHOLDER = [
   {
     id: 1, slug: 'kerala-backwaters-houseboat',
     title: 'Kerala Backwaters',
@@ -255,7 +255,7 @@ function StarCanvas() {
 }
 
 // ─── BOARDING PREVIEW (full-screen cinematic panel) ──────────────────────────
-function BoardingPreview({ tour, onClose }: { tour: typeof TOURS[0] | null; onClose: () => void }) {
+function BoardingPreview({ tour, onClose }: { tour: any; onClose: () => void }) {
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
   const rotateX = useTransform(mouseY, [-300, 300], [6, -6])
@@ -431,7 +431,7 @@ function BoardingPreview({ tour, onClose }: { tour: typeof TOURS[0] | null; onCl
 }
 
 // ─── DEPARTURE ROW (the main manifest entry) ──────────────────────────────────
-function DepartureRow({ tour, index, onBoard }: { tour: typeof TOURS[0]; index: number; onBoard: () => void }) {
+function DepartureRow({ tour, index, onBoard }: { tour: any; index: number; onBoard: () => void }) {
   const [hovered, setHovered] = useState(false)
   const st = STATUS_STYLE[tour.status] || STATUS_STYLE['ON TIME']
 
@@ -626,11 +626,29 @@ function RegionOrbit({ active, onSelect }: { active: string; onSelect: (r: strin
 
 // ─── MAIN PAGE ─────────────────────────────────────────────────────────────────
 export default function ToursPage() {
+  const [tours, setTours] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [regionFilter, setRegionFilter] = useState('All')
   const [typeFilter, setTypeFilter] = useState('All')
   const [search, setSearch] = useState('')
-  const [selectedTour, setSelectedTour] = useState<typeof TOURS[0] | null>(null)
+  const [selectedTour, setSelectedTour] = useState<any | null>(null)
   const [scrollY, setScrollY] = useState(0)
+
+  // Fetch tours from API on mount
+  useEffect(() => {
+    fetch('http://localhost:5000/api/tours')
+      .then(r => r.json())
+      .then(data => {
+        setTours(data.data?.tours || [])
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error('Failed to load tours:', err)
+        setError('Failed to load tours')
+        setLoading(false)
+      })
+  }, [])
 
   useEffect(() => {
     const h = () => setScrollY(window.scrollY)
@@ -644,7 +662,7 @@ export default function ToursPage() {
     return () => { document.body.style.overflow = '' }
   }, [selectedTour])
 
-  const filtered = useMemo(() => TOURS.filter(t => {
+  const filtered = useMemo(() => tours.filter((t: any) => {
     if (regionFilter !== 'All' && t.region !== regionFilter) return false
     if (typeFilter !== 'All' && t.type !== typeFilter) return false
     if (search) {
@@ -653,7 +671,31 @@ export default function ToursPage() {
     }
     return true
   }), [regionFilter, typeFilter, search])
+  // Show loading state
+  if (loading && tours.length === 0) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'none' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: 60, height: 60, border: '3px solid rgba(249,115,22,0.2)', borderTop: '3px solid #f97316', borderRadius: '50%', margin: '0 auto 20px', animation: 'spin 0.8s linear infinite' }} />
+          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>Loading tours...</p>
+        </div>
+      </div>
+    )
+  }
 
+  // Show error state
+  if (error) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'none' }}>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 14, color: '#ef4444', marginBottom: 20 }}>{error}</p>
+          <button onClick={() => window.location.reload()} style={{ padding: '10px 20px', background: '#f97316', color: '#fff', border: 'none', borderRadius: 2, cursor: 'pointer', fontFamily: '"Space Mono",monospace' }}>
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
   return (
     <div style={{ minHeight: '100vh', background: '#06040f', color: '#f0ebe0', fontFamily: '"Crimson Text",Georgia,serif', overflowX: 'hidden' }}>
       <style>{`
@@ -753,7 +795,7 @@ export default function ToursPage() {
 
               <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
                 style={{ fontFamily: '"Crimson Text",serif', fontStyle: 'italic', fontSize: 19, color: 'rgba(240,235,224,0.45)', maxWidth: 500, lineHeight: 1.65, marginBottom: 32 }}>
-                {TOURS.length} handcrafted expeditions across every corner of Incredible India. Select your route. Board your journey.
+                {tours.length} handcrafted expeditions across every corner of Incredible India. Select your route. Board your journey.
               </motion.p>
 
               {/* Search */}
@@ -925,7 +967,7 @@ export default function ToursPage() {
       {/* Ticker */}
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.04)', padding: '14px 0', overflow: 'hidden', zIndex: 1, position: 'relative' }}>
         <div style={{ display: 'flex', animation: 'tickerScroll 50s linear infinite', width: 'max-content' }}>
-          {[...TOURS, ...TOURS].map((t, i) => (
+          {[...tours, ...tours].map((t, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 28px', borderRight: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>
               <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.12em', color: t.accent }}>{t.boardingCode}</span>
               <span style={{ width: 4, height: 4, borderRadius: '50%', background: t.accent, flexShrink: 0 }} />

@@ -180,9 +180,73 @@ export const getTourBySlug = async (req, res, next) => {
 
     if (!tour) return next(AppError.notFound('Tour'));
 
+    // Normalize to a plain object and add frontend-friendly aliases
+    const t = tour.toObject({ virtuals: true });
+
+    // ── Field aliases for TourDetailPage ──────────────────────────
+    // cover image
+    t.cover = t.coverImage || '';
+
+    // subtitle (may be stored directly, or fall back to region string)
+    t.subtitle = t.subtitle || (t.destination?.region ? `${t.destination.region.toUpperCase()}` : '');
+
+    // region / state — prefer stored values, then populated destination
+    t.region = t.region || t.destination?.region || '';
+    t.state  = t.state  || t.destination?.state  || '';
+
+    // duration — frontend expects a plain number (days)
+    if (t.duration && typeof t.duration === 'object') {
+      t.duration = t.duration.days ?? t.duration.nights ?? 0;
+    }
+
+    // groupSize — frontend expects a plain number (max)
+    if (t.groupSize && typeof t.groupSize === 'object') {
+      t.groupSize = t.groupSize.max ?? 20;
+    }
+
+    // reviews count alias
+    t.reviews = t.reviewCount ?? 0;
+
+    // included / excluded aliases (seed data stored them directly; schema now has both)
+    t.included = t.included?.length ? t.included : (t.includes ?? []);
+    t.excluded = t.excluded?.length ? t.excluded : (t.excludes ?? []);
+
+    // guides — populate returns User docs ({name, avatar}); frontend expects {name, role, exp, summits, img}
+    // If guides are User refs, map to a display shape; if empty provide empty array
+    if (Array.isArray(t.guides)) {
+      t.guides = t.guides.map((g) =>
+        typeof g === 'object' && g !== null
+          ? {
+              name: g.name || 'Guide',
+              role: g.role || 'Expedition Guide',
+              exp: g.experience || g.exp || '',
+              summits: g.speciality || g.summits || '',
+              img: g.avatar || g.img || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
+            }
+          : g
+      );
+    }
+
+    // itinerary — ensure each item exposes both .description and .desc
+    if (Array.isArray(t.itinerary)) {
+      t.itinerary = t.itinerary.map((item) => ({
+        ...item,
+        desc: item.desc || item.description || '',
+      }));
+    }
+
+    // gallery — ensure it's always an array
+    t.gallery = Array.isArray(t.gallery) ? t.gallery : [];
+
+    // highlights — ensure it's always an array
+    t.highlights = Array.isArray(t.highlights) ? t.highlights : [];
+
+    // tags — ensure it's always an array
+    t.tags = Array.isArray(t.tags) ? t.tags : [];
+
     res.status(200).json({
       status: 'success',
-      data: { tour },
+      data: { tour: t },
     });
   } catch (err) {
     next(err);

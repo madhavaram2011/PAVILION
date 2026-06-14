@@ -162,7 +162,7 @@ function useStarField(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
     const ctx = canvas.getContext('2d')!
     let raf: number
 
-    const stars = Array.from({ length: 280 }, () => ({
+    const stars = Array.from({ length: 120 }, () => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
       r: Math.random() * 1.5 + 0.2,
@@ -176,7 +176,13 @@ function useStarField(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
     window.addEventListener('resize', resize)
 
     let t = 0
-    const draw = () => {
+    let lastTime = 0
+    const draw = (timestamp: number) => {
+      if (timestamp - lastTime < 33) {
+        raf = requestAnimationFrame(draw)
+        return
+      }
+      lastTime = timestamp
       t += 0.008
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       stars.forEach(s => {
@@ -188,7 +194,7 @@ function useStarField(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
       })
       raf = requestAnimationFrame(draw)
     }
-    draw()
+    raf = requestAnimationFrame(draw)
 
     return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize) }
   }, [canvasRef])
@@ -215,7 +221,7 @@ function RegionNode({ region, isActive, isHighlighted: _isHighlighted, isDimmed,
         cursor: 'pointer', zIndex: 30,
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
         opacity: isDimmed ? 0.18 : 1,
-        transition: 'opacity 0.4s ease',
+        transition: 'opacity 0.2s ease',
       }}
     >
       {/* Outer glow ring */}
@@ -226,7 +232,7 @@ function RegionNode({ region, isActive, isHighlighted: _isHighlighted, isDimmed,
           borderRadius: '50%',
           background: `radial-gradient(circle, ${region.color}35 0%, transparent 70%)`,
           filter: 'blur(10px)',
-          transition: 'all 0.5s ease',
+          transition: 'opacity 0.2s ease, width 0.2s ease, height 0.2s ease',
         }} />
       )}
 
@@ -242,12 +248,11 @@ function RegionNode({ region, isActive, isHighlighted: _isHighlighted, isDimmed,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: isActive || hov ? 28 : 22,
         transform: isActive || hov ? 'scale(1.0)' : 'scale(1)',
-        transition: 'all 0.4s cubic-bezier(0.34,1.56,0.64,1)',
+        transition: 'background 0.2s ease, border 0.2s ease, transform 0.2s ease, opacity 0.2s ease',
         boxShadow: isActive
           ? `0 0 32px ${region.color}55, 0 0 70px ${region.color}22, inset 0 1px 0 rgba(255,255,255,0.15)`
           : hov ? `0 0 18px ${region.color}40, inset 0 1px 0 rgba(255,255,255,0.1)` : 'none',
         position: 'relative',
-        backdropFilter: 'blur(4px)',
       }}>
         {/* Ping ring when active */}
         {isActive && (
@@ -561,7 +566,7 @@ function DestinationTicker({ destinations }: { destinations: typeof DESTINATIONS
         <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 7, letterSpacing: '0.4em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.16)' }}>Live</span>
       </div>
       <div style={{ overflow: 'hidden', flex: 1 }}>
-        <div style={{ display: 'flex', animation: 'tickerScroll 65s linear infinite', width: 'max-content' }}>
+        <div style={{ display: 'flex', animation: 'tickerScroll 45s linear infinite', width: 'max-content', willChange: 'transform' }}>
           {doubled.map((d, i) => {
             const reg = REGIONS.find(r => r.id === normalizeRegion(d.region)) || REGIONS[0]
             return (
@@ -611,7 +616,7 @@ export default function DestinationsPage() {
 
   // Fetch real destinations from API
   useEffect(() => {
-    fetch('http://localhost:5000/api/destinations?limit=200')
+    fetch('http://localhost:5000/api/destinations?limit=200&page=1')
       .then(r => r.json())
       .then(data => {
         const apiData = data.data?.destinations || []
@@ -685,6 +690,8 @@ export default function DestinationsPage() {
         @keyframes ping { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.65); opacity: 0; } }
         @keyframes pingDot { 0%, 100% { opacity: 0.7; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }
         @keyframes spin { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }
+        .destinations-page * { will-change: auto; }
+        .destinations-page canvas { will-change: transform; }
         @keyframes spinR { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(-360deg); } }
         @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @keyframes fadeUp { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform: translateY(0); } }

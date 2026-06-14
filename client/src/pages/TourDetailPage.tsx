@@ -93,7 +93,9 @@ function ItineraryItem({ item, index }: { item: any; index: number }) {
 
 export default function TourDetailPage() {
   const { slug } = useParams<{ slug: string }>()
-  const tour = TOURS_DATA[slug!] || Object.values(TOURS_DATA)[0]
+  const [tour, setTour] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
   const [activeGallery, setActiveGallery] = useState(0)
   const [scrollY, setScrollY] = useState(0)
@@ -102,7 +104,50 @@ export default function TourDetailPage() {
   const [showShareToast, setShowShareToast] = useState(false)
   const bookRef = useRef<HTMLDivElement>(null)
 
+  // Fetch tour by slug from API
+  useEffect(() => {
+    if (!slug) return
+    fetch(`http://localhost:5000/api/tours/${slug}`)
+      .then(r => r.json())
+      .then(data => {
+        setTour(data.data?.tour || null)
+        setLoading(false)
+        if (!data.data?.tour) {
+          setError('Tour not found')
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load tour:', err)
+        setError('Failed to load tour')
+        setLoading(false)
+      })
+  }, [slug])
+
   useEffect(() => { const onScroll = () => setScrollY(window.scrollY); window.addEventListener('scroll', onScroll, { passive: true }); return () => window.removeEventListener('scroll', onScroll) }, [])
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'none' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: 60, height: 60, border: '3px solid rgba(249,115,22,0.2)', borderTop: '3px solid #f97316', borderRadius: '50%', margin: '0 auto 20px', animation: 'spin 0.8s linear infinite' }} />
+          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>Loading tour...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !tour) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'none' }}>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 14, color: '#ef4444', marginBottom: 20 }}>{error || 'Tour not found'}</p>
+          <button onClick={() => navigate('/tours')} style={{ padding: '10px 20px', background: '#f97316', color: '#fff', border: 'none', borderRadius: 2, cursor: 'pointer', fontFamily: '"Space Mono",monospace' }}>
+            Back to Tours
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   const dc = DIFF_COLOR[tour.difficulty] || '#f97316'
 
   return (

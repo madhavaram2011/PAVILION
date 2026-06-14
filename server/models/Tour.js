@@ -60,17 +60,24 @@ const tourSchema = new mongoose.Schema(
       trim: true,
       index: true,
     },
+    subtitle: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     summary: {
       type: String,
       trim: true,
       required: [true, 'Tour summary is required'],
-      maxlength: [300, 'Summary cannot exceed 300 characters'],
+      maxlength: [500, 'Summary cannot exceed 500 characters'],
     },
     description: {
       type: String,
       trim: true,
       default: '',
     },
+    region: { type: String, trim: true, default: '' },
+    state: { type: String, trim: true, default: '' },
     highlights: [{ type: String }],
 
     // ── Destination ref ───────────────────────────────────────────
@@ -118,7 +125,7 @@ const tourSchema = new mongoose.Schema(
     difficulty: {
       type: String,
       enum: {
-        values: ['Easy', 'Moderate', 'Challenging', 'Extreme'],
+        values: ['Easy', 'Moderate', 'Hard', 'Challenging', 'Extreme'],
         message: '{VALUE} is not a valid difficulty level',
       },
       default: 'Easy',
@@ -144,6 +151,9 @@ const tourSchema = new mongoose.Schema(
     // ── Inclusions / Exclusions ───────────────────────────────────
     includes: [{ type: String }],
     excludes: [{ type: String }],
+    // aliases used by seed data (stored alongside includes/excludes)
+    included: [{ type: String }],
+    excluded: [{ type: String }],
 
     // ── Media ─────────────────────────────────────────────────────
     coverImage: {
