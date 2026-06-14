@@ -124,6 +124,11 @@ const destinationSchema = new mongoose.Schema(
       maxlength: [200, 'Tagline cannot exceed 200 characters'],
       default: '',
     },
+    subtitle: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     intro: {
       type: String,
       trim: true,
@@ -172,6 +177,14 @@ const destinationSchema = new mongoose.Schema(
     thingsToDo: [{ type: String }],
     localCuisine: [{ type: String }],
     accommodation: [accommodationSchema],
+    warnings: [{ type: String }],
+    experiences: [{
+      title:       { type: String },
+      description: { type: String },
+      category:    { type: String },
+      duration:    { type: String },
+      img:         { type: String },
+    }],
 
     // ── Tags & Flags ──────────────────────────────────────────────
     tags: [{ type: String }],

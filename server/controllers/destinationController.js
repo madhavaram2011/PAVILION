@@ -34,7 +34,7 @@ export const getAllDestinations = async (req, res, next) => {
 
     // ── Pagination ───────────────────────────────────────────────
     const pageNum = Math.max(1, parseInt(page, 10));
-    const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10)));
+    const limitNum = Math.min(500, Math.max(1, parseInt(limit, 10)));
     const skip = (pageNum - 1) * limitNum;
 
     // ── Sorting ──────────────────────────────────────────────────
@@ -85,15 +85,23 @@ export const getDestinationBySlug = async (req, res, next) => {
 
     if (!destination) return next(AppError.notFound('Destination'));
 
-    // Populate nearby tours
-    const nearbyTours = await Tour.find({
+    // Populate nearby tours — also accept docs without isActive field (seed data)
+    const nearbyToursRaw = await Tour.find({
       destination: destination._id,
-      isActive: true,
+      $or: [{ isActive: true }, { isActive: { $exists: false } }],
     })
       .sort('-rating')
       .limit(6)
       .select('title slug type difficulty price discountPrice duration coverImage rating reviewCount isFeatured')
       .lean();
+
+    // Normalize duration to a plain number for the frontend
+    const nearbyTours = nearbyToursRaw.map((t) => ({
+      ...t,
+      duration: t.duration && typeof t.duration === 'object'
+        ? (t.duration.days ?? t.duration.nights ?? 0)
+        : (t.duration ?? 0),
+    }));
 
     res.status(200).json({
       status: 'success',

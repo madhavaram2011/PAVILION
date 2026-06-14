@@ -1,93 +1,90 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { FiArrowLeft, FiArrowRight, FiHeart, FiShare2, FiCheck } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
+import { travelService } from '../services/travelService'
 
-const DESTINATIONS_DATA: Record<string, any> = {
-  nepal: {
-    slug: 'nepal', name: 'Nepal', tagline: 'Where the Himalayas Pierce the Sky', subtitle: 'SOUTH ASIA · HIMALAYAS',
-    region: 'Asia', type: 'MOUNTAIN',
-    cover: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2000&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=900&q=80',
-      'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=900&q=80',
-      'https://images.unsplash.com/photo-1585409677983-0f6c41ca9c3b?w=900&q=80',
-      'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&q=80',
-      'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=900&q=80',
-    ],
-    intro: "Nepal is not a destination. It is a reckoning. Eight of the world's fourteen eight-thousanders stand here — including Everest, the crown jewel of human ambition. But Nepal is also ancient monasteries ringing with prayer bells, terraced fields carved from impossible slopes, and a people whose warmth is as legendary as their mountains.",
-    facts: [
-      { label: 'CAPITAL', val: 'Kathmandu' },
-      { label: 'ALTITUDE RANGE', val: '60m – 8,849m' },
-      { label: 'BEST MONTHS', val: 'Oct – Nov / Mar – May' },
-      { label: 'LANGUAGE', val: 'Nepali' },
-      { label: 'CURRENCY', val: 'Nepalese Rupee' },
-      { label: 'TIME ZONE', val: 'UTC +5:45' },
-    ],
-    climate: [
-      { month: 'JAN', temp: 2, rain: 'DRY', }, { month: 'FEB', temp: 5, rain: 'DRY', },
-      { month: 'MAR', temp: 11, rain: 'LOW', }, { month: 'APR', temp: 16, rain: 'LOW', },
-      { month: 'MAY', temp: 20, rain: 'MED', }, { month: 'JUN', temp: 22, rain: 'HIGH', },
-      { month: 'JUL', temp: 23, rain: 'PEAK', }, { month: 'AUG', temp: 22, rain: 'PEAK', },
-      { month: 'SEP', temp: 21, rain: 'HIGH', }, { month: 'OCT', temp: 16, rain: 'LOW', },
-      { month: 'NOV', temp: 10, rain: 'DRY', }, { month: 'DEC', temp: 4, rain: 'DRY', },
-    ],
-    experiences: [
-      { title: 'Everest Base Camp', category: 'ICONIC TREK', duration: '14 days', description: "The world's most famous trek. Stand in the shadow of the world's highest peak and hear the Khumbu Icefall roar.", img: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600&q=80' },
-      { title: 'Annapurna Circuit', category: 'CLASSIC TREK', duration: '18 days', description: 'Cross Thorong La at 5,416m. Walk through rice paddies, apple orchards, and glacial moonscapes in a single loop.', img: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80' },
-      { title: 'Kathmandu Valley', category: 'CULTURAL', duration: '4 days', description: 'Seven UNESCO World Heritage sites within cycling distance. Ancient kingdoms, living goddesses, and sacred squares.', img: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=600&q=80' },
-    ],
-    tours: [
-      { slug: 'himalayan-circuit', title: 'Himalayan Circuit', duration: 21, price: 6800, rating: 4.9, difficulty: 'EXTREME' },
-      { slug: 'everest-base-camp', title: 'Everest Base Camp Classic', duration: 14, price: 3900, rating: 4.8, difficulty: 'HARD' },
-    ],
-    warnings: [
-      'Altitude sickness is a real risk above 3,000m. Ascend slowly.',
-      'Permits required for all trekking regions — we handle this.',
-      'Weather windows are narrow. Oct–Nov and Mar–May only.',
-    ],
-  },
-}
-
-const DIFF_COLOR: Record<string, string> = { MODERATE: '#4ade80', HARD: '#facc15', EXTREME: '#f97316' }
+const DIFF_COLOR: Record<string, string> = { MODERATE: '#4ade80', HARD: '#facc15', EXTREME: '#f97316', EASY: '#34d399', CHALLENGING: '#f59e0b' }
 const RAIN_COLOR: Record<string, string> = { DRY: '#4ade80', LOW: '#86efac', MED: '#facc15', HIGH: '#fb923c', PEAK: '#f97316' }
 
-// ── STARFIELD — no custom cursor override ─────────────────────────────────────
+const skeletonStyle = {
+  background: 'rgba(255,255,255,0.05)',
+  borderRadius: 8,
+  animation: 'pulse 1.5s infinite',
+  height: 200,
+}
+
+function normalizeClimateItem(item: any) {
+  const temp = item.maxTemp ?? item.minTemp ?? item.temperature ?? 0
+  const rainfall = item.rainfall ?? item.rain ?? 0
+  const rain =
+    rainfall <= 50 ? 'DRY' :
+    rainfall <= 150 ? 'LOW' :
+    rainfall <= 300 ? 'MED' :
+    rainfall <= 500 ? 'HIGH' :
+    'PEAK'
+
+  return {
+    month: String(item.month || item.name || '').slice(0, 3).toUpperCase(),
+    temp,
+    rain,
+  }
+}
+
 function StarCanvas() {
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
-    const canvas = ref.current; if (!canvas) return
-    const ctx = canvas.getContext('2d')!; let raf: number
+    const canvas = ref.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')!
+    let raf: number
     const stars = Array.from({ length: 200 }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() * 1.2 + 0.2, a: Math.random(), speed: Math.random() * 0.004 + 0.001 }))
-    const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight }
-    resize(); window.addEventListener('resize', resize)
+    const resize = () => {
+      canvas.width = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+    }
+    resize()
+    window.addEventListener('resize', resize)
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      stars.forEach(s => { s.a += s.speed; ctx.beginPath(); ctx.arc(s.x * canvas.width, s.y * canvas.height, s.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(255,255,255,${0.2 + 0.55 * Math.abs(Math.sin(s.a))})`; ctx.fill() })
+      stars.forEach(s => {
+        s.a += s.speed
+        ctx.beginPath()
+        ctx.arc(s.x * canvas.width, s.y * canvas.height, s.r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255,255,255,${0.2 + 0.55 * Math.abs(Math.sin(s.a))})`
+        ctx.fill()
+      })
       raf = requestAnimationFrame(draw)
     }
     draw()
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize) }
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', resize)
+    }
   }, [])
   return <canvas ref={ref} style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }} />
 }
 
-// ── EXPERIENCE CARD ──────────────────────────────────────────────────────────
 function ExperienceCard({ exp, index }: { exp: any; index: number }) {
   const [hover, setHover] = useState(false)
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       style={{
-        display: 'grid', gridTemplateColumns: '220px 1fr',
+        display: 'grid',
+        gridTemplateColumns: '220px 1fr',
         border: hover ? '1px solid rgba(201,169,110,0.2)' : '1px solid rgba(201,169,110,0.07)',
-        borderRadius: 2, overflow: 'hidden',
+        borderRadius: 2,
+        overflow: 'hidden',
         background: hover ? 'rgba(201,169,110,0.03)' : 'transparent',
         transition: 'all 0.3s',
       }}>
       <div style={{
-        backgroundImage: `url(${exp.img})`, backgroundSize: 'cover', backgroundPosition: 'center',
-        transform: hover ? 'scale(1.06)' : 'scale(1)', transition: 'transform 0.6s',
+        backgroundImage: `url(${exp.img})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        transform: hover ? 'scale(1.06)' : 'scale(1)',
+        transition: 'transform 0.6s',
         minHeight: 140,
       }} />
       <div style={{ padding: '24px 28px' }}>
@@ -99,15 +96,16 @@ function ExperienceCard({ exp, index }: { exp: any; index: number }) {
   )
 }
 
-// ── MAIN ─────────────────────────────────────────────────────────────────────
 export default function DestinationDetailPage() {
   const { slug } = useParams<{ slug: string }>()
-  const dest = DESTINATIONS_DATA[slug!] || Object.values(DESTINATIONS_DATA)[0]
+  const navigate = useNavigate()
+  const [dest, setDest] = useState<any | null>(null)
   const [scrollY, setScrollY] = useState(0)
   const [activeGallery, setActiveGallery] = useState(0)
   const [wishlisted, setWishlisted] = useState(false)
   const [showShareToast, setShowShareToast] = useState(false)
-  const maxTemp = Math.max(...dest.climate.map((c: any) => c.temp))
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY)
@@ -115,11 +113,96 @@ export default function DestinationDetailPage() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  useEffect(() => {
+    if (!slug) return
+
+    setLoading(true)
+    setError(null)
+
+    travelService.getDestinationBySlug(slug)
+      .then(({ destination, nearbyTours }) => {
+        setDest({ ...destination, nearbyTours: nearbyTours ?? [] })
+      })
+      .catch((err) => {
+        console.error('Failed to load destination:', err)
+        // On 404 / not-found, redirect to /destinations listing
+        const msg: string = err?.message || ''
+        if (err?.response?.status === 404 || /not found/i.test(msg)) {
+          navigate('/destinations', { replace: true })
+        } else {
+          setError(msg || 'Failed to load. Please try again.')
+        }
+      })
+      .finally(() => setLoading(false))
+  }, [slug, navigate])
+
   const handleShare = () => {
     navigator.clipboard?.writeText(window.location.href)
     setShowShareToast(true)
     setTimeout(() => setShowShareToast(false), 2200)
   }
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#03060f', color: '#f0ebe0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '90%', maxWidth: 1200, display: 'grid', gap: 20, padding: 40 }}>
+          <div style={{ ...skeletonStyle, height: 420 }} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+            <div style={skeletonStyle} />
+            <div style={skeletonStyle} />
+          </div>
+          <div style={{ ...skeletonStyle, height: 120 }} />
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !dest) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#03060f', color: '#f0ebe0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', padding: 60 }}>
+          <p style={{ marginBottom: 24, color: 'rgba(240,235,224,0.6)', fontFamily: '"Crimson Text",serif', fontSize: 18 }}>
+            {error || 'Destination not found.'}
+          </p>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            <button onClick={() => window.location.reload()} style={{ padding: '12px 24px', background: 'transparent', color: '#c9a96e', border: '1px solid rgba(201,169,110,0.3)', borderRadius: 2, cursor: 'pointer', fontFamily: '"Space Mono",monospace', fontSize: 10, letterSpacing: '0.15em' }}>
+              RETRY
+            </button>
+            <button onClick={() => navigate('/destinations')} style={{ padding: '12px 24px', background: '#c9a96e', color: '#03060f', border: 'none', borderRadius: 2, cursor: 'pointer', fontFamily: '"Space Mono",monospace', fontSize: 10, letterSpacing: '0.15em', fontWeight: 700 }}>
+              ALL DESTINATIONS
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Normalize all real API fields to safe UI-friendly shapes ───────────────
+  const cover        = dest.coverImage || dest.cover || ''
+  const subtitle     = dest.subtitle || dest.type || ''
+  const gallery      = Array.isArray(dest.gallery) && dest.gallery.length > 0 ? dest.gallery : (cover ? [cover] : [])
+  const experiences  = Array.isArray(dest.experiences) ? dest.experiences : []
+  const expedNotes   = Array.isArray(dest.warnings) && dest.warnings.length > 0
+                       ? dest.warnings
+                       : (dest.bestTimeToVisit ? [`Best time to visit: ${dest.bestTimeToVisit}`] : [])
+  const facts        = Array.isArray(dest.facts)
+                       ? dest.facts.map((f: any) => ({ label: f.label, val: f.value ?? f.val ?? '' }))
+                       : [
+                           dest.state       && { label: 'State',          val: dest.state },
+                           dest.bestDuration && { label: 'Duration',      val: dest.bestDuration },
+                           dest.entryFee    && { label: 'Entry Fee',      val: dest.entryFee },
+                           dest.timings     && { label: 'Timings',        val: dest.timings },
+                           dest.bestTimeToVisit && { label: 'Best Time',  val: dest.bestTimeToVisit },
+                         ].filter(Boolean)
+  const tours        = Array.isArray(dest.nearbyTours) ? dest.nearbyTours.map((t: any) => ({
+                           title:      t.title,
+                           slug:       t.slug,
+                           duration:   t.duration,
+                           difficulty: t.difficulty ?? t.type ?? '',
+                           price:      t.discountPrice ?? t.price ?? 0,
+                         })) : []
+  const climate      = Array.isArray(dest.climate) ? dest.climate.map(normalizeClimateItem) : []
+  const maxTemp      = climate.reduce((max: number, item: { temp: number }) => Math.max(max, item.temp), 0) || 1
 
   return (
     // NOTE: No cursor: none here — system cursor is correct behavior
@@ -160,7 +243,7 @@ export default function DestinationDetailPage() {
       {/* ── HERO ── */}
       <div style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
         <div style={{
-          position: 'absolute', inset: 0, backgroundImage: `url(${dest.cover})`,
+          position: 'absolute', inset: 0, backgroundImage: `url(${cover})`,
           backgroundSize: 'cover', backgroundPosition: 'center',
           transform: `translateY(${scrollY * 0.4}px)`, filter: 'brightness(0.26) saturate(0.6)',
         }} />
@@ -206,9 +289,9 @@ export default function DestinationDetailPage() {
 
         {/* Hero text */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 clamp(20px,6vw,100px) 70px' }}>
-          <p style={{ fontFamily: '"Space Mono", monospace', fontSize: 10, letterSpacing: '0.3em', color: '#c9a96e', marginBottom: 14 }}>{dest.subtitle}</p>
+          <p style={{ fontFamily: '"Space Mono", monospace', fontSize: 10, letterSpacing: '0.3em', color: '#c9a96e', marginBottom: 14 }}>{subtitle}</p>
           <h1 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: 'clamp(5rem,11vw,13rem)', letterSpacing: '0.02em', lineHeight: 0.88, color: '#f0ebe0', marginBottom: 24 }}>{dest.name}</h1>
-          <p style={{ fontFamily: '"Crimson Text", serif', fontStyle: 'italic', fontSize: 22, color: 'rgba(240,235,224,0.5)', maxWidth: 600, lineHeight: 1.6 }}>"{dest.tagline}"</p>
+          {dest.tagline && <p style={{ fontFamily: '"Crimson Text", serif', fontStyle: 'italic', fontSize: 22, color: 'rgba(240,235,224,0.5)', maxWidth: 600, lineHeight: 1.6 }}>"{dest.tagline}"</p>}
         </div>
 
         {/* Scroll indicator */}
@@ -236,86 +319,131 @@ export default function DestinationDetailPage() {
                 <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.3em', color: 'rgba(240,235,224,0.2)' }}>◈ TERRITORY GALLERY</span>
                 <div style={{ flex: 1, height: 1, background: 'rgba(201,169,110,0.08)' }} />
               </div>
-              <motion.div
-                key={activeGallery}
-                initial={{ opacity: 0.7, scale: 0.99 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4 }}
-                style={{ height: 460, borderRadius: 2, overflow: 'hidden', marginBottom: 6, backgroundImage: `url(${dest.gallery[activeGallery]})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-              />
-              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${dest.gallery.length}, 1fr)`, gap: 4 }}>
-                {dest.gallery.map((img: string, i: number) => (
-                  <motion.div key={i} onClick={() => setActiveGallery(i)} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                    style={{
-                      height: 70, backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center',
-                      opacity: activeGallery === i ? 1 : 0.32,
-                      border: activeGallery === i ? '1px solid #c9a96e' : '1px solid transparent',
-                      cursor: 'pointer', transition: 'opacity 0.2s, border 0.2s', borderRadius: 1,
-                    }}
+              {gallery.length > 0 ? (
+                <>
+                  <motion.div
+                    key={activeGallery}
+                    initial={{ opacity: 0.7, scale: 0.99 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4 }}
+                    style={{ height: 460, borderRadius: 2, overflow: 'hidden', marginBottom: 6, backgroundImage: `url(${gallery[activeGallery]})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                   />
-                ))}
-              </div>
-            </div>
-
-            {/* Experiences */}
-            <div style={{ marginBottom: 70 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
-                <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.3em', color: 'rgba(240,235,224,0.2)' }}>◈ SIGNATURE EXPERIENCES</span>
-                <div style={{ flex: 1, height: 1, background: 'rgba(201,169,110,0.08)' }} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                {dest.experiences.map((exp: any, i: number) => (
-                  <ExperienceCard key={i} exp={exp} index={i} />
-                ))}
-              </div>
-            </div>
-
-            {/* Climate */}
-            <div style={{ marginBottom: 70 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
-                <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.3em', color: 'rgba(240,235,224,0.2)' }}>◈ CLIMATE GUIDE</span>
-                <div style={{ flex: 1, height: 1, background: 'rgba(201,169,110,0.08)' }} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 4 }}>
-                {dest.climate.map((c: any) => (
-                  <div key={c.month} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 8, color: 'rgba(240,235,224,0.22)', letterSpacing: '0.1em' }}>{c.month}</span>
-                    <div style={{ width: '100%', height: 60, display: 'flex', alignItems: 'flex-end' }}>
-                      <motion.div
-                        initial={{ height: 0 }} whileInView={{ height: `${Math.max(10, (c.temp / maxTemp) * 100)}%` }}
-                        viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.05 }}
-                        style={{ width: '100%', background: RAIN_COLOR[c.rain], borderRadius: '1px 1px 0 0', opacity: 0.75 }}
-                      />
+                  {gallery.length > 1 && (
+                    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${gallery.length}, 1fr)`, gap: 4 }}>
+                      {gallery.map((img: string, i: number) => (
+                        <motion.div key={i} onClick={() => setActiveGallery(i)} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+                          style={{
+                            height: 70, backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center',
+                            opacity: activeGallery === i ? 1 : 0.32,
+                            border: activeGallery === i ? '1px solid #c9a96e' : '1px solid transparent',
+                            cursor: 'pointer', transition: 'opacity 0.2s, border 0.2s', borderRadius: 1,
+                          }}
+                        />
+                      ))}
                     </div>
-                    <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, color: RAIN_COLOR[c.rain] }}>{c.temp}°</span>
-                    <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 7, letterSpacing: '0.1em', color: 'rgba(240,235,224,0.18)', textAlign: 'center' }}>{c.rain}</span>
-                  </div>
-                ))}
-              </div>
-              <div style={{ display: 'flex', gap: 20, marginTop: 16, flexWrap: 'wrap' }}>
-                {Object.entries(RAIN_COLOR).map(([k, v]) => (
-                  <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: v, opacity: 0.75 }} />
-                    <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 8, color: 'rgba(240,235,224,0.28)', letterSpacing: '0.15em' }}>{k}</span>
-                  </div>
-                ))}
-              </div>
+                  )}
+                </>
+              ) : (
+                <div style={{ height: 460, borderRadius: 2, background: 'rgba(201,169,110,0.05)', border: '1px dashed rgba(201,169,110,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.2em', color: 'rgba(201,169,110,0.25)' }}>GALLERY COMING SOON</span>
+                </div>
+              )}
             </div>
 
-            {/* Warnings */}
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-                <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.3em', color: '#f97316' }}>◈ EXPEDITION NOTES</span>
-                <div style={{ flex: 1, height: 1, background: 'rgba(249,115,22,0.1)' }} />
+            {/* Things To Do / Experiences */}
+            {(experiences.length > 0 || (dest.thingsToDo && dest.thingsToDo.length > 0)) && (
+              <div style={{ marginBottom: 70 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
+                  <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.3em', color: 'rgba(240,235,224,0.2)' }}>◈ SIGNATURE EXPERIENCES</span>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(201,169,110,0.08)' }} />
+                </div>
+                {experiences.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                    {experiences.map((exp: any, i: number) => (
+                      <ExperienceCard key={i} exp={exp} index={i} />
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {(dest.thingsToDo ?? []).map((thing: string, i: number) => (
+                      <motion.div key={i} initial={{ opacity: 0, x: -12 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
+                        style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '12px 0', borderBottom: '1px solid rgba(201,169,110,0.06)' }}>
+                        <span style={{ color: '#c9a96e', fontSize: 14, flexShrink: 0, marginTop: 2 }}>◈</span>
+                        <p style={{ fontFamily: '"Crimson Text", serif', fontSize: 17, color: 'rgba(240,235,224,0.6)', lineHeight: 1.55 }}>{thing}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
               </div>
-              {dest.warnings.map((w: string, i: number) => (
-                <motion.div key={i} initial={{ opacity: 0, x: -12 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                  style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '14px 0', borderBottom: '1px solid rgba(249,115,22,0.06)' }}>
-                  <span style={{ color: '#f97316', fontSize: 16, flexShrink: 0, marginTop: 1 }}>!</span>
-                  <p style={{ fontFamily: '"Crimson Text", serif', fontSize: 16, color: 'rgba(240,235,224,0.52)', lineHeight: 1.55 }}>{w}</p>
-                </motion.div>
-              ))}
-            </div>
+            )}
+
+            {/* Climate — only rendered when data exists */}
+            {climate.length > 0 && (
+              <div style={{ marginBottom: 70 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
+                  <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.3em', color: 'rgba(240,235,224,0.2)' }}>◈ CLIMATE GUIDE</span>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(201,169,110,0.08)' }} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: `repeat(${climate.length}, 1fr)`, gap: 4 }}>
+                  {climate.map((c: any) => (
+                    <div key={c.month} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 8, color: 'rgba(240,235,224,0.22)', letterSpacing: '0.1em' }}>{c.month}</span>
+                      <div style={{ width: '100%', height: 60, display: 'flex', alignItems: 'flex-end' }}>
+                        <motion.div
+                          initial={{ height: 0 }} whileInView={{ height: `${Math.max(10, (c.temp / maxTemp) * 100)}%` }}
+                          viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.05 }}
+                          style={{ width: '100%', background: RAIN_COLOR[c.rain], borderRadius: '1px 1px 0 0', opacity: 0.75 }}
+                        />
+                      </div>
+                      <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, color: RAIN_COLOR[c.rain] }}>{c.temp}°</span>
+                      <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 7, letterSpacing: '0.1em', color: 'rgba(240,235,224,0.18)', textAlign: 'center' }}>{c.rain}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 20, marginTop: 16, flexWrap: 'wrap' }}>
+                  {Object.entries(RAIN_COLOR).map(([k, v]) => (
+                    <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: v, opacity: 0.75 }} />
+                      <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 8, color: 'rgba(240,235,224,0.28)', letterSpacing: '0.15em' }}>{k}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Expedition Notes / How to Reach */}
+            {expedNotes.length > 0 && (
+              <div style={{ marginBottom: 48 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+                  <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.3em', color: '#f97316' }}>◈ EXPEDITION NOTES</span>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(249,115,22,0.1)' }} />
+                </div>
+                {expedNotes.map((w: string, i: number) => (
+                  <motion.div key={i} initial={{ opacity: 0, x: -12 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                    style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '14px 0', borderBottom: '1px solid rgba(249,115,22,0.06)' }}>
+                    <span style={{ color: '#f97316', fontSize: 16, flexShrink: 0, marginTop: 1 }}>!</span>
+                    <p style={{ fontFamily: '"Crimson Text", serif', fontSize: 16, color: 'rgba(240,235,224,0.52)', lineHeight: 1.55 }}>{w}</p>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+            {/* How To Reach */}
+            {dest.howToReach && (dest.howToReach.byAir || dest.howToReach.byTrain || dest.howToReach.byRoad) && (
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+                  <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.3em', color: 'rgba(240,235,224,0.2)' }}>◈ HOW TO REACH</span>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(201,169,110,0.08)' }} />
+                </div>
+                {[['✈ BY AIR', dest.howToReach.byAir], ['🚆 BY TRAIN', dest.howToReach.byTrain], ['🚌 BY ROAD', dest.howToReach.byRoad]]
+                  .filter(([, v]) => !!v)
+                  .map(([label, text]) => (
+                    <div key={label as string} style={{ marginBottom: 16 }}>
+                      <p style={{ fontFamily: '"Space Mono", monospace', fontSize: 8, letterSpacing: '0.15em', color: '#c9a96e', marginBottom: 6 }}>{label as string}</p>
+                      <p style={{ fontFamily: '"Crimson Text", serif', fontSize: 15, color: 'rgba(240,235,224,0.5)', lineHeight: 1.6 }}>{text as string}</p>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
 
           {/* ── RIGHT ── */}
@@ -324,7 +452,7 @@ export default function DestinationDetailPage() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
               style={{ border: '1px solid rgba(201,169,110,0.15)', borderRadius: 2, padding: 28, marginBottom: 16, background: 'rgba(201,169,110,0.02)' }}>
               <p style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.25em', color: 'rgba(240,235,224,0.22)', marginBottom: 20 }}>TERRITORY DOSSIER</p>
-              {dest.facts.map((f: any) => (
+              {facts.map((f: any) => (
                 <div key={f.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '10px 0', borderBottom: '1px solid rgba(240,235,224,0.04)' }}>
                   <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.15em', color: 'rgba(240,235,224,0.25)' }}>{f.label}</span>
                   <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 10, color: 'rgba(240,235,224,0.6)', textAlign: 'right', maxWidth: '55%' }}>{f.val}</span>
@@ -336,24 +464,27 @@ export default function DestinationDetailPage() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}
               style={{ border: '1px solid rgba(201,169,110,0.15)', borderRadius: 2, padding: 28, background: 'rgba(201,169,110,0.02)' }}>
               <p style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.25em', color: 'rgba(240,235,224,0.22)', marginBottom: 20 }}>EXPEDITIONS HERE</p>
-              {dest.tours.map((t: any, i: number) => (
-                <Link key={i} to={`/tours/${t.slug}`}
-                  style={{ display: 'block', textDecoration: 'none', padding: '16px 0', borderBottom: '1px solid rgba(240,235,224,0.04)', transition: 'background 0.2s' }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.paddingLeft = '6px'}
-                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.paddingLeft = '0px'}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-                    <h4 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: 20, letterSpacing: '0.04em', color: '#f0ebe0' }}>{t.title}</h4>
-                    <FiArrowRight size={12} color="#c9a96e" />
-                  </div>
-                  <div style={{ display: 'flex', gap: 16 }}>
-                    <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, color: 'rgba(240,235,224,0.28)', letterSpacing: '0.1em' }}>{t.duration}D</span>
-                    <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, color: DIFF_COLOR[t.difficulty] || '#c9a96e', letterSpacing: '0.1em' }}>{t.difficulty}</span>
-                    <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, color: '#c9a96e', letterSpacing: '0.1em', marginLeft: 'auto' }}>${t.price.toLocaleString()}</span>
-                  </div>
-                </Link>
-              ))}
-
+              {tours.length === 0 ? (
+                <p style={{ fontFamily: '"Crimson Text", serif', fontStyle: 'italic', fontSize: 15, color: 'rgba(240,235,224,0.28)', marginBottom: 20 }}>No active expeditions for this destination yet.</p>
+              ) : (
+                tours.map((t: any, i: number) => (
+                  <Link key={i} to={`/tours/${t.slug}`}
+                    style={{ display: 'block', textDecoration: 'none', padding: '16px 0', borderBottom: '1px solid rgba(240,235,224,0.04)', transition: 'background 0.2s' }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.paddingLeft = '6px'}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.paddingLeft = '0px'}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                      <h4 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: 20, letterSpacing: '0.04em', color: '#f0ebe0' }}>{t.title}</h4>
+                      <FiArrowRight size={12} color="#c9a96e" />
+                    </div>
+                    <div style={{ display: 'flex', gap: 16 }}>
+                      <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, color: 'rgba(240,235,224,0.28)', letterSpacing: '0.1em' }}>{t.duration}D</span>
+                      <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, color: DIFF_COLOR[t.difficulty] || '#c9a96e', letterSpacing: '0.1em' }}>{t.difficulty}</span>
+                      <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, color: '#c9a96e', letterSpacing: '0.1em', marginLeft: 'auto' }}>₹{(t.price ?? 0).toLocaleString()}</span>
+                    </div>
+                  </Link>
+                ))
+              )}
               <Link to="/tours" style={{
                 display: 'flex', alignItems: 'center', gap: 10, marginTop: 20, textDecoration: 'none',
                 border: '1px solid rgba(201,169,110,0.22)', padding: '12px 16px', borderRadius: 1,
