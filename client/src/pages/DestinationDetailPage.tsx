@@ -3,16 +3,11 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { FiArrowLeft, FiArrowRight, FiHeart, FiShare2, FiCheck } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { travelService } from '../services/travelService'
+import Skeleton from '../components/ui/Skeleton'
 
 const DIFF_COLOR: Record<string, string> = { MODERATE: '#4ade80', HARD: '#facc15', EXTREME: '#f97316', EASY: '#34d399', CHALLENGING: '#f59e0b' }
 const RAIN_COLOR: Record<string, string> = { DRY: '#4ade80', LOW: '#86efac', MED: '#facc15', HIGH: '#fb923c', PEAK: '#f97316' }
 
-const skeletonStyle = {
-  background: 'rgba(255,255,255,0.05)',
-  borderRadius: 8,
-  animation: 'pulse 1.5s infinite',
-  height: 200,
-}
 
 function normalizeClimateItem(item: any) {
   const temp = item.maxTemp ?? item.minTemp ?? item.temperature ?? 0
@@ -144,14 +139,24 @@ export default function DestinationDetailPage() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#03060f', color: '#f0ebe0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: '90%', maxWidth: 1200, display: 'grid', gap: 20, padding: 40 }}>
-          <div style={{ ...skeletonStyle, height: 420 }} />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-            <div style={skeletonStyle} />
-            <div style={skeletonStyle} />
+      <div style={{ minHeight: '100vh', background: '#03060f' }}>
+        {/* Hero skeleton */}
+        <Skeleton height='100vh' borderRadius={0} />
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '80px clamp(20px,6vw,60px) 120px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 80 }}>
+            {/* Left — intro + gallery + sections */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+              <Skeleton height={100} borderRadius={4} />
+              <Skeleton height={460} borderRadius={4} />
+              <Skeleton height={280} borderRadius={4} />
+              <Skeleton height={200} borderRadius={4} />
+            </div>
+            {/* Right — dossier + tours */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <Skeleton height={300} borderRadius={4} />
+              <Skeleton height={260} borderRadius={4} />
+            </div>
           </div>
-          <div style={{ ...skeletonStyle, height: 120 }} />
         </div>
       </div>
     )
@@ -181,19 +186,39 @@ export default function DestinationDetailPage() {
   const cover        = dest.coverImage || dest.cover || ''
   const subtitle     = dest.subtitle || dest.type || ''
   const gallery      = Array.isArray(dest.gallery) && dest.gallery.length > 0 ? dest.gallery : (cover ? [cover] : [])
+
+  // dest.thingsToDo is the primary API field; dest.experiences is legacy/fallback
+  const thingsToDo   = Array.isArray(dest.thingsToDo) ? dest.thingsToDo : []
   const experiences  = Array.isArray(dest.experiences) ? dest.experiences : []
+
+  // localCuisine & nearbyAttractions from seed data
+  const localCuisine       = Array.isArray(dest.localCuisine) ? dest.localCuisine : []
+  const nearbyAttractions  = Array.isArray(dest.nearbyAttractions) ? dest.nearbyAttractions : []
+
+  // warnings → use dest.warnings if present, else generic safety tip
   const expedNotes   = Array.isArray(dest.warnings) && dest.warnings.length > 0
                        ? dest.warnings
-                       : (dest.bestTimeToVisit ? [`Best time to visit: ${dest.bestTimeToVisit}`] : [])
-  const facts        = Array.isArray(dest.facts)
-                       ? dest.facts.map((f: any) => ({ label: f.label, val: f.value ?? f.val ?? '' }))
-                       : [
-                           dest.state       && { label: 'State',          val: dest.state },
-                           dest.bestDuration && { label: 'Duration',      val: dest.bestDuration },
-                           dest.entryFee    && { label: 'Entry Fee',      val: dest.entryFee },
-                           dest.timings     && { label: 'Timings',        val: dest.timings },
-                           dest.bestTimeToVisit && { label: 'Best Time',  val: dest.bestTimeToVisit },
-                         ].filter(Boolean)
+                       : dest.bestTimeToVisit
+                         ? [`Best time to visit: ${dest.bestTimeToVisit}`]
+                         : ['Always travel with a qualified local guide and check current advisories before departure.']
+
+  // facts: use dest.facts array {label,value} from seed data, or build from loose fields
+  const coordsFact   = dest.coordinates?.lat != null && dest.coordinates?.lng != null
+                       ? [{ label: 'Coordinates', val: `${dest.coordinates.lat.toFixed(4)}°N, ${dest.coordinates.lng.toFixed(4)}°E` }]
+                       : []
+  const facts        = [
+                         ...(Array.isArray(dest.facts)
+                           ? dest.facts.map((f: any) => ({ label: f.label, val: f.value ?? f.val ?? '' }))
+                           : [
+                               dest.state           && { label: 'State',      val: dest.state },
+                               dest.bestDuration    && { label: 'Duration',   val: dest.bestDuration },
+                               dest.entryFee        && { label: 'Entry Fee',  val: dest.entryFee },
+                               dest.timings         && { label: 'Timings',    val: dest.timings },
+                               dest.bestTimeToVisit && { label: 'Best Time',  val: dest.bestTimeToVisit },
+                             ].filter(Boolean)),
+                         ...coordsFact,
+                       ]
+
   const tours        = Array.isArray(dest.nearbyTours) ? dest.nearbyTours.map((t: any) => ({
                            title:      t.title,
                            slug:       t.slug,
@@ -350,22 +375,24 @@ export default function DestinationDetailPage() {
               )}
             </div>
 
-            {/* Things To Do / Experiences */}
-            {(experiences.length > 0 || (dest.thingsToDo && dest.thingsToDo.length > 0)) && (
+            {/* Things To Do — thingsToDo is primary API field; experiences is legacy shape */}
+            {(thingsToDo.length > 0 || experiences.length > 0) && (
               <div style={{ marginBottom: 70 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
                   <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.3em', color: 'rgba(240,235,224,0.2)' }}>◈ SIGNATURE EXPERIENCES</span>
                   <div style={{ flex: 1, height: 1, background: 'rgba(201,169,110,0.08)' }} />
                 </div>
                 {experiences.length > 0 ? (
+                  // Rich card layout when dest.experiences objects are available
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                     {experiences.map((exp: any, i: number) => (
                       <ExperienceCard key={i} exp={exp} index={i} />
                     ))}
                   </div>
                 ) : (
+                  // Flat list from dest.thingsToDo (array of strings)
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    {(dest.thingsToDo ?? []).map((thing: string, i: number) => (
+                    {thingsToDo.map((thing: string, i: number) => (
                       <motion.div key={i} initial={{ opacity: 0, x: -12 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
                         style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '12px 0', borderBottom: '1px solid rgba(201,169,110,0.06)' }}>
                         <span style={{ color: '#c9a96e', fontSize: 14, flexShrink: 0, marginTop: 2 }}>◈</span>
@@ -374,6 +401,44 @@ export default function DestinationDetailPage() {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Local Cuisine — dest.localCuisine: string[] */}
+            {localCuisine.length > 0 && (
+              <div style={{ marginBottom: 70 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
+                  <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.3em', color: 'rgba(240,235,224,0.2)' }}>◈ LOCAL CUISINE</span>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(201,169,110,0.08)' }} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
+                  {localCuisine.map((dish: string, i: number) => (
+                    <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
+                      style={{ padding: '14px 18px', border: '1px solid rgba(201,169,110,0.1)', borderRadius: 2, background: 'rgba(201,169,110,0.03)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ color: '#c9a96e', fontSize: 13 }}>◈</span>
+                      <p style={{ fontFamily: '"Crimson Text", serif', fontSize: 16, color: 'rgba(240,235,224,0.6)', lineHeight: 1.4 }}>{dish}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Nearby Attractions — dest.nearbyAttractions: string[] */}
+            {nearbyAttractions.length > 0 && (
+              <div style={{ marginBottom: 70 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+                  <span style={{ fontFamily: '"Space Mono", monospace', fontSize: 9, letterSpacing: '0.3em', color: 'rgba(240,235,224,0.2)' }}>◈ NEARBY ATTRACTIONS</span>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(201,169,110,0.08)' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {nearbyAttractions.map((place: string, i: number) => (
+                    <motion.div key={i} initial={{ opacity: 0, x: -12 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}
+                      style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(201,169,110,0.05)' }}>
+                      <span style={{ color: '#c9a96e', fontSize: 12 }}>→</span>
+                      <p style={{ fontFamily: '"Crimson Text", serif', fontSize: 16, color: 'rgba(240,235,224,0.55)', lineHeight: 1.5 }}>{place}</p>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             )}
 

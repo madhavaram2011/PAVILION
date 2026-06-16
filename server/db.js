@@ -28,8 +28,10 @@ const connectDB = async () => {
         socketTimeoutMS: 45000,
       });
 
-      console.log(`  ✅ MongoDB connected: ${conn.connection.host}`);
-      console.log(`     Database: ${conn.connection.name}`);
+      const isAtlas = MONGO_URI.includes('mongodb+srv') || MONGO_URI.includes('mongodb.net');
+      const instanceType = isAtlas ? '☁️  Cloud Atlas Instance' : '🏠  Local MongoDB';
+      console.log(`  ✅ MongoDB connected [${instanceType}]: ${conn.connection.host}`);
+      console.log(`     Database : ${conn.connection.name}`);
 
       // ── Connection event listeners ──────────────────────────────
       mongoose.connection.on('error', (err) => {

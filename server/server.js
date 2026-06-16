@@ -1,7 +1,12 @@
+import 'dotenv/config'; // 🚨 SABSE UPAR! Express, cors, routes sabse pehle yeh chalna chahiye!
+
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+
+// 🚨 CRITICAL: Saare custom files, routes, aur middleware se PEHLE variables load hone chahiye!
+dotenv.config();
 
 import connectDB, { closeDB } from './db.js';
 
@@ -13,13 +18,11 @@ import destinationRoutes from './routes/destinationRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
 import statsRoutes from './routes/statsRoutes.js';
 import placeRoutes from './routes/placeRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 
 // ── Middleware ────────────────────────────────────────────────────
 import { handleMongooseErrors, errorHandler } from './middleware/errorMiddleware.js';
 import AppError from './utils/AppError.js';
-
-// ── Load environment variables ───────────────────────────────────
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -47,6 +50,7 @@ app.use('/api/destinations', destinationRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/places', placeRoutes);      // legacy place routes
+app.use('/api/reviews', reviewRoutes);
 
 // ── Health Check ─────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

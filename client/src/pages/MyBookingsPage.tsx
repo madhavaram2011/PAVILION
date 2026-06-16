@@ -6,6 +6,7 @@ import { GiCompass } from 'react-icons/gi'
 import { format } from 'date-fns'
 import { bookingService } from '../services/travelService'
 import toast from 'react-hot-toast'
+import Skeleton from '../components/ui/Skeleton'
 
 type BookingStatus = 'confirmed' | 'pending' | 'cancelled' | 'completed'
 
@@ -199,11 +200,34 @@ export default function MyBookingsPage() {
           <div style={{ height: 2, background: 'linear-gradient(90deg,rgba(249,115,22,0.5),transparent)', width: 180 }} />
         </div>
 
-        {/* Loading state */}
+        {/* Loading state — skeleton booking cards */}
         {loading && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: 20 }}>
-            <div style={{ width: 48, height: 48, border: '2px solid rgba(249,115,22,0.2)', borderTop: '2px solid #f97316', borderRadius: '50%', animation: 'spinSlow 0.8s linear infinite' }} />
-            <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.15em' }}>Loading your journeys...</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} style={{ border: '1px solid rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden', display: 'flex', height: 160 }}>
+                {/* Image strip */}
+                <Skeleton width={170} height='100%' borderRadius={0} style={{ flexShrink: 0 }} />
+                {/* Content */}
+                <div style={{ flex: 1, padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+                      <Skeleton height={12} width={80} borderRadius={3} />
+                      <Skeleton height={22} width='55%' borderRadius={3} />
+                    </div>
+                    <Skeleton height={36} width={90} borderRadius={3} />
+                  </div>
+                  <div style={{ display: 'flex', gap: 16 }}>
+                    <Skeleton height={10} width={80} borderRadius={3} />
+                    <Skeleton height={10} width={90} borderRadius={3} />
+                    <Skeleton height={10} width={70} borderRadius={3} />
+                  </div>
+                  <div style={{ marginTop: 'auto', paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between' }}>
+                    <Skeleton height={10} width={110} borderRadius={3} />
+                    <Skeleton height={10} width={70} borderRadius={3} />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 

@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { FiArrowLeft, FiClock, FiUsers, FiStar, FiMapPin, FiChevronDown, FiCalendar, FiAlertTriangle, FiArrowRight, FiCheck, FiShare2, FiHeart } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
+import { tourService } from '../services/travelService'
+import Skeleton from '../components/ui/Skeleton'
+
 
 function AirplaneCursor() {
   const planeRef = useRef<HTMLDivElement>(null)
@@ -46,28 +49,6 @@ function StarCanvas() {
   return <canvas ref={ref} style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }} />
 }
 
-const TOURS_DATA: Record<string, any> = {
-  'himalayan-circuit': {
-    slug: 'himalayan-circuit', title: 'Himalayan Circuit', subtitle: 'NEPAL · TIBET · BHUTAN', region: 'Asia', difficulty: 'EXTREME', duration: 21, groupSize: 8, rating: 4.9, reviews: 127, price: 6800, category: 'Trek', tags: ['High Altitude', 'Cultural', 'Remote'],
-    cover: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1800&q=80',
-    gallery: ['https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=900&q=80', 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=900&q=80', 'https://images.unsplash.com/photo-1585409677983-0f6c41ca9c3b?w=900&q=80', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&q=80'],
-    summary: 'A legendary traverse across three kingdoms — where glaciers carve the sky and ancient monasteries cling to cliffs at the edge of the world. This is not a walk. It is an initiation.',
-    highlights: ['Cross Thorong La Pass at 5,416m — the highest trekking pass in the world', "Audience at Tiger's Nest Monastery, Bhutan's most sacred site", 'Traverse the forbidden plateau of Tibet under snow-capped giants', 'Camp at Everest Base Camp under the Khumbu Icefall', "Private cultural immersion with Sherpa families in Namche Bazaar"],
-    included: ['All permits (Everest, Annapurna, Bhutan tariff)', 'Expert mountain guides — certified & local', 'All accommodations (teahouses to boutique lodges)', 'All meals on trail', 'Domestic flights within itinerary', 'Emergency evacuation insurance'],
-    excluded: ['International flights', 'Nepal/Bhutan visa fees', 'Personal equipment', 'Travel insurance (mandatory)', 'Gratuities'],
-    itinerary: [
-      { day: '1–2', title: 'Kathmandu Arrival & Briefing', desc: "Land in Kathmandu. Acclimatization walk through Thamel's ancient streets. Gear check and expedition briefing." },
-      { day: '3–7', title: 'Annapurna Circuit — High Camps', desc: 'Fly to Pokhara, then drive to Chame. Begin the legendary Annapurna Circuit, ascending through rhododendron forests.' },
-      { day: '8', title: 'Thorong La Pass', desc: "3am start under headtorches. Summit the world's highest trekking pass at 5,416m as dawn breaks." },
-      { day: '9–12', title: 'Tibet Plateau Transit', desc: 'Cross into Tibet via the Friendship Highway. Drive through Shigatse and Gyantse — towns frozen in another century.' },
-      { day: '13–15', title: 'Everest Base Camp', desc: 'Trek to EBC at 5,364m. Sleep in the shadow of the world\'s highest peak. Wake to the roar of the Khumbu Icefall.' },
-      { day: '16–19', title: "Bhutan — The Last Shangri-La", desc: "Fly to Paro. Trek to Tiger's Nest at dawn. Explore the fortress dzongs of Thimphu and Punakha." },
-      { day: '20–21', title: 'Return & Debrief', desc: 'Final night in Kathmandu. Expedition debrief, celebration dinner, and farewell under the Himalayan stars.' },
-    ],
-    departures: [{ date: 'Mar 15, 2025', spots: 3, status: 'AVAILABLE' }, { date: 'Sep 10, 2025', spots: 6, status: 'AVAILABLE' }, { date: 'Oct 18, 2025', spots: 1, status: 'FILLING FAST' }, { date: 'Mar 20, 2026', spots: 8, status: 'OPEN' }],
-    guides: [{ name: 'Pasang Sherpa', role: 'Lead Guide', exp: '18 seasons', summits: '12 × Everest', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80' }, { name: 'Tenzin Dorje', role: 'Cultural Expert', exp: '12 seasons', summits: 'Tibet & Bhutan specialist', img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80' }],
-  }
-}
 
 const DIFF_COLOR: Record<string, string> = { MODERATE: '#22c55e', HARD: '#f59e0b', EXTREME: '#ef4444' }
 
@@ -83,7 +64,7 @@ function ItineraryItem({ item, index }: { item: any; index: number }) {
       <AnimatePresence>
         {open && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }} style={{ overflow: 'hidden' }}>
-            <p style={{ fontFamily: '"Crimson Text",serif', fontStyle: 'italic', fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.75, padding: '0 0 18px 80px' }}>{item.desc}</p>
+            <p style={{ fontFamily: '"Crimson Text",serif', fontStyle: 'italic', fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.75, padding: '0 0 18px 80px' }}>{item.description ?? item.desc}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -107,29 +88,43 @@ export default function TourDetailPage() {
   // Fetch tour by slug from API
   useEffect(() => {
     if (!slug) return
-    fetch(`http://localhost:5000/api/tours/${slug}`)
-      .then(r => r.json())
+    setLoading(true)
+    setError(null)
+    tourService.getBySlug(slug)
       .then(data => {
-        setTour(data.data?.tour || null)
-        setLoading(false)
-        if (!data.data?.tour) {
-          setError('Tour not found')
-        }
+        setTour(data)
       })
       .catch(err => {
         console.error('Failed to load tour:', err)
-        setError('Failed to load tour')
-        setLoading(false)
+        setError(err.message || 'Failed to load. Please try again.')
       })
+      .finally(() => setLoading(false))
   }, [slug])
 
   useEffect(() => { const onScroll = () => setScrollY(window.scrollY); window.addEventListener('scroll', onScroll, { passive: true }); return () => window.removeEventListener('scroll', onScroll) }, [])
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'none' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 60, height: 60, border: '3px solid rgba(249,115,22,0.2)', borderTop: '3px solid #f97316', borderRadius: '50%', margin: '0 auto 20px', animation: 'spin 0.8s linear infinite' }} />
-          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>Loading tour...</p>
+      <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff' }}>
+        {/* Hero skeleton */}
+        <Skeleton height='95vh' borderRadius={0} />
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '80px clamp(20px,6vw,60px)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 72 }}>
+            {/* Left col */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <Skeleton height={120} borderRadius={4} />
+              <Skeleton height={320} borderRadius={4} />
+              <Skeleton height={400} borderRadius={4} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <Skeleton height={200} borderRadius={4} />
+                <Skeleton height={200} borderRadius={4} />
+              </div>
+            </div>
+            {/* Sidebar */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <Skeleton height={320} borderRadius={4} />
+              <Skeleton height={80} borderRadius={4} />
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -137,11 +132,11 @@ export default function TourDetailPage() {
 
   if (error || !tour) {
     return (
-      <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'none' }}>
-        <div style={{ textAlign: 'center' }}>
-          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 14, color: '#ef4444', marginBottom: 20 }}>{error || 'Tour not found'}</p>
-          <button onClick={() => navigate('/tours')} style={{ padding: '10px 20px', background: '#f97316', color: '#fff', border: 'none', borderRadius: 2, cursor: 'pointer', fontFamily: '"Space Mono",monospace' }}>
-            Back to Tours
+      <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', padding: 60 }}>
+          <p style={{ marginBottom: 24, color: '#fff' }}>Failed to load. Please try again.</p>
+          <button onClick={() => window.location.reload()} style={{ padding: '12px 24px', background: '#f97316', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
+            Retry
           </button>
         </div>
       </div>
@@ -168,7 +163,7 @@ export default function TourDetailPage() {
 
       {/* HERO */}
       <div style={{ position: 'relative', height: '95vh', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${tour.cover})`, backgroundSize: 'cover', backgroundPosition: 'center', transform: `translateY(${scrollY * 0.35}px)`, filter: 'brightness(0.25) saturate(0.55)' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${tour.coverImage || tour.cover || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600'})`, backgroundSize: 'cover', backgroundPosition: 'center', transform: `translateY(${scrollY * 0.35}px)`, filter: 'brightness(0.25) saturate(0.55)' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #06040f 0%, rgba(6,4,15,0.35) 50%, rgba(6,4,15,0.1) 100%)' }} />
 
         <Link to="/tours" style={{ position: 'absolute', top: 32, left: 'clamp(20px,6vw,100px)', display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', zIndex: 10, padding: '8px 16px', background: 'rgba(6,4,15,0.6)', backdropFilter: 'blur(8px)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 2 }}>
@@ -187,12 +182,12 @@ export default function TourDetailPage() {
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 clamp(20px,6vw,100px) 56px' }}>
           <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>
             <span style={{ border: `1px solid ${dc}`, color: dc, fontFamily: '"Space Mono",monospace', fontSize: 9, letterSpacing: '0.2em', padding: '3px 10px', borderRadius: 2, background: `${dc}12` }}>{tour.difficulty}</span>
-            {tour.tags.map((tag: string) => <span key={tag} style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.35)', fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.15em', padding: '3px 10px', borderRadius: 2 }}>{tag.toUpperCase()}</span>)}
+            {tour.tags?.map((tag: string) => <span key={tag} style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.35)', fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.15em', padding: '3px 10px', borderRadius: 2 }}>{tag.toUpperCase()}</span>)}
           </div>
           <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: '#f97316', marginBottom: 10 }}>{tour.subtitle}</p>
           <h1 style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 'clamp(4rem,9vw,10rem)', letterSpacing: '0.03em', lineHeight: 0.9, color: '#fff', marginBottom: 24 }}>{tour.title}</h1>
           <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', alignItems: 'center' }}>
-            {[{ icon: <FiClock size={11} />, val: `${tour.duration} Days` }, { icon: <FiUsers size={11} />, val: `Max ${tour.groupSize}` }, { icon: <FiStar size={11} />, val: `${tour.rating} (${tour.reviews} reviews)` }, { icon: <FiMapPin size={11} />, val: tour.region }].map(({ icon, val }) => (
+            {[{ icon: <FiClock size={11} />, val: `${tour.duration} Days` }, { icon: <FiUsers size={11} />, val: `Max ${tour.groupSize?.max ?? tour.groupSize ?? '—'}` }, { icon: <FiStar size={11} />, val: `${tour.rating} (${tour.reviewCount ?? tour.reviews ?? 0} reviews)` }, { icon: <FiMapPin size={11} />, val: tour.region }].map(({ icon, val }) => (
               <div key={val} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                 <span style={{ color: '#f97316' }}>{icon}</span>
                 <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 10, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.55)' }}>{val}</span>
@@ -218,7 +213,7 @@ export default function TourDetailPage() {
                 <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)' }}>Expedition Highlights</span>
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
               </div>
-              {tour.highlights.map((h: string, i: number) => (
+              {tour.highlights?.map((h: string, i: number) => (
                 <motion.div key={i} initial={{ opacity: 0, x: -14 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}
                   style={{ display: 'flex', gap: 14, marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                   <FiCheck size={12} color="#22c55e" style={{ marginTop: 3, flexShrink: 0 }} />
@@ -235,9 +230,9 @@ export default function TourDetailPage() {
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
               </div>
               <motion.div key={activeGallery} initial={{ opacity: 0.6, scale: 0.99 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}
-                style={{ height: 400, borderRadius: 3, overflow: 'hidden', backgroundImage: `url(${tour.gallery[activeGallery]})`, backgroundSize: 'cover', backgroundPosition: 'center', marginBottom: 6 }} />
+                style={{ height: 400, borderRadius: 3, overflow: 'hidden', backgroundImage: `url(${tour.gallery?.[activeGallery]})`, backgroundSize: 'cover', backgroundPosition: 'center', marginBottom: 6 }} />
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 4 }}>
-                {tour.gallery.map((img: string, i: number) => (
+                {tour.gallery?.map((img: string, i: number) => (
                   <div key={i} onClick={() => setActiveGallery(i)} style={{ height: 76, backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: activeGallery === i ? 1 : 0.32, border: activeGallery === i ? '1px solid #f97316' : '1px solid transparent', cursor: 'none', transition: 'all 0.25s', borderRadius: 2 }} />
                 ))}
               </div>
@@ -250,7 +245,7 @@ export default function TourDetailPage() {
                 <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)' }}>Expedition Itinerary</span>
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
               </div>
-              {tour.itinerary.map((item: any, i: number) => <ItineraryItem key={i} item={item} index={i} />)}
+              {tour.itinerary?.map((item: any, i: number) => <ItineraryItem key={i} item={item} index={i} />)}
             </div>
 
             {/* Included/Excluded */}
@@ -258,7 +253,7 @@ export default function TourDetailPage() {
               {[{ title: 'INCLUDED', items: tour.included, color: '#22c55e', mark: <FiCheck size={11} color="#22c55e" style={{ marginTop: 3, flexShrink: 0 }} /> }, { title: 'NOT INCLUDED', items: tour.excluded, color: '#ef4444', mark: <span style={{ color: '#ef4444', fontSize: 16, flexShrink: 0 }}>×</span> }].map(({ title, items, color, mark }) => (
                 <div key={title}>
                   <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.3em', textTransform: 'uppercase', color, marginBottom: 16 }}>{title}</p>
-                  {items.map((item: string, i: number) => (
+                  {items?.map((item: string, i: number) => (
                     <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 10 }}>{mark}<p style={{ fontFamily: '"Crimson Text",serif', fontSize: 14, color: 'rgba(255,255,255,0.52)', lineHeight: 1.5 }}>{item}</p></div>
                   ))}
                 </div>
@@ -272,23 +267,30 @@ export default function TourDetailPage() {
                 <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)' }}>Your Guides</span>
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                {tour.guides.map((g: any, i: number) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                    style={{ padding: '22px', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 3, background: 'rgba(255,255,255,0.02)', transition: 'border-color 0.3s', cursor: 'none' }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(249,115,22,0.3)'}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)'}>
-                    <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                      <div style={{ width: 50, height: 50, borderRadius: '50%', flexShrink: 0, backgroundImage: `url(${g.img})`, backgroundSize: 'cover', backgroundPosition: 'center', border: '1px solid rgba(249,115,22,0.3)' }} />
-                      <div>
-                        <p style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 18, letterSpacing: '0.05em', color: '#fff', marginBottom: 2 }}>{g.name}</p>
-                        <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#f97316', marginBottom: 6 }}>{g.role}</p>
-                        <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>{g.exp} · {g.summits}</p>
+              {tour.guides?.length > 0 ? (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  {tour.guides.map((g: any, i: number) => (
+                    <motion.div key={i} initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                      style={{ padding: '22px', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 3, background: 'rgba(255,255,255,0.02)', transition: 'border-color 0.3s', cursor: 'none' }}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(249,115,22,0.3)'}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)'}>
+                      <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                        <div style={{ width: 50, height: 50, borderRadius: '50%', flexShrink: 0, backgroundImage: `url(${g.img})`, backgroundSize: 'cover', backgroundPosition: 'center', border: '1px solid rgba(249,115,22,0.3)' }} />
+                        <div>
+                          <p style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 18, letterSpacing: '0.05em', color: '#fff', marginBottom: 2 }}>{g.name}</p>
+                          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#f97316', marginBottom: 6 }}>{g.role}</p>
+                          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>{g.exp} · {g.summits}</p>
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ padding: '20px 22px', border: '1px solid rgba(249,115,22,0.15)', borderRadius: 3, background: 'rgba(249,115,22,0.04)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <FiCheck size={14} color="#f97316" />
+                  <p style={{ fontFamily: '"Crimson Text",serif', fontSize: 16, color: 'rgba(255,255,255,0.55)', fontStyle: 'italic' }}>Expert local guides included</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -302,18 +304,27 @@ export default function TourDetailPage() {
                 <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, color: 'rgba(255,255,255,0.22)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Per Person · All-Inclusive</p>
               </div>
               <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.25em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: 10 }}>Select Departure</p>
-              {tour.departures.map((dep: any, i: number) => (
+              {(tour.departures ?? (tour.startDates?.map((date: string) => ({
+                date: new Date(date).toLocaleDateString(),
+                spots: tour.groupSize?.max || 8,
+                status: 'AVAILABLE'
+              }))) ?? []).map((dep: any, i: number) => {
+                // Normalize: startDates can be a Date string, or an object with {date, spots, status}
+                const dateStr = typeof dep === 'string' ? new Date(dep).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : (dep.date ?? dep.startDate ?? String(dep))
+                const spots = dep.spots ?? dep.availableSeats ?? dep.maxGroupSize ?? tour.groupSize ?? '—'
+                const depStatus = dep.status ?? (dep.availableSeats === 0 ? 'SOLD OUT' : dep.availableSeats <= 3 ? 'FILLING FAST' : 'AVAILABLE')
+                return (
                 <motion.button key={i} onClick={() => setSelectedDeparture(i)} whileHover={{ x: 3 }} style={{ width: '100%', marginBottom: 6, padding: '11px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: selectedDeparture === i ? 'rgba(249,115,22,0.1)' : 'transparent', border: selectedDeparture === i ? '1px solid rgba(249,115,22,0.5)' : '1px solid rgba(255,255,255,0.06)', borderRadius: 2, transition: 'all 0.2s', cursor: 'none' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                     <FiCalendar size={10} color={selectedDeparture === i ? '#f97316' : 'rgba(255,255,255,0.25)'} />
-                    <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 10, color: selectedDeparture === i ? '#fff' : 'rgba(255,255,255,0.4)' }}>{dep.date}</span>
+                    <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 10, color: selectedDeparture === i ? '#fff' : 'rgba(255,255,255,0.4)' }}>{dateStr}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                    {dep.status === 'FILLING FAST' && <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.5, repeat: Infinity }} style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, color: '#f59e0b', letterSpacing: '0.1em' }}>FILLING FAST</motion.span>}
-                    <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, color: 'rgba(255,255,255,0.25)' }}>{dep.spots} SPOTS</span>
+                    {depStatus === 'FILLING FAST' && <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.5, repeat: Infinity }} style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, color: '#f59e0b', letterSpacing: '0.1em' }}>FILLING FAST</motion.span>}
+                    <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, color: 'rgba(255,255,255,0.25)' }}>{spots} SPOTS</span>
                   </div>
                 </motion.button>
-              ))}
+              )})}
               <motion.button whileHover={selectedDeparture !== null ? { y: -2 } : {}}
                 onClick={() => { if (selectedDeparture !== null) navigate(`/book/${tour.slug}`) }}
                 style={{ width: '100%', marginTop: 18, padding: '15px', background: selectedDeparture !== null ? 'linear-gradient(135deg,#f97316,#ea580c)' : 'rgba(249,115,22,0.1)', border: 'none', borderRadius: 2, fontFamily: '"Space Mono",monospace', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: selectedDeparture !== null ? '#fff' : 'rgba(249,115,22,0.3)', fontWeight: 700, cursor: selectedDeparture !== null ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, boxShadow: selectedDeparture !== null ? '0 8px 28px rgba(249,115,22,0.35)' : 'none', transition: 'all 0.3s' }}>

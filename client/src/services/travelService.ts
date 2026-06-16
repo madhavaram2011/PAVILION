@@ -11,7 +11,7 @@ import type {
   DestinationFilters,
 } from '../types'
 
-// ─── Tours ────────────────────────────────────────────────────────────────────
+// ─── 1. Tours ─────────────────────────────────────────────────────────────────
 export const tourService = {
   getAll: async (filters: TourFilters = {}): Promise<PaginatedResponse<Tour>> => {
     const res = await api.get<PaginatedResponse<Tour>>('/tours', { params: filters })
@@ -34,7 +34,7 @@ export const tourService = {
   },
 }
 
-// ─── Destinations ─────────────────────────────────────────────────────────────
+// ─── 2. Destinations ──────────────────────────────────────────────────────────
 export const destinationService = {
   getAll: async (filters: DestinationFilters = {}): Promise<PaginatedResponse<Destination>> => {
     const res = await api.get<PaginatedResponse<Destination>>('/destinations', { params: filters })
@@ -45,14 +45,15 @@ export const destinationService = {
     const res = await api.get<{ data: Destination[] }>('/destinations/featured')
     return res.data.data
   },
+
   getById: async (id: string): Promise<Destination> => {
     const res = await api.get<{ data: Destination }>(`/destinations/${id}`)
     return res.data.data
   },
 
-  getBySlug: async (slug: string): Promise<Destination> => {
-    const res = await api.get<{ data: Destination }>(`/destinations/${slug}`)
-    return res.data.data
+  getBySlug: async (slug: string): Promise<{ destination: any; nearbyTours: any[] }> => {
+    const res = await api.get<{ data: { destination: any; nearbyTours: any[] } }>(`/destinations/${slug}`)
+    return res.data.data   // { destination, nearbyTours }
   },
 
   getByRegion: async (region: string): Promise<Destination[]> => {
@@ -61,7 +62,7 @@ export const destinationService = {
   },
 }
 
-// ─── Bookings ─────────────────────────────────────────────────────────────────
+// ─── 3. Bookings ──────────────────────────────────────────────────────────────
 export const bookingService = {
   create: async (data: BookingFormData): Promise<Booking> => {
     // Backend returns { status, data: { booking } }
@@ -87,17 +88,7 @@ export const bookingService = {
   },
 }
 
-export const travelService = {
-  getFeaturedTours: tourService.getFeatured,
-  getAllTours: tourService.getAll,
-  getTourBySlug: tourService.getBySlug,
-  getAllDestinations: destinationService.getAll,
-  getDestinationBySlug: destinationService.getBySlug,
-  getDestinations: destinationService.getAll,
-  getMyBookings: bookingService.getMyBookings,
-}
-
-// ─── Reviews ──────────────────────────────────────────────────────────────────
+// ─── 4. Reviews ───────────────────────────────────────────────────────────────
 export const reviewService = {
   getByTour: async (tourId: string): Promise<Review[]> => {
     const res = await api.get<{ data: Review[] }>(`/reviews/tour/${tourId}`)
@@ -112,4 +103,15 @@ export const reviewService = {
   markHelpful: async (reviewId: string): Promise<void> => {
     await api.patch(`/reviews/${reviewId}/helpful`)
   },
+}
+
+// ─── 5. Aggregator (references all four above — must come last) ───────────────
+export const travelService = {
+  getFeaturedTours:       tourService.getFeatured,
+  getAllTours:             tourService.getAll,
+  getTourBySlug:          tourService.getBySlug,
+  getAllDestinations:      destinationService.getAll,
+  getDestinationBySlug:   destinationService.getBySlug,
+  getDestinations:        destinationService.getAll,
+  getMyBookings:          bookingService.getMyBookings,
 }

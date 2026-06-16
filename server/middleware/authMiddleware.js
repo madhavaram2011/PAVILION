@@ -2,7 +2,10 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import AppError from '../utils/AppError.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'pavilion_super_secret_key_2024';
+if (!process.env.JWT_SECRET) {
+  throw new Error('CRITICAL CONFIG ERROR: JWT_SECRET environment variable is missing!');
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // ── protect ───────────────────────────────────────────────────────
 /**
