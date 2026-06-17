@@ -187,7 +187,7 @@ export default function TourDetailPage() {
           <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: '#f97316', marginBottom: 10 }}>{tour.subtitle}</p>
           <h1 style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 'clamp(4rem,9vw,10rem)', letterSpacing: '0.03em', lineHeight: 0.9, color: '#fff', marginBottom: 24 }}>{tour.title}</h1>
           <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', alignItems: 'center' }}>
-            {[{ icon: <FiClock size={11} />, val: `${tour.duration} Days` }, { icon: <FiUsers size={11} />, val: `Max ${tour.groupSize?.max ?? tour.groupSize ?? '—'}` }, { icon: <FiStar size={11} />, val: `${tour.rating} (${tour.reviewCount ?? tour.reviews ?? 0} reviews)` }, { icon: <FiMapPin size={11} />, val: tour.region }].map(({ icon, val }) => (
+            {[{ icon: <FiClock size={11} />, val: `${tour.duration} Days` }, { icon: <FiUsers size={11} />, val: `Max ${typeof tour.groupSize === 'object' ? (tour.groupSize?.max ?? '—') : (tour.groupSize ?? '—')}` }, { icon: <FiStar size={11} />, val: `${tour.rating ?? '—'} (${tour.reviewCount ?? tour.reviews ?? 0} reviews)` }, { icon: <FiMapPin size={11} />, val: tour.region }].map(({ icon, val }) => (
               <div key={val} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                 <span style={{ color: '#f97316' }}>{icon}</span>
                 <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 10, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.55)' }}>{val}</span>
@@ -314,19 +314,20 @@ export default function TourDetailPage() {
                 const spots = dep.spots ?? dep.availableSeats ?? dep.maxGroupSize ?? tour.groupSize ?? '—'
                 const depStatus = dep.status ?? (dep.availableSeats === 0 ? 'SOLD OUT' : dep.availableSeats <= 3 ? 'FILLING FAST' : 'AVAILABLE')
                 return (
-                <motion.button key={i} onClick={() => setSelectedDeparture(i)} whileHover={{ x: 3 }} style={{ width: '100%', marginBottom: 6, padding: '11px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: selectedDeparture === i ? 'rgba(249,115,22,0.1)' : 'transparent', border: selectedDeparture === i ? '1px solid rgba(249,115,22,0.5)' : '1px solid rgba(255,255,255,0.06)', borderRadius: 2, transition: 'all 0.2s', cursor: 'none' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                    <FiCalendar size={10} color={selectedDeparture === i ? '#f97316' : 'rgba(255,255,255,0.25)'} />
-                    <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 10, color: selectedDeparture === i ? '#fff' : 'rgba(255,255,255,0.4)' }}>{dateStr}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                    {depStatus === 'FILLING FAST' && <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.5, repeat: Infinity }} style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, color: '#f59e0b', letterSpacing: '0.1em' }}>FILLING FAST</motion.span>}
-                    <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, color: 'rgba(255,255,255,0.25)' }}>{spots} SPOTS</span>
-                  </div>
-                </motion.button>
-              )})}
+                  <motion.button key={i} onClick={() => setSelectedDeparture(i)} whileHover={{ x: 3 }} style={{ width: '100%', marginBottom: 6, padding: '11px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: selectedDeparture === i ? 'rgba(249,115,22,0.1)' : 'transparent', border: selectedDeparture === i ? '1px solid rgba(249,115,22,0.5)' : '1px solid rgba(255,255,255,0.06)', borderRadius: 2, transition: 'all 0.2s', cursor: 'none' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                      <FiCalendar size={10} color={selectedDeparture === i ? '#f97316' : 'rgba(255,255,255,0.25)'} />
+                      <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 10, color: selectedDeparture === i ? '#fff' : 'rgba(255,255,255,0.4)' }}>{dateStr}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      {depStatus === 'FILLING FAST' && <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.5, repeat: Infinity }} style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, color: '#f59e0b', letterSpacing: '0.1em' }}>FILLING FAST</motion.span>}
+                      <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, color: 'rgba(255,255,255,0.25)' }}>{spots} SPOTS</span>
+                    </div>
+                  </motion.button>
+                )
+              })}
               <motion.button whileHover={selectedDeparture !== null ? { y: -2 } : {}}
-                onClick={() => { if (selectedDeparture !== null) navigate(`/book/${tour.slug}`) }}
+                onClick={() => { if (selectedDeparture !== null) navigate(`/booking/${tour.slug}`) }}
                 style={{ width: '100%', marginTop: 18, padding: '15px', background: selectedDeparture !== null ? 'linear-gradient(135deg,#f97316,#ea580c)' : 'rgba(249,115,22,0.1)', border: 'none', borderRadius: 2, fontFamily: '"Space Mono",monospace', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: selectedDeparture !== null ? '#fff' : 'rgba(249,115,22,0.3)', fontWeight: 700, cursor: selectedDeparture !== null ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, boxShadow: selectedDeparture !== null ? '0 8px 28px rgba(249,115,22,0.35)' : 'none', transition: 'all 0.3s' }}>
                 {selectedDeparture !== null ? <><span>Reserve My Spot</span><FiArrowRight size={13} /></> : 'Select a Date First'}
               </motion.button>

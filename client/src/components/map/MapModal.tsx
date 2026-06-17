@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from 'react'
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 interface Destination {
@@ -115,13 +115,15 @@ export default function MapModal({
             Google Maps preview - no API required
           </div>
 
-          <iframe
-            src={embedUrl}
-            title={`Map of ${destination.name}`}
-            loading="lazy"
-            style={{ width: '100%', height: '100%', border: 0 }}
-            onError={() => setIframeError('Map preview could not load. Please open the map externally.')}
-          />
+          {useMemo(() => (
+            <iframe
+              src={embedUrl}
+              title={`Map of ${destination.name}`}
+              loading="lazy"
+              style={{ width: '100%', height: '100%', border: 0 }}
+              onError={() => setIframeError('Map preview could not load. Please open the map externally.')}
+            />
+          ), [embedUrl, destination.name])}
 
           <button
             onClick={onClose}

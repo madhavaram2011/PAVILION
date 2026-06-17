@@ -394,7 +394,7 @@ function BoardingPreview({ tour, onClose }: { tour: any; onClose: () => void }) 
             }}>
               {/* Highlights */}
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                {tour.highlights.map((h, i) => (
+                {tour.highlights.map((h: string, i: number) => (
                   <motion.span key={h} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.07 }}
                     style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', background: tour.accentDim, border: `1px solid ${tour.accent}35`, borderRadius: 100, fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.1em', color: tour.accent }}>
                     <span style={{ width: 4, height: 4, borderRadius: '50%', background: tour.accent, flexShrink: 0 }} />{h}

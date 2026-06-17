@@ -638,17 +638,25 @@ export default function DestinationsPage() {
 
   const openMap = useCallback((destName: string) => {
     const coords = getDestinationCoords(destName)
-    if (coords) {
-      const dest = DESTINATIONS.find(d => d.name === destName)
-      setMapDest({
-        name: destName,
-        ...coords,
-        rating: dest?.rating || 4.5,
-        category: [dest?.type?.toLowerCase() || 'destination'],
-      })
-      setMapOpen(true)
-    }
-  }, [])
+    if (!coords) return
+    const staticDest = DESTINATIONS.find(d => d.name === destName)
+    const apiDest = apiDestinations.find((d: any) => d.name === destName)
+    const merged: any = apiDest || staticDest
+    setMapDest({
+      name: destName,
+      ...coords,
+      address: merged?.state ? `${destName}, ${merged.state}, India` : `${destName}, India`,
+      rating: merged?.rating || 4.5,
+      category: [merged?.type?.toLowerCase() || 'destination'],
+      coverImage: merged?.coverImage,
+      bestTimeToVisit: merged?.bestTimeToVisit,
+      entryFee: merged?.entryFee,
+      timings: merged?.timings,
+      howToReach: merged?.howToReach,
+      nearbyAttractions: merged?.nearbyAttractions,
+    })
+    setMapOpen(true)
+  }, [apiDestinations])
 
   const closeMap = useCallback(() => { setMapOpen(false); setMapDest(null) }, [])
 
