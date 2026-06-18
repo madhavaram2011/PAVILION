@@ -3,7 +3,10 @@ import User from '../models/User.js';
 import AppError from '../utils/AppError.js';
 
 // ── Token helpers ─────────────────────────────────────────────────
-const JWT_SECRET         = process.env.JWT_SECRET         || 'pavilion_super_secret_key_2024';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('CRITICAL: JWT_SECRET environment variable is missing in authController!');
+}
 const JWT_EXPIRES_IN     = process.env.JWT_EXPIRES_IN     || '15m';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || `${JWT_SECRET}_refresh`;
 const JWT_REFRESH_EXPIRES= process.env.JWT_REFRESH_EXPIRES|| '7d';

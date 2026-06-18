@@ -4,6 +4,7 @@ import {
   getMyBookings,
   cancelBooking,
   getAllBookings,
+  updateBookingStatus,
 } from '../controllers/bookingController.js';
 import { protect, restrictTo } from '../middleware/authMiddleware.js';
 
@@ -19,5 +20,6 @@ router.patch('/:id/cancel',        cancelBooking);
 
 // ── Admin only ────────────────────────────────────────────────────
 router.get('/', restrictTo('admin'), getAllBookings);
+router.patch('/:id/status', restrictTo('admin'), updateBookingStatus);
 
 export default router;

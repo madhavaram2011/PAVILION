@@ -225,3 +225,19 @@ export const getAllBookings = async (req, res, next) => {
     next(err);
   }
 };
+
+// ── PATCH /api/bookings/:id/status — Admin only ───────────────────
+export const updateBookingStatus = async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    const allowed = ['confirmed', 'completed', 'cancelled', 'refunded', 'no-show', 'pending'];
+    if (!allowed.includes(status)) return next(AppError.badRequest('Invalid status value.'));
+    const booking = await Booking.findByIdAndUpdate(
+      req.params.id,
+      { status, ...(status === 'cancelled' ? { cancelledAt: new Date() } : {}) },
+      { new: true, runValidators: true }
+    );
+    if (!booking) return next(AppError.notFound('Booking'));
+    res.status(200).json({ status: 'success', data: { booking } });
+  } catch (err) { next(err); }
+};

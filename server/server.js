@@ -4,6 +4,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 // 🚨 CRITICAL: Saare custom files, routes, aur middleware se PEHLE variables load hone chahiye!
 dotenv.config();
@@ -17,7 +19,7 @@ import tourRoutes from './routes/tourRoutes.js';
 import destinationRoutes from './routes/destinationRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
 import statsRoutes from './routes/statsRoutes.js';
-import placeRoutes from './routes/placeRoutes.js';
+
 import reviewRoutes from './routes/reviewRoutes.js';
 
 // ── Middleware ────────────────────────────────────────────────────
@@ -39,6 +41,9 @@ app.use(
   })
 );
 app.use(express.json({ limit: '10mb' }));
+app.use(helmet());
+const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
+app.use('/api/', apiLimiter);
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); // parse httpOnly refresh-token cookie
 
@@ -49,7 +54,7 @@ app.use('/api/tours', tourRoutes);
 app.use('/api/destinations', destinationRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/stats', statsRoutes);
-app.use('/api/places', placeRoutes);      // legacy place routes
+
 app.use('/api/reviews', reviewRoutes);
 
 // ── Health Check ─────────────────────────────────────────────────
