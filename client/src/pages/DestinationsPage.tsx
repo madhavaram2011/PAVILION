@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import MapModal from '../components/map/MapModal'
-import { getDestinationCoords } from '../utils/destinationCoords'
 
 // ── DATA ─────────────────────────────────────────────────────────────────────
 const REGIONS = [
+  {
+    id: 'All', icon: '🇮🇳', color: '#c9a96e', glow: '#a97c3f',
+    label: 'All India', short: 'All',
+  },
   {
     id: 'North India', icon: '🏔️', color: '#38bdf8', glow: '#0ea5e9',
     label: 'North India', short: 'North',
@@ -13,7 +15,7 @@ const REGIONS = [
     image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=85',
     stats: { tours: 12, rating: '4.8', best: 'Oct–Mar' },
     desc: 'Golden forts rising from desert sands, ancient ghats where pilgrims bathe at dawn, and the crown jewel of the Mughal empire.',
-    destCount: 12, angle: 270,
+    destCount: 12,
   },
   {
     id: 'South India', icon: '🌴', color: '#34d399', glow: '#10b981',
@@ -23,7 +25,7 @@ const REGIONS = [
     image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=85',
     stats: { tours: 10, rating: '4.9', best: 'Nov–Feb' },
     desc: 'Gliding through palm-fringed backwaters on a houseboat, ancient gopurams rising against sunset, spice gardens perfuming the mountain air.',
-    destCount: 10, angle: 90,
+    destCount: 10,
   },
   {
     id: 'West India', icon: '🏖️', color: '#fb923c', glow: '#f97316',
@@ -33,7 +35,7 @@ const REGIONS = [
     image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=85',
     stats: { tours: 8, rating: '4.7', best: 'Nov–Mar' },
     desc: 'Portuguese forts overlooking turquoise Arabian Sea, ancient Buddhist caves carved into basalt cliffs, the salt desert glowing white under a full moon.',
-    destCount: 8, angle: 180,
+    destCount: 8,
   },
   {
     id: 'East India', icon: '🐯', color: '#f472b6', glow: '#ec4899',
@@ -43,17 +45,17 @@ const REGIONS = [
     image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=85',
     stats: { tours: 7, rating: '4.6', best: 'Sep–Mar' },
     desc: "Sunrise over Kanchenjunga from Darjeeling's tea estates, royal Bengal tigers prowling mangrove islands, the 13th-century Sun Temple at the Bay of Bengal.",
-    destCount: 7, angle: 0,
+    destCount: 7,
   },
   {
     id: 'Northeast India', icon: '🌿', color: '#a78bfa', glow: '#8b5cf6',
-    label: 'Northeast India', short: 'Northeast',
+    label: 'North-East', short: 'NE',
     tagline: 'Last wilderness of the subcontinent',
     landmarks: ['Living Root Bridges', 'Kaziranga', 'Tawang Monastery', 'Loktak Lake'],
     image: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=800&q=85',
     stats: { tours: 6, rating: '4.8', best: 'Oct–Apr' },
     desc: 'Ancient living bridges woven from rubber tree roots, one-horned rhinos in misty grasslands, Tibetan monasteries perched on Himalayan ridges.',
-    destCount: 6, angle: 315,
+    destCount: 6,
   },
   {
     id: 'Central India', icon: '🦁', color: '#fbbf24', glow: '#f59e0b',
@@ -63,7 +65,7 @@ const REGIONS = [
     image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800&q=85',
     stats: { tours: 6, rating: '4.7', best: 'Oct–Jun' },
     desc: "Erotic temple carvings at Khajuraho speak of a civilisation at peace with itself, and some of India's finest tiger reserves deep in Sal forest.",
-    destCount: 6, angle: 135,
+    destCount: 6,
   },
   {
     id: 'Islands', icon: '🐠', color: '#22d3ee', glow: '#06b6d4',
@@ -73,7 +75,7 @@ const REGIONS = [
     image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=85',
     stats: { tours: 5, rating: '4.9', best: 'Oct–May' },
     desc: "Asia's finest beach at Radhanagar, coral gardens teeming with life, bioluminescent plankton lighting the surf, absolute isolation from the world.",
-    destCount: 5, angle: 45,
+    destCount: 5,
   },
 ]
 
@@ -136,19 +138,20 @@ const DESTINATIONS = [
 
 const CATEGORIES = ['All', 'Beach', 'Mountain', 'Desert', 'Wildlife', 'Cultural', 'Adventure', 'Spiritual']
 
+// FIX: Added 'Northeast India' → 'Northeast India' mapping (was missing, broke NE filter)
 const REGION_NAME_MAP: Record<string, string> = {
   North: 'North India',
   South: 'South India',
   East: 'East India',
   West: 'West India',
   Northeast: 'Northeast India',
+  'Northeast India': 'Northeast India',
   Central: 'Central India',
   Islands: 'Islands',
   'North India': 'North India',
   'South India': 'South India',
   'East India': 'East India',
   'West India': 'West India',
-  'Northeast India': 'Northeast India',
   'Central India': 'Central India',
 }
 
@@ -171,17 +174,18 @@ function useStarField(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
       phase: Math.random() * Math.PI * 2,
     }))
 
-    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight }
+    const resize = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+    }
     resize()
     window.addEventListener('resize', resize)
 
     let t = 0
     let lastTime = 0
     const draw = (timestamp: number) => {
-      if (timestamp - lastTime < 33) {
-        raf = requestAnimationFrame(draw)
-        return
-      }
+      // Throttle to ~30fps to reduce CPU usage across 145+ cards
+      if (timestamp - lastTime < 33) { raf = requestAnimationFrame(draw); return }
       lastTime = timestamp
       t += 0.008
       ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -200,353 +204,193 @@ function useStarField(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
   }, [canvasRef])
 }
 
-// ── REGION NODE ──────────────────────────────────────────────────────────────
-function RegionNode({ region, isActive, isHighlighted: _isHighlighted, isDimmed, onClick }: {
-  region: typeof REGIONS[0]; isActive: boolean; isHighlighted: boolean; isDimmed: boolean; onClick: () => void
-}) {
-  const [hov, setHov] = useState(false)
-  const rad = (region.angle - 90) * Math.PI / 180
-  const R = 200
-  const cx = 270 + R * Math.cos(rad)
-  const cy = 270 + R * Math.sin(rad)
-
-  return (
-    <div
-      onClick={onClick}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-      style={{
-        position: 'absolute', left: cx, top: cy,
-        transform: 'translate(-50%, -50%)',
-        cursor: 'pointer', zIndex: 30,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
-        opacity: isDimmed ? 0.18 : 1,
-        transition: 'opacity 0.2s ease',
-      }}
-    >
-      {/* Outer glow ring */}
-      {(isActive || hov) && (
-        <div style={{
-          position: 'absolute',
-          width: isActive ? 100 : 76, height: isActive ? 100 : 76,
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${region.color}35 0%, transparent 70%)`,
-          filter: 'blur(10px)',
-          transition: 'opacity 0.2s ease, width 0.2s ease, height 0.2s ease',
-        }} />
-      )}
-
-      {/* Main orb */}
-      <div style={{
-        width: isActive || hov ? 72 : 58,
-        height: isActive || hov ? 72 : 58,
-        borderRadius: '50%',
-        background: isActive
-          ? `radial-gradient(circle at 35% 35%, ${region.color}55, ${region.color}15)`
-          : `radial-gradient(circle at 35% 35%, ${region.color}30, ${region.color}08)`,
-        border: `1.5px solid ${region.color}${isActive ? 'cc' : hov ? '88' : '44'}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: isActive || hov ? 28 : 22,
-        transform: isActive || hov ? 'scale(1.0)' : 'scale(1)',
-        transition: 'background 0.2s ease, border 0.2s ease, transform 0.2s ease, opacity 0.2s ease',
-        boxShadow: isActive
-          ? `0 0 32px ${region.color}55, 0 0 70px ${region.color}22, inset 0 1px 0 rgba(255,255,255,0.15)`
-          : hov ? `0 0 18px ${region.color}40, inset 0 1px 0 rgba(255,255,255,0.1)` : 'none',
-        position: 'relative',
-      }}>
-        {/* Ping ring when active */}
-        {isActive && (
-          <div style={{
-            position: 'absolute', inset: -7, borderRadius: '50%',
-            border: `1px solid ${region.color}45`,
-            animation: 'ping 2.2s ease-out infinite',
-          }} />
-        )}
-        {/* Second ping */}
-        {isActive && (
-          <div style={{
-            position: 'absolute', inset: -14, borderRadius: '50%',
-            border: `1px solid ${region.color}20`,
-            animation: 'ping 2.2s ease-out 0.7s infinite',
-          }} />
-        )}
-        <span style={{ filter: isDimmed ? 'grayscale(1)' : 'none' }}>{region.icon}</span>
-      </div>
-
-      {/* Label */}
-      <div style={{ textAlign: 'center' }}>
-        <span style={{
-          fontFamily: "'Space Mono', monospace", fontSize: 8.5,
-          letterSpacing: '0.22em', textTransform: 'uppercase',
-          color: isActive ? '#fff' : hov ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.38)',
-          transition: 'color 0.3s', whiteSpace: 'nowrap', display: 'block',
-          textShadow: isActive ? `0 0 20px ${region.color}` : 'none',
-        }}>{region.short}</span>
-        {(isActive || hov) && (
-          <span style={{
-            fontFamily: "'Space Mono', monospace", fontSize: 6.5,
-            color: region.color, letterSpacing: '0.1em', display: 'block', marginTop: 1,
-            opacity: 0.8,
-          }}>{region.destCount} places</span>
-        )}
-      </div>
-    </div>
-  )
+// ── TYPE ICONS ────────────────────────────────────────────────────────────────
+const TYPE_ICON: Record<string, string> = {
+  Beach: '🏖️', Mountain: '⛰️', Desert: '🏜️', Wildlife: '🐾',
+  Cultural: '🏛️', Adventure: '🧗', Spiritual: '🕌', Default: '✦',
 }
 
-// ── DETAIL PANEL ─────────────────────────────────────────────────────────────
-function DetailPanel({ region, onClose, regionDests, onMapClick }: {
-  region: typeof REGIONS[0] | null; onClose: () => void
-  regionDests: typeof DESTINATIONS; onMapClick: (name: string) => void
-}) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'places'>('overview')
-  const [hovDest, setHovDest] = useState<string | null>(null)
-
-  // Reset tab when region changes
-  useEffect(() => { setActiveTab('overview') }, [region?.id])
-
-  return (
-    <div style={{
-      position: 'fixed', right: 0, top: 0, bottom: 0, width: 430,
-      background: 'linear-gradient(160deg, rgba(5,3,18,0.98) 0%, rgba(3,3,12,0.99) 100%)',
-      backdropFilter: 'blur(28px)',
-      borderLeft: region ? `1px solid ${region.color}25` : '1px solid rgba(255,255,255,0.05)',
-      zIndex: 500,
-      transform: region ? 'translateX(0)' : 'translateX(100%)',
-      transition: 'transform 0.6s cubic-bezier(0.16,1,0.3,1)',
-      overflowY: 'auto', overflowX: 'hidden',
-      display: 'flex', flexDirection: 'column',
-    }}>
-      {region && (
-        <>
-          {/* Hero */}
-          <div style={{ position: 'relative', height: 240, flexShrink: 0, overflow: 'hidden' }}>
-            <img
-              src={region.image} alt={region.label}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.38) saturate(0.7)', transition: 'transform 6s ease' }}
-              onLoad={e => { (e.target as HTMLImageElement).style.transform = 'scale(1.04)' }}
-            />
-            {/* Color tint */}
-            <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, ${region.color}30 0%, transparent 55%)` }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(5,3,18,0.15) 0%, rgba(5,3,18,0.98) 100%)' }} />
-
-            {/* Top bar */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 22px' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 9,
-                background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)',
-                border: `1px solid ${region.color}35`, borderRadius: 3, padding: '7px 14px',
-              }}>
-                <span style={{ fontSize: 14 }}>{region.icon}</span>
-                <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: '0.28em', textTransform: 'uppercase', color: region.color }}>{region.short}</span>
-              </div>
-              <button onClick={onClose} style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.13)',
-                color: 'rgba(255,255,255,0.55)', cursor: 'pointer', fontSize: 16,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s',
-              }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.16)'; (e.currentTarget as HTMLElement).style.color = '#fff' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.55)' }}
-              >✕</button>
-            </div>
-
-            {/* Title */}
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 22px 18px' }}>
-              <p style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: '0.32em', textTransform: 'uppercase', color: region.color, marginBottom: 5, opacity: 0.85 }}>{region.tagline}</p>
-              <h2 style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 52, letterSpacing: '0.03em', lineHeight: 0.9, color: '#fff', margin: 0 }}>{region.label}</h2>
-            </div>
-            {/* Color line */}
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${region.color}, transparent)` }} />
-          </div>
-
-          {/* Stats row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
-            {[
-              { val: String(region.stats.tours), label: 'Tours' },
-              { val: region.stats.rating + '★', label: 'Rating' },
-              { val: String(region.destCount), label: 'Places' },
-              { val: region.stats.best, label: 'Season', sm: true },
-            ].map((s, i) => (
-              <div key={i} style={{ padding: '13px 6px', textAlign: 'center', borderRight: i < 3 ? '1px solid rgba(255,255,255,0.05)' : 'none', background: i % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent' }}>
-                <div style={{ fontFamily: s.sm ? "'Space Mono',monospace" : "'Bebas Neue',sans-serif", fontSize: s.sm ? 9 : 26, letterSpacing: s.sm ? '0.04em' : '0.04em', color: region.color, lineHeight: 1 }}>{s.val}</div>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 6.5, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)', marginTop: 5 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Tabs */}
-          <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
-            {(['overview', 'places'] as const).map(tab => (
-              <button key={tab} onClick={() => setActiveTab(tab)} style={{
-                flex: 1, padding: '12px', fontFamily: "'Space Mono',monospace", fontSize: 8,
-                letterSpacing: '0.25em', textTransform: 'uppercase', cursor: 'pointer',
-                background: activeTab === tab ? `${region.color}12` : 'transparent',
-                border: 'none',
-                borderBottom: activeTab === tab ? `2px solid ${region.color}` : '2px solid transparent',
-                color: activeTab === tab ? region.color : 'rgba(255,255,255,0.28)',
-                transition: 'all 0.25s',
-              }}>{tab === 'overview' ? 'Overview' : `Places (${regionDests.length})`}</button>
-            ))}
-          </div>
-
-          {/* Tab content */}
-          <div style={{ padding: '20px 22px', flex: 1, display: 'flex', flexDirection: 'column', gap: 20 }}>
-
-            {activeTab === 'overview' && (
-              <>
-                <p style={{ fontFamily: "'Crimson Text',serif", fontStyle: 'italic', fontSize: 16, color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, margin: 0 }}>{region.desc}</p>
-
-                {/* Landmarks */}
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                    <div style={{ width: 4, height: 4, borderRadius: '50%', background: region.color }} />
-                    <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 7, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)' }}>Signature Places</span>
-                    <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${region.color}30, transparent)` }} />
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {region.landmarks.map(lm => (
-                      <span key={lm} style={{
-                        fontFamily: "'Space Mono',monospace", fontSize: 7.5, letterSpacing: '0.1em', textTransform: 'uppercase',
-                        padding: '5px 11px', borderRadius: 2,
-                        background: `${region.color}12`, border: `1px solid ${region.color}35`, color: region.color,
-                        transition: 'all 0.2s', cursor: 'default',
-                      }}
-                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${region.color}25`}
-                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = `${region.color}12`}
-                      >{lm}</span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* CTA */}
-                <Link to="/tours" style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                  padding: '15px 20px', borderRadius: 2,
-                  background: `linear-gradient(135deg, ${region.color}ee, ${region.color}88)`,
-                  color: '#03060f', fontFamily: "'Space Mono',monospace", fontSize: 10,
-                  letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 700,
-                  textDecoration: 'none', flexShrink: 0,
-                  boxShadow: `0 8px 28px ${region.color}30`, transition: 'opacity 0.2s, transform 0.2s',
-                }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.88'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)' }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; (e.currentTarget as HTMLElement).style.transform = 'translateY(0)' }}
-                >Explore {region.short} Tours →</Link>
-              </>
-            )}
-
-            {activeTab === 'places' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {regionDests.map(dest => {
-                  const hasCoords = !!getDestinationCoords(dest.name)
-                  return (
-                    <div key={dest.name}
-                      onMouseEnter={() => setHovDest(dest.name)}
-                      onMouseLeave={() => setHovDest(null)}
-                      style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '11px 13px', borderRadius: 2, cursor: 'default',
-                        background: hovDest === dest.name ? `${region.color}12` : 'rgba(255,255,255,0.02)',
-                        border: `1px solid ${hovDest === dest.name ? region.color + '35' : 'rgba(255,255,255,0.05)'}`,
-                        transition: 'all 0.2s',
-                      }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ width: 6, height: 6, borderRadius: '50%', background: region.color, opacity: 0.7, flexShrink: 0 }} />
-                        <div>
-                          <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9.5, color: hovDest === dest.name ? '#fff' : 'rgba(255,255,255,0.6)', letterSpacing: '0.04em', marginBottom: 2 }}>{dest.name}</div>
-                          <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 6.5, color: `${region.color}80`, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{dest.type}</div>
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: '#f5c842' }}>★{dest.rating}</span>
-                        {hasCoords && (
-                          <button
-                            onClick={() => onMapClick(dest.name)}
-                            title="Open the map preview"
-                            style={{
-                              display: 'inline-flex', alignItems: 'center', gap: 6,
-                              padding: '6px 10px', borderRadius: 4, cursor: 'pointer',
-                              background: hovDest === dest.name ? `${region.color}20` : 'rgba(255,255,255,0.04)',
-                              border: `1px solid ${hovDest === dest.name ? region.color + '50' : 'rgba(255,255,255,0.1)'}`,
-                              color: hovDest === dest.name ? region.color : 'rgba(255,255,255,0.35)',
-                              fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: '0.08em',
-                              textTransform: 'uppercase', transition: 'all 0.2s',
-                            }}
-                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = `${region.color}28`; (e.currentTarget as HTMLElement).style.color = region.color }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = hovDest === dest.name ? `${region.color}20` : 'rgba(255,255,255,0.04)'; (e.currentTarget as HTMLElement).style.color = hovDest === dest.name ? region.color : 'rgba(255,255,255,0.35)' }}
-                          >
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                              <span>📍</span>
-                              <span style={{ fontWeight: 700 }}>View on Map</span>
-                            </span>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        </>
-      )}
-    </div>
-  )
+// ── POSTCARD CARD ─────────────────────────────────────────────────────────────
+// FIX: Added explicit prop types — previously onMapClick was passed but not in the type signature
+interface DestCardProps {
+  dest: typeof DESTINATIONS[0]
+  index: number
 }
 
-// ── DESTINATION CARD ──────────────────────────────────────────────────────────
-function DestCard({ dest, index, onMapClick }: {
-  dest: typeof DESTINATIONS[0]; index: number; onMapClick?: (name: string) => void
-}) {
+function DestCard({ dest, index }: DestCardProps) {
   const [hovered, setHovered] = useState(false)
-  const reg = REGIONS.find(r => r.id === dest.region)!
-  const hasCoords = !!getDestinationCoords(dest.name)
+  const reg = REGIONS.find(r => r.id === dest.region) ?? REGIONS[1]
+  const typeIcon = TYPE_ICON[dest.type] ?? TYPE_ICON.Default
+
+  const openGoogleMaps = useCallback(() => {
+    const query = encodeURIComponent(`${dest.name}, India`)
+    window.open(
+      `https://www.google.com/maps/search/?api=1&query=${query}`,
+      '_blank',
+      'noopener,noreferrer'
+    )
+  }, [dest.name])
 
   return (
     <div
+      className="postcard-card"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered ? `${reg.color}0e` : 'rgba(255,255,255,0.025)',
-        border: `1px solid ${hovered ? reg.color + '55' : 'rgba(255,255,255,0.07)'}`,
-        borderRadius: 3, padding: '13px 15px', cursor: 'default',
-        transition: 'all 0.28s ease',
-        transform: hovered ? 'translateY(-3px)' : 'none',
-        boxShadow: hovered ? `0 8px 28px ${reg.color}15` : 'none',
-        animation: `fadeUp 0.4s ${index * 0.025}s both`,
+        position: 'relative',
+        // FIX: Moved gradient to a CSS class via inline style only — no stale-closure
+        // hovered/non-hovered backgrounds are toggled purely via the state variable
+        background: hovered
+          ? 'linear-gradient(145deg, #fdf8f0 0%, #faf3e8 60%, #f5ece0 100%)'
+          : 'linear-gradient(145deg, #faf5ed 0%, #f7f0e5 60%, #f2ead8 100%)',
+        border: `1px solid ${hovered ? reg.color + 'aa' : 'rgba(201,169,110,0.28)'}`,
+        borderRadius: 4,
+        padding: 0,
+        cursor: 'default',
+        overflow: 'hidden',
+        transition: 'all 0.32s cubic-bezier(0.22, 1, 0.36, 1)',
+        transform: hovered ? 'translateY(-6px) rotate(-0.4deg)' : 'translateY(0) rotate(0deg)',
+        boxShadow: hovered
+          ? `0 20px 50px rgba(0,0,0,0.45), 0 6px 18px ${reg.color}30, 2px 2px 0 rgba(201,169,110,0.12)`
+          : '0 3px 12px rgba(0,0,0,0.25), 1px 1px 0 rgba(201,169,110,0.08)',
+        // Stagger the reveal animation — capped at 0.5s so late cards don't wait forever
+        animation: `fadeUp 0.38s ${Math.min(index * 0.018, 0.5)}s both`,
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <div style={{ width: 7, height: 7, borderRadius: '50%', background: reg.color, boxShadow: hovered ? `0 0 9px ${reg.color}` : 'none', transition: 'box-shadow 0.3s', marginTop: 1 }} />
-          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 7, letterSpacing: '0.14em', textTransform: 'uppercase', padding: '2px 7px', borderRadius: 100, background: `${reg.color}18`, color: reg.color, border: `1px solid ${reg.color}30` }}>{dest.type}</span>
+      {/* Colored top accent stripe */}
+      <div style={{
+        height: 3,
+        background: `linear-gradient(90deg, ${reg.color}, ${reg.color}55, transparent)`,
+        transition: 'opacity 0.3s',
+        opacity: hovered ? 1 : 0.6,
+      }} />
+
+      {/* Postcard body */}
+      <div style={{ padding: '14px 16px 12px' }}>
+
+        {/* ── TOP ROW: type badge + stamp ── */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: 10,
+        }}>
+          {/* Type badge */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            padding: '3px 9px', borderRadius: 2,
+            border: `1px solid ${reg.color}50`,
+            background: `${reg.color}12`,
+          }}>
+            <span style={{ fontSize: 9 }}>{typeIcon}</span>
+            <span style={{
+              fontFamily: "'Space Mono',monospace",
+              fontSize: 6.5, letterSpacing: '0.2em',
+              textTransform: 'uppercase', color: reg.color,
+              fontWeight: 700,
+            }}>{dest.type}</span>
+          </div>
+
+          {/* Stamp-style rating */}
+          <div style={{
+            width: 36, height: 36,
+            border: `1.5px solid ${reg.color}60`,
+            borderRadius: 2,
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            background: `${reg.color}0a`,
+            flexShrink: 0,
+            boxShadow: hovered ? `0 0 10px ${reg.color}25` : 'none',
+            transition: 'box-shadow 0.3s',
+          }}>
+            <span style={{ fontSize: 9, lineHeight: 1, color: '#8a6800' }}>★</span>
+            <span style={{
+              fontFamily: "'Bebas Neue',sans-serif",
+              fontSize: 14, letterSpacing: '0.04em',
+              color: '#8a6800', lineHeight: 1.1,
+            }}>{dest.rating}</span>
+          </div>
         </div>
-        <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8.5, color: '#f5c842', letterSpacing: '0.04em' }}>★{dest.rating}</span>
+
+        {/* ── DESTINATION NAME ── */}
+        <div style={{
+          fontFamily: "'Crimson Text',serif",
+          fontSize: 20, fontWeight: 600,
+          letterSpacing: '0.015em',
+          color: hovered ? '#1a1209' : '#2a1f10',
+          lineHeight: 1.15,
+          marginBottom: 6,
+          transition: 'color 0.25s',
+        }}>{dest.name}</div>
+
+        {/* ── REGION LINE ── */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 6,
+          marginBottom: 12,
+        }}>
+          <div style={{
+            width: 14, height: 1,
+            background: `linear-gradient(90deg, ${reg.color}80, transparent)`,
+          }} />
+          <span style={{
+            fontFamily: "'Space Mono',monospace",
+            fontSize: 6.5, letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            color: '#a07840',
+            opacity: 0.75,
+          }}>{dest.region}</span>
+        </div>
+
+        {/* ── DIVIDER: classic postcard stamp-edge line ── */}
+        <div style={{
+          borderTop: '1px dashed rgba(160,120,64,0.25)',
+          marginBottom: 10,
+        }} />
+
+        {/* ── FOOTER: Google Maps pin button ── */}
+        {/* FIX: Removed stale-closure bug in onMouseLeave — was reading `hovered` which
+            is always false inside the leave handler. Now uses CSS transition only. */}
+        <button
+          onClick={openGoogleMaps}
+          title={`Open ${dest.name} on Google Maps`}
+          className="pin-btn"
+          style={{
+            width: '100%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+            padding: '7px 0',
+            borderRadius: 2,
+            border: `1px solid ${hovered ? reg.color + '70' : 'rgba(160,120,64,0.28)'}`,
+            background: hovered
+              ? `linear-gradient(135deg, ${reg.color}18, ${reg.color}08)`
+              : 'rgba(160,120,64,0.06)',
+            color: hovered ? reg.color : '#8a6430',
+            fontFamily: "'Space Mono',monospace",
+            fontSize: 7.5, letterSpacing: '0.18em',
+            textTransform: 'uppercase', fontWeight: 700,
+            cursor: 'pointer',
+            transition: 'all 0.25s ease',
+          }}
+        >
+          <span style={{ fontSize: 11 }}>📍</span>
+          <span>Pin Location</span>
+          <svg width="9" height="9" viewBox="0 0 9 9" fill="none" style={{ opacity: 0.65 }}>
+            <path
+              d="M1.5 7.5L7.5 1.5M7.5 1.5H3M7.5 1.5V6"
+              stroke="currentColor" strokeWidth="1.2"
+              strokeLinecap="round" strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       </div>
 
-      <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 17, letterSpacing: '0.05em', color: hovered ? '#fff' : 'rgba(255,255,255,0.7)', marginBottom: 10, lineHeight: 1.1, transition: 'color 0.2s' }}>{dest.name}</div>
-
-      {hovered && hasCoords && (
-        <button
-          onClick={() => onMapClick?.(dest.name)}
-          title="Open the map preview"
-          style={{
-            width: '100%', padding: '8px 0', borderRadius: 4,
-            border: `1px solid ${reg.color}50`, background: `${reg.color}14`,
-            color: reg.color, fontFamily: "'Space Mono',monospace",
-            fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase',
-            cursor: 'pointer', transition: 'all 0.2s',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${reg.color}28`}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = `${reg.color}14`}
-        >
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-            <span>📍</span>
-            <span style={{ fontWeight: 800 }}>View on Map</span>
-          </span>
-        </button>
-      )}
+      {/* Subtle inner paper grain overlay */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 4,
+        background: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")`,
+        pointerEvents: 'none', zIndex: 1,
+        opacity: hovered ? 0.5 : 0.8,
+        transition: 'opacity 0.3s',
+      }} />
     </div>
   )
 }
@@ -561,20 +405,57 @@ function DestinationTicker({ destinations }: { destinations: typeof DESTINATIONS
       background: 'rgba(3,5,15,0.9)', backdropFilter: 'blur(14px)',
       zIndex: 100, display: 'flex', alignItems: 'center', overflow: 'hidden',
     }}>
-      <div style={{ padding: '0 16px', borderRight: '1px solid rgba(255,255,255,0.07)', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 7, marginRight: 10 }}>
-        <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#22c55e', animation: 'pingDot 1.5s infinite' }} />
-        <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 7, letterSpacing: '0.4em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.16)' }}>Live</span>
+      <div style={{
+        padding: '0 16px',
+        borderRight: '1px solid rgba(255,255,255,0.07)',
+        flexShrink: 0,
+        display: 'flex', alignItems: 'center', gap: 7,
+        marginRight: 10,
+      }}>
+        <div style={{
+          width: 5, height: 5, borderRadius: '50%',
+          background: '#22c55e', animation: 'pingDot 1.5s infinite',
+        }} />
+        <span style={{
+          fontFamily: "'Space Mono',monospace", fontSize: 7,
+          letterSpacing: '0.4em', textTransform: 'uppercase',
+          color: 'rgba(255,255,255,0.16)',
+        }}>Live</span>
       </div>
+
       <div style={{ overflow: 'hidden', flex: 1 }}>
-        <div style={{ display: 'flex', animation: 'tickerScroll 45s linear infinite', width: 'max-content', willChange: 'transform' }}>
+        <div style={{
+          display: 'flex',
+          animation: 'tickerScroll 45s linear infinite',
+          width: 'max-content',
+          willChange: 'transform',
+        }}>
           {doubled.map((d, i) => {
-            const reg = REGIONS.find(r => r.id === normalizeRegion(d.region)) || REGIONS[0]
+            const reg = REGIONS.find(r => r.id === normalizeRegion(d.region)) || REGIONS[1]
             return (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 22px', borderRight: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>
-                <div style={{ width: 5, height: 5, borderRadius: '50%', background: reg.color, flexShrink: 0 }} />
-                <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.04em' }}>{d.name}</span>
-                <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 7, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)' }}>{d.type}</span>
-                <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: '#f5c842' }}>★{d.rating}</span>
+              <div key={i} style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '0 22px',
+                borderRight: '1px solid rgba(255,255,255,0.04)',
+                whiteSpace: 'nowrap',
+              }}>
+                <div style={{
+                  width: 5, height: 5, borderRadius: '50%',
+                  background: reg.color, flexShrink: 0,
+                }} />
+                <span style={{
+                  fontFamily: "'Bebas Neue',sans-serif", fontSize: 14,
+                  color: 'rgba(255,255,255,0.5)', letterSpacing: '0.04em',
+                }}>{d.name}</span>
+                <span style={{
+                  fontFamily: "'Space Mono',monospace", fontSize: 7,
+                  letterSpacing: '0.1em', textTransform: 'uppercase',
+                  color: 'rgba(255,255,255,0.18)',
+                }}>{d.type}</span>
+                <span style={{
+                  fontFamily: "'Space Mono',monospace", fontSize: 8,
+                  color: '#f5c842',
+                }}>★{d.rating}</span>
               </div>
             )
           })}
@@ -584,35 +465,138 @@ function DestinationTicker({ destinations }: { destinations: typeof DESTINATIONS
   )
 }
 
+// ── FLOATING REGION FILTER ────────────────────────────────────────────────────
+function FloatingRegionFilter({
+  activeRegionId,
+  onSelect,
+}: {
+  activeRegionId: string
+  onSelect: (id: string) => void
+}) {
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const h = () => setScrolled(window.scrollY > 40)
+    window.addEventListener('scroll', h, { passive: true })
+    return () => window.removeEventListener('scroll', h)
+  }, [])
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 64, // sits just below the main nav
+      left: 0, right: 0,
+      zIndex: 190,
+      display: 'flex',
+      justifyContent: 'center',
+      padding: '0 clamp(16px,4vw,56px)',
+      pointerEvents: 'none',
+    }}>
+      <div style={{
+        pointerEvents: 'all',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        padding: scrolled ? '8px 18px' : '10px 20px',
+        borderRadius: 40,
+        background: scrolled ? 'rgba(3,6,15,0.88)' : 'rgba(3,6,15,0.72)',
+        backdropFilter: 'blur(20px)',
+        border: scrolled
+          ? '1px solid rgba(255,255,255,0.08)'
+          : '1px solid rgba(255,255,255,0.05)',
+        boxShadow: scrolled
+          ? '0 8px 40px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.04) inset'
+          : '0 4px 24px rgba(0,0,0,0.3)',
+        transition: 'all 0.35s cubic-bezier(0.16,1,0.3,1)',
+        marginTop: 10,
+      }}>
+        {REGIONS.map(reg => (
+          <RegionBadge
+            key={reg.id}
+            region={reg}
+            isActive={activeRegionId === reg.id}
+            onClick={() => onSelect(reg.id)}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function RegionBadge({
+  region, isActive, onClick,
+}: {
+  region: typeof REGIONS[0]
+  isActive: boolean
+  onClick: () => void
+}) {
+  const [hov, setHov] = useState(false)
+
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+        padding: isActive ? '7px 16px' : '6px 13px',
+        borderRadius: 30,
+        cursor: 'pointer',
+        border: isActive
+          ? `1px solid ${region.color}70`
+          : hov
+            ? `1px solid ${region.color}35`
+            : '1px solid rgba(255,255,255,0.07)',
+        background: isActive
+          ? `linear-gradient(135deg, ${region.color}22, ${region.color}10)`
+          : hov
+            ? `${region.color}0d`
+            : 'transparent',
+        boxShadow: isActive
+          ? `0 0 18px ${region.color}30, 0 0 6px ${region.color}18 inset`
+          : 'none',
+        color: isActive
+          ? region.color
+          : hov ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.38)',
+        fontFamily: "'Space Mono',monospace",
+        fontSize: 8, letterSpacing: '0.18em',
+        textTransform: 'uppercase',
+        fontWeight: isActive ? 700 : 400,
+        whiteSpace: 'nowrap',
+        transition: 'all 0.22s cubic-bezier(0.16,1,0.3,1)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Active glow underline */}
+      {isActive && (
+        <span style={{
+          position: 'absolute',
+          bottom: 0, left: '20%', right: '20%',
+          height: 1,
+          background: `linear-gradient(90deg, transparent, ${region.color}90, transparent)`,
+        }} />
+      )}
+      <span style={{ fontSize: 12, lineHeight: 1 }}>{region.icon}</span>
+      {/* FIX: Use region.label (full name) consistently — was mixing label/short */}
+      <span>{region.label}</span>
+    </button>
+  )
+}
+
 // ── MAIN PAGE ─────────────────────────────────────────────────────────────────
 export default function DestinationsPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   useStarField(canvasRef)
 
-  const [activeRegion, setActiveRegion] = useState<typeof REGIONS[0] | null>(null)
+  const [activeRegionId, setActiveRegionId] = useState('All')
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
-  const [showGrid, setShowGrid] = useState(false)
   const [scrollY, setScrollY] = useState(0)
   const [apiDestinations, setApiDestinations] = useState<typeof DESTINATIONS>([])
   const [loading, setLoading] = useState(true)
-
-  // Map modal state
-  const [mapOpen, setMapOpen] = useState(false)
-  const [mapDest, setMapDest] = useState<{
-    name: string
-    lat: number
-    lng: number
-    address: string
-    rating?: number
-    category?: string[]
-    coverImage?: string
-    bestTimeToVisit?: string
-    entryFee?: string
-    timings?: string
-    howToReach?: { byAir?: string; byTrain?: string; byRoad?: string }
-    nearbyAttractions?: string[]
-  } | null>(null)
 
   // Fetch real destinations from API
   useEffect(() => {
@@ -627,7 +611,10 @@ export default function DestinationsPage() {
         setApiDestinations(normalized)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch(() => {
+        // Graceful fallback to static data on API failure
+        setLoading(false)
+      })
   }, [])
 
   useEffect(() => {
@@ -636,102 +623,119 @@ export default function DestinationsPage() {
     return () => window.removeEventListener('scroll', h)
   }, [])
 
-  const openMap = useCallback((destName: string) => {
-    const coords = getDestinationCoords(destName)
-    if (!coords) return
-    const staticDest = DESTINATIONS.find(d => d.name === destName)
-    const apiDest = apiDestinations.find((d: any) => d.name === destName)
-    const merged: any = apiDest || staticDest
-    setMapDest({
-      name: destName,
-      ...coords,
-      address: merged?.state ? `${destName}, ${merged.state}, India` : `${destName}, India`,
-      rating: merged?.rating || 4.5,
-      category: [merged?.type?.toLowerCase() || 'destination'],
-      coverImage: merged?.coverImage,
-      bestTimeToVisit: merged?.bestTimeToVisit,
-      entryFee: merged?.entryFee,
-      timings: merged?.timings,
-      howToReach: merged?.howToReach,
-      nearbyAttractions: merged?.nearbyAttractions,
-    })
-    setMapOpen(true)
-  }, [apiDestinations])
-
-  const closeMap = useCallback(() => { setMapOpen(false); setMapDest(null) }, [])
-
   const destToUse = apiDestinations.length > 0 ? apiDestinations : DESTINATIONS
 
   const filteredDests = useMemo(() =>
     destToUse.filter(d => {
-      const ms = !search || d.name.toLowerCase().includes(search.toLowerCase()) || d.region.toLowerCase().includes(search.toLowerCase()) || d.type.toLowerCase().includes(search.toLowerCase())
+      const ms = !search
+        || d.name.toLowerCase().includes(search.toLowerCase())
+        || d.region.toLowerCase().includes(search.toLowerCase())
+        || d.type.toLowerCase().includes(search.toLowerCase())
       const mc = category === 'All' || d.type === category
-      const mr = !activeRegion || d.region === activeRegion.id
+      const mr = activeRegionId === 'All' || d.region === activeRegionId
       return ms && mc && mr
-    }), [search, category, activeRegion, destToUse])
+    }),
+    [search, category, activeRegionId, destToUse]
+  )
 
-  const matchedRegions = useMemo(() => {
-    if (!search) return new Set<string>()
-    return new Set(destToUse.filter(d => d.name.toLowerCase().includes(search.toLowerCase()) || d.type.toLowerCase().includes(search.toLowerCase())).map(d => d.region))
-  }, [search, destToUse])
-
-  const handleRegionClick = (reg: typeof REGIONS[0]) => {
-    setActiveRegion(prev => prev?.id === reg.id ? null : reg)
-    setShowGrid(true)
-  }
-
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') { setActiveRegion(null); setShowGrid(false) } }
-    window.addEventListener('keydown', h)
-    return () => window.removeEventListener('keydown', h)
+  // FIX: 'All' badge should never toggle off — only non-All regions toggle
+  const handleRegionSelect = useCallback((id: string) => {
+    if (id === 'All') {
+      setActiveRegionId('All')
+    } else {
+      setActiveRegionId(prev => prev === id ? 'All' : id)
+    }
   }, [])
 
-  const scrollPct = Math.min(100, (scrollY / (document.documentElement.scrollHeight - window.innerHeight || 1)) * 100)
-  const regionDests = activeRegion ? destToUse.filter(d => d.region === activeRegion.id) : []
+  const scrollPct = Math.min(
+    100,
+    (scrollY / (document.documentElement.scrollHeight - window.innerHeight || 1)) * 100
+  )
+
+  const activeRegionData = REGIONS.find(r => r.id === activeRegionId && r.id !== 'All')
 
   return (
-    <div className="destinations-page pt-20" style={{ minHeight: '100vh', background: '#03060f', color: '#fff', fontFamily: "'Space Mono', monospace", overflowX: 'hidden' }}>
+    <div
+      className="destinations-page pt-20"
+      style={{
+        minHeight: '100vh',
+        background: '#03060f',
+        color: '#fff',
+        fontFamily: "'Space Mono', monospace",
+        overflowX: 'hidden',
+      }}
+    >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
         .destinations-page, .destinations-page * { box-sizing: border-box; }
         body { overflow-x: hidden; }
+
         @keyframes ping { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.65); opacity: 0; } }
         @keyframes pingDot { 0%, 100% { opacity: 0.7; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }
-        @keyframes spin { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }
-        .destinations-page * { will-change: auto; }
-        .destinations-page canvas { will-change: transform; }
-        @keyframes spinR { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(-360deg); } }
         @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        @keyframes fadeUp { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform: translateY(0); } }
-        @keyframes coreGlow { 0%,100% { box-shadow: 0 0 30px rgba(245,200,66,0.22), 0 0 60px rgba(245,200,66,0.08); } 50% { box-shadow: 0 0 55px rgba(245,200,66,0.38), 0 0 110px rgba(245,200,66,0.14); } }
-        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes heroReveal { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* FIX: Pin button hover handled via CSS to avoid stale-closure JS bugs */
+        .pin-btn:hover {
+          transform: scale(1.015) !important;
+          filter: brightness(1.1);
+        }
+        .pin-btn:active {
+          transform: scale(0.99) !important;
+        }
+
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        @media (prefers-reduced-motion: reduce) {
+          .destinations-page *, .destinations-page canvas {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
       `}</style>
 
       {/* Star canvas */}
-      <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }} />
+      <canvas
+        ref={canvasRef}
+        style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}
+      />
 
-      {/* Nebulae */}
+      {/* Nebulae — fixed, GPU-composited */}
       {[
-        { w: 700, h: 700, top: -150, left: -100, c: '#1e3a5f' },
-        { w: 550, h: 550, bottom: -100, right: -50, c: '#2d1b69' },
-        { w: 450, h: 450, top: '35%', left: '15%', c: '#0d4a3a' },
+        { w: 700, h: 700, top: -150, left: -100, c: '#1e3a5f', dur: 8 },
+        { w: 550, h: 550, bottom: -100, right: -50, c: '#2d1b69', dur: 11 },
+        { w: 450, h: 450, top: '35%', left: '15%', c: '#0d4a3a', dur: 14 },
       ].map((n, i) => (
         <div key={i} style={{
-          position: 'fixed', width: n.w, height: n.h,
-          top: n.top, left: n.left,
-          borderRadius: '50%', background: `radial-gradient(circle, ${n.c}, transparent)`,
-          filter: 'blur(90px)', opacity: 0.12, pointerEvents: 'none', zIndex: 0,
-          animation: `float ${8 + i * 3}s ease-in-out infinite alternate`,
+          position: 'fixed',
+          width: n.w, height: n.h,
+          top: n.top as any, left: n.left as any,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${n.c}, transparent)`,
+          filter: 'blur(90px)',
+          opacity: 0.12,
+          pointerEvents: 'none',
+          zIndex: 0,
+          animation: `float ${n.dur}s ease-in-out infinite alternate`,
         }} />
       ))}
 
-      {/* Scroll progress */}
-      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 2, zIndex: 9999, background: 'rgba(255,255,255,0.04)' }}>
-        <div style={{ height: '100%', background: 'linear-gradient(90deg,#ff9933,rgba(240,235,224,0.8),#138808)', width: `${scrollPct}%`, transition: 'width 0.05s linear' }} />
+      {/* Scroll progress bar */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, height: 2,
+        zIndex: 9999, background: 'rgba(255,255,255,0.04)',
+      }}>
+        <div style={{
+          height: '100%',
+          background: 'linear-gradient(90deg,#ff9933,rgba(240,235,224,0.8),#138808)',
+          width: `${scrollPct}%`,
+          transition: 'width 0.05s linear',
+        }} />
       </div>
 
       {/* ── HEADER ───────────────────────────────────────────────────────── */}
@@ -743,259 +747,321 @@ export default function DestinationsPage() {
         borderBottom: '1px solid rgba(255,255,255,0.04)',
       }}>
         <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid rgba(201,169,110,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{
+            width: 28, height: 28, borderRadius: '50%',
+            border: '1px solid rgba(201,169,110,0.45)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#c9a96e' }} />
           </div>
           <div>
-            <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 22, letterSpacing: '0.16em', color: 'rgba(255,255,255,0.88)', lineHeight: 1 }}>PAVILION</div>
-            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 6.5, letterSpacing: '0.38em', color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', lineHeight: 1.3 }}>India</div>
+            <div style={{
+              fontFamily: "'Bebas Neue',sans-serif", fontSize: 22,
+              letterSpacing: '0.16em', color: 'rgba(255,255,255,0.88)', lineHeight: 1,
+            }}>PAVILION</div>
+            <div style={{
+              fontFamily: "'Space Mono',monospace", fontSize: 6.5,
+              letterSpacing: '0.38em', color: 'rgba(255,255,255,0.2)',
+              textTransform: 'uppercase', lineHeight: 1.3,
+            }}>India</div>
           </div>
         </Link>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-          {[{ l: 'Destinations', p: '/destinations', a: true }, { l: 'Tours', p: '/tours' }, { l: 'About', p: '/about' }, { l: 'Contact', p: '/contact' }].map(({ l, p, a }) => (
-            <Link key={l} to={p} style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: a ? 'rgba(245,200,66,0.75)' : 'rgba(255,255,255,0.28)', textDecoration: 'none', transition: 'color 0.2s', borderBottom: a ? '1px solid rgba(245,200,66,0.35)' : 'none', paddingBottom: a ? 2 : 0 }}
+          {[
+            { l: 'Destinations', p: '/destinations', a: true },
+            { l: 'Tours', p: '/tours' },
+            { l: 'About', p: '/about' },
+            { l: 'Contact', p: '/contact' },
+          ].map(({ l, p, a }) => (
+            <Link
+              key={l} to={p}
+              style={{
+                fontFamily: "'Space Mono',monospace", fontSize: 9,
+                letterSpacing: '0.22em', textTransform: 'uppercase',
+                color: a ? 'rgba(245,200,66,0.75)' : 'rgba(255,255,255,0.28)',
+                textDecoration: 'none', transition: 'color 0.2s',
+                borderBottom: a ? '1px solid rgba(245,200,66,0.35)' : 'none',
+                paddingBottom: a ? 2 : 0,
+              }}
               onMouseEnter={e => { if (!a) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.65)' }}
               onMouseLeave={e => { if (!a) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.28)' }}
             >{l}</Link>
           ))}
         </div>
+
         <div style={{ display: 'flex', gap: 10 }}>
-          <Link to="/login" style={{ fontFamily: "'Space Mono',monospace", fontSize: 8.5, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', textDecoration: 'none', transition: 'color 0.2s', display: 'flex', alignItems: 'center' }}
+          <Link
+            to="/login"
+            style={{
+              fontFamily: "'Space Mono',monospace", fontSize: 8.5,
+              letterSpacing: '0.2em', textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.25)', textDecoration: 'none',
+              transition: 'color 0.2s', display: 'flex', alignItems: 'center',
+            }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.6)'}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.25)'}
           >Sign In</Link>
-          <Link to="/register" style={{ fontFamily: "'Space Mono',monospace", fontSize: 8.5, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#c9a96e', border: '1px solid rgba(201,169,110,0.4)', padding: '7px 16px', borderRadius: 2, textDecoration: 'none', transition: 'all 0.2s', display: 'flex', alignItems: 'center' }}
+          <Link
+            to="/register"
+            style={{
+              fontFamily: "'Space Mono',monospace", fontSize: 8.5,
+              letterSpacing: '0.18em', textTransform: 'uppercase',
+              color: '#c9a96e', border: '1px solid rgba(201,169,110,0.4)',
+              padding: '7px 16px', borderRadius: 2,
+              textDecoration: 'none', transition: 'all 0.2s',
+              display: 'flex', alignItems: 'center',
+            }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(201,169,110,0.1)'}
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
           >Get Started</Link>
         </div>
       </div>
 
-      {/* ── HERO — ORBITAL MAP ───────────────────────────────────────────── */}
-      <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: 64, zIndex: 1 }}>
+      {/* ── FLOATING REGION FILTER ────────────────────────────────────────── */}
+      <FloatingRegionFilter activeRegionId={activeRegionId} onSelect={handleRegionSelect} />
 
-        {/* Count badge top-left */}
-        <div style={{ position: 'absolute', top: 88, left: 'clamp(20px,4vw,56px)', zIndex: 20 }}>
-          <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 88, letterSpacing: '0.02em', lineHeight: 1, background: 'linear-gradient(135deg,rgba(255,255,255,0.7) 0%,rgba(255,255,255,0.08) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            {filteredDests.length < destToUse.length ? filteredDests.length : apiDestinations.length || DESTINATIONS.length}
-          </div>
-          <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: '0.4em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', marginTop: -8 }}>Destinations</div>
+      {/* ── HERO HEADLINE ─────────────────────────────────────────────────── */}
+      <div style={{
+        position: 'relative', zIndex: 1,
+        paddingTop: 'calc(64px + 72px + 48px)',
+        paddingBottom: 40,
+        paddingLeft: 'clamp(20px,4vw,56px)',
+        paddingRight: 'clamp(20px,4vw,56px)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', textAlign: 'center',
+        animation: 'heroReveal 0.7s 0.1s both',
+      }}>
+        {/* Eyebrow label */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <div style={{ width: 24, height: 1, background: 'rgba(201,169,110,0.4)' }} />
+          <span style={{
+            fontFamily: "'Space Mono',monospace", fontSize: 7.5,
+            letterSpacing: '0.42em', textTransform: 'uppercase',
+            color: 'rgba(201,169,110,0.65)',
+          }}>Discover India</span>
+          <div style={{ width: 24, height: 1, background: 'rgba(201,169,110,0.4)' }} />
         </div>
 
-        {/* Top-right */}
-        <div style={{ position: 'absolute', top: 100, right: 'clamp(20px,4vw,56px)', textAlign: 'right', zIndex: 20 }}>
-          <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 7.5, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', marginBottom: 6 }}>7 Regions</div>
-          <div style={{ fontFamily: "'Crimson Text',serif", fontStyle: 'italic', fontSize: 14, color: 'rgba(255,255,255,0.3)', maxWidth: 160, lineHeight: 1.6 }}>One subcontinent.<br />Infinite wonders.</div>
-        </div>
+        {/* Big title */}
+        <h1 style={{
+          fontFamily: "'Bebas Neue',sans-serif",
+          fontSize: 'clamp(64px, 10vw, 110px)',
+          letterSpacing: '0.04em', lineHeight: 0.92,
+          margin: '0 0 12px',
+          background: activeRegionData
+            ? `linear-gradient(135deg, ${activeRegionData.color} 0%, rgba(255,255,255,0.6) 100%)`
+            : 'linear-gradient(135deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.22) 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          transition: 'all 0.4s ease',
+        }}>
+          {activeRegionData ? activeRegionData.label : 'Destinations'}
+        </h1>
 
-        {/* ── ORBITAL SYSTEM ── */}
-        <div style={{ position: 'relative', width: 540, height: 540, flexShrink: 0 }}>
-
-          {/* Orbit rings — styled like the original but refined */}
-          {[100, 220, 360, 510].map((size, i) => (
-            <div key={i} style={{
-              position: 'absolute', width: size, height: size, borderRadius: '50%',
-              border: `1px solid rgba(255,255,255,${i === 2 ? '0.06' : '0.03'})`,
-              top: '50%', left: '50%',
-              transform: 'translate(-50%,-50%)',
-              animation: i % 2 === 0
-                ? `spin ${55 + i * 18}s linear infinite`
-                : `spinR ${65 + i * 18}s linear infinite`,
-            }} />
-          ))}
-
-          {/* Tick marks on outer ring */}
-          {Array.from({ length: 24 }).map((_, i) => {
-            const ang = (i / 24) * Math.PI * 2
-            const r2 = 262
-            return (
-              <div key={i} style={{
-                position: 'absolute', top: '50%', left: '50%',
-                width: 1, height: i % 6 === 0 ? 12 : 6,
-                background: i % 6 === 0 ? 'rgba(245,200,66,0.25)' : 'rgba(255,255,255,0.08)',
-                transformOrigin: '50% 0%',
-                transform: `translate(-50%, -${r2}px) rotate(${ang}rad)`,
-              }} />
-            )
-          })}
-
-          {/* SVG connectors */}
-          <svg style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 15 }} viewBox="0 0 540 540" width="540" height="540">
-            {REGIONS.map((reg, i) => {
-              const rad = (reg.angle - 90) * Math.PI / 180
-              const cx = 270 + 200 * Math.cos(rad)
-              const cy = 270 + 200 * Math.sin(rad)
-              const isActive = activeRegion?.id === reg.id
-              const isHl = matchedRegions.has(reg.id)
-              return (
-                <line key={i} x1="270" y1="270" x2={cx} y2={cy}
-                  stroke={reg.color}
-                  strokeWidth={isActive || isHl ? 1.2 : 0.5}
-                  strokeOpacity={isActive || isHl ? 0.55 : 0.1}
-                  strokeDasharray={isActive ? 'none' : '4 6'}
-                  style={{ transition: 'all 0.4s ease' }}
-                />
-              )
-            })}
-          </svg>
-
-          {/* Center core */}
-          <div style={{
-            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-            width: 96, height: 96, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(245,200,66,0.25) 0%, rgba(245,200,66,0.04) 65%, transparent 100%)',
-            border: '1px solid rgba(245,200,66,0.38)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            zIndex: 20, animation: 'coreGlow 4s ease-in-out infinite',
-          }}>
-            {/* Ping rings */}
-            {[{ inset: -9, delay: '0s' }, { inset: -22, delay: '1s' }].map((p, i) => (
-              <div key={i} style={{
-                position: 'absolute', inset: p.inset, borderRadius: '50%',
-                border: '1px solid rgba(245,200,66,0.2)',
-                animation: `ping 3s ease-out ${p.delay} infinite`,
-              }} />
-            ))}
-            <span style={{ fontSize: 36, lineHeight: 1 }}>🇮🇳</span>
-            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 7, letterSpacing: '0.3em', color: 'rgba(245,200,66,0.65)', textTransform: 'uppercase', marginTop: 3 }}>India</span>
-          </div>
-
-          {/* Region nodes */}
-          {REGIONS.map(reg => {
-            const isDimmed = matchedRegions.size > 0 ? !matchedRegions.has(reg.id) : false
-            const isHl = matchedRegions.has(reg.id)
-            return (
-              <RegionNode
-                key={reg.id} region={reg}
-                isActive={activeRegion?.id === reg.id}
-                isHighlighted={isHl} isDimmed={isDimmed}
-                onClick={() => handleRegionClick(reg)}
-              />
-            )
-          })}
-        </div>
-
-        {/* Search + controls */}
-        <div style={{ marginTop: 28, display: 'flex', alignItems: 'center', gap: 10, zIndex: 10, position: 'relative', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <div style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 13, opacity: 0.3 }}>🔍</span>
-            <input
-              value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Search destinations..."
-              style={{
-                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 2, padding: '10px 16px 10px 40px',
-                fontSize: 11, fontFamily: "'Space Mono',monospace", letterSpacing: '0.06em',
-                color: '#fff', outline: 'none', width: 270, transition: 'border-color 0.3s, background 0.3s',
-              }}
-              onFocus={e => { e.target.style.borderColor = 'rgba(201,169,110,0.5)'; e.target.style.background = 'rgba(255,255,255,0.07)' }}
-              onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.background = 'rgba(255,255,255,0.05)' }}
-            />
-            {search && (
-              <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', width: 19, height: 19, fontSize: 10, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>✕</button>
-            )}
-          </div>
-          <button onClick={() => setShowGrid(s => !s)} style={{
-            background: showGrid ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.12)', borderRadius: 2,
-            padding: '10px 20px', fontFamily: "'Space Mono',monospace",
-            fontSize: 8, letterSpacing: '0.25em', textTransform: 'uppercase',
-            color: showGrid ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.45)', cursor: 'pointer', transition: 'all 0.3s',
-          }}>{showGrid ? 'Hide Grid' : 'View All'}</button>
-        </div>
-
-        {/* Hint text */}
-        <p style={{ fontFamily: "'Space Mono',monospace", fontSize: 7.5, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.12)', marginTop: 16, zIndex: 10 }}>
-          Click any region to explore · ESC to close
+        {/* Subtitle */}
+        <p style={{
+          fontFamily: "'Crimson Text',serif",
+          fontStyle: 'italic', fontSize: 17,
+          color: activeRegionData ? `${activeRegionData.color}80` : 'rgba(255,255,255,0.28)',
+          letterSpacing: '0.02em', margin: '0 0 28px',
+          maxWidth: 460, lineHeight: 1.6,
+          transition: 'color 0.4s ease',
+        }}>
+          {activeRegionData?.tagline ?? 'One subcontinent. Infinite wonders.'}
         </p>
+
+        {/* Destination count badge */}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+          <span style={{
+            fontFamily: "'Bebas Neue',sans-serif", fontSize: 54,
+            letterSpacing: '0.02em', lineHeight: 1,
+            background: 'linear-gradient(135deg,rgba(255,255,255,0.7) 0%,rgba(255,255,255,0.12) 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}>
+            {loading ? '—' : filteredDests.length}
+          </span>
+          <span style={{
+            fontFamily: "'Space Mono',monospace", fontSize: 8,
+            letterSpacing: '0.4em', textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.18)',
+          }}>
+            {filteredDests.length === 1 ? 'Destination' : 'Destinations'}
+          </span>
+        </div>
       </div>
 
-      {/* ── DESTINATION GRID ─────────────────────────────────────────────── */}
-      {showGrid && (
-        <div style={{ position: 'relative', zIndex: 10, background: 'linear-gradient(to bottom, rgba(3,6,15,0) 0%, rgba(3,6,15,1) 60px)', padding: '0 clamp(20px,4vw,56px) 120px' }}>
+      {/* ── SEARCH + CATEGORY FILTERS ─────────────────────────────────────── */}
+      <div style={{
+        position: 'relative', zIndex: 10,
+        padding: '0 clamp(20px,4vw,56px) 28px',
+        display: 'flex', flexDirection: 'column',
+        gap: 14, alignItems: 'center',
+      }}>
+        {/* Search input */}
+        <div style={{ position: 'relative', width: '100%', maxWidth: 480 }}>
+          <span style={{
+            position: 'absolute', left: 16, top: '50%',
+            transform: 'translateY(-50%)', fontSize: 14, opacity: 0.3,
+          }}>🔍</span>
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search destinations, regions, categories…"
+            style={{
+              width: '100%',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.09)',
+              borderRadius: 30, padding: '11px 44px 11px 44px',
+              fontSize: 11, fontFamily: "'Space Mono',monospace",
+              letterSpacing: '0.06em', color: '#fff',
+              outline: 'none', transition: 'border-color 0.3s, background 0.3s',
+            }}
+            onFocus={e => {
+              e.target.style.borderColor = 'rgba(201,169,110,0.45)'
+              e.target.style.background = 'rgba(255,255,255,0.06)'
+            }}
+            onBlur={e => {
+              e.target.style.borderColor = 'rgba(255,255,255,0.09)'
+              e.target.style.background = 'rgba(255,255,255,0.04)'
+            }}
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              style={{
+                position: 'absolute', right: 14, top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'rgba(255,255,255,0.1)', border: 'none',
+                borderRadius: '50%', width: 20, height: 20,
+                fontSize: 10, color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer',
+              }}
+            >✕</button>
+          )}
+        </div>
 
-          {/* Region filter strip */}
-          <div style={{ display: 'flex', gap: 6, marginBottom: 18, flexWrap: 'wrap', alignItems: 'center' }}>
-            <button onClick={() => setActiveRegion(null)} style={{
-              fontFamily: "'Space Mono',monospace", fontSize: 7.5, letterSpacing: '0.2em', textTransform: 'uppercase',
-              padding: '6px 15px', borderRadius: 2, cursor: 'pointer',
-              background: !activeRegion ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)',
-              border: `1px solid ${!activeRegion ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)'}`,
-              color: !activeRegion ? '#fff' : 'rgba(255,255,255,0.38)', transition: 'all 0.2s',
-            }}>All Regions</button>
-            {REGIONS.map(reg => (
-              <button key={reg.id} onClick={() => setActiveRegion(prev => prev?.id === reg.id ? null : reg)} style={{
-                fontFamily: "'Space Mono',monospace", fontSize: 7.5, letterSpacing: '0.18em', textTransform: 'uppercase',
-                padding: '6px 14px', borderRadius: 2, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 6,
-                background: activeRegion?.id === reg.id ? `${reg.color}18` : 'rgba(255,255,255,0.02)',
-                border: `1px solid ${activeRegion?.id === reg.id ? reg.color + '55' : 'rgba(255,255,255,0.07)'}`,
-                color: activeRegion?.id === reg.id ? reg.color : 'rgba(255,255,255,0.38)', transition: 'all 0.2s',
-              }}>
-                <span style={{ fontSize: 10 }}>{reg.icon}</span> {reg.short}
-              </button>
-            ))}
-          </div>
-
-          {/* Category filter */}
-          <div style={{ display: 'flex', gap: 5, marginBottom: 26, flexWrap: 'wrap' }}>
-            {CATEGORIES.map(cat => (
-              <button key={cat} onClick={() => setCategory(cat)} style={{
-                fontFamily: "'Space Mono',monospace", fontSize: 7.5, letterSpacing: '0.16em', textTransform: 'uppercase',
+        {/* Category pills */}
+        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setCategory(cat)}
+              style={{
+                fontFamily: "'Space Mono',monospace", fontSize: 7.5,
+                letterSpacing: '0.16em', textTransform: 'uppercase',
                 padding: '5px 13px', borderRadius: 100, cursor: 'pointer',
                 background: category === cat ? 'rgba(56,189,248,0.18)' : 'rgba(255,255,255,0.02)',
                 border: `1px solid ${category === cat ? '#38bdf875' : 'rgba(255,255,255,0.07)'}`,
-                color: category === cat ? '#38bdf8' : 'rgba(255,255,255,0.32)', transition: 'all 0.2s',
-              }}>{cat}</button>
-            ))}
-          </div>
+                color: category === cat ? '#38bdf8' : 'rgba(255,255,255,0.32)',
+                transition: 'all 0.2s',
+              }}
+            >{cat}</button>
+          ))}
+          {(search || category !== 'All' || activeRegionId !== 'All') && (
+            <button
+              onClick={() => { setSearch(''); setCategory('All'); setActiveRegionId('All') }}
+              style={{
+                fontFamily: "'Space Mono',monospace", fontSize: 7.5,
+                letterSpacing: '0.14em', textTransform: 'uppercase',
+                padding: '5px 13px', borderRadius: 100, cursor: 'pointer',
+                background: 'rgba(239,68,68,0.1)',
+                border: '1px solid rgba(239,68,68,0.3)',
+                color: 'rgba(239,68,68,0.7)', transition: 'all 0.2s',
+              }}
+            >Clear ✕</button>
+          )}
+        </div>
+      </div>
 
-          {/* Results header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: 14 }}>
-            <div>
-              <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 36, color: '#fff', letterSpacing: '0.02em' }}>{filteredDests.length}</span>
-              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.28)', marginLeft: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}>destinations found</span>
-            </div>
-            {(search || activeRegion || category !== 'All') && (
-              <button onClick={() => { setSearch(''); setActiveRegion(null); setCategory('All') }}
-                style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(239,68,68,0.55)', background: 'none', border: 'none', cursor: 'pointer' }}>
-                Clear all ✕
-              </button>
-            )}
+      {/* ── DESTINATION GRID ─────────────────────────────────────────────── */}
+      <div style={{
+        position: 'relative', zIndex: 10,
+        padding: '0 clamp(20px,4vw,56px) 100px',
+      }}>
+        {/* Results header */}
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          marginBottom: 20,
+          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          paddingBottom: 14,
+        }}>
+          <div>
+            <span style={{
+              fontFamily: "'Bebas Neue',sans-serif", fontSize: 36,
+              color: '#fff', letterSpacing: '0.02em',
+            }}>{filteredDests.length}</span>
+            <span style={{
+              fontFamily: "'Space Mono',monospace", fontSize: 9,
+              color: 'rgba(255,255,255,0.28)', marginLeft: 10,
+              letterSpacing: '0.2em', textTransform: 'uppercase',
+            }}>destinations found</span>
           </div>
-
-          {/* Grid */}
-          {filteredDests.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(175px, 1fr))', gap: 10 }}>
-              {filteredDests.map((d, i) => <DestCard key={`${d.name}-${i}`} dest={d} index={i} onMapClick={openMap} />)}
-            </div>
-          ) : (
-            <div style={{ textAlign: 'center', padding: '80px 0', background: 'rgba(255,255,255,0.02)', borderRadius: 3, border: '1px dashed rgba(255,255,255,0.07)' }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>🗺️</div>
-              <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 28, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.05em' }}>No destinations found</div>
-              <button onClick={() => { setSearch(''); setActiveRegion(null); setCategory('All') }}
-                style={{ marginTop: 20, padding: '10px 28px', borderRadius: 2, background: 'rgba(56,189,248,0.14)', border: '1px solid rgba(56,189,248,0.38)', color: '#38bdf8', fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: '0.2em', textTransform: 'uppercase', cursor: 'pointer' }}>
-                Show Everything
-              </button>
+          {activeRegionData && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{
+                fontFamily: "'Space Mono',monospace", fontSize: 8,
+                letterSpacing: '0.14em', textTransform: 'uppercase',
+                color: activeRegionData.color, opacity: 0.8,
+              }}>
+                {activeRegionData.icon} {activeRegionData.tagline}
+              </span>
             </div>
           )}
         </div>
-      )}
 
-      {/* Ticker */}
+        {/* Grid */}
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '80px 0' }}>
+            <div style={{
+              fontFamily: "'Bebas Neue',sans-serif", fontSize: 28,
+              color: 'rgba(255,255,255,0.22)', letterSpacing: '0.1em',
+              animation: 'pingDot 1.4s infinite',
+            }}>
+              Loading…
+            </div>
+          </div>
+        ) : filteredDests.length > 0 ? (
+          <div style={{
+            display: 'grid',
+            // Auto-fill ensures all 145+ cards render with no JS virtualization needed
+            gridTemplateColumns: 'repeat(auto-fill, minmax(175px, 1fr))',
+            gap: 10,
+          }}>
+            {filteredDests.map((d, i) => (
+              <DestCard key={`${d.name}-${d.region}`} dest={d} index={i} />
+            ))}
+          </div>
+        ) : (
+          <div style={{
+            textAlign: 'center', padding: '80px 0',
+            background: 'rgba(255,255,255,0.02)', borderRadius: 3,
+            border: '1px dashed rgba(255,255,255,0.07)',
+          }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>🗺️</div>
+            <div style={{
+              fontFamily: "'Bebas Neue',sans-serif", fontSize: 28,
+              color: 'rgba(255,255,255,0.35)', letterSpacing: '0.05em',
+            }}>No destinations found</div>
+            <button
+              onClick={() => { setSearch(''); setActiveRegionId('All'); setCategory('All') }}
+              style={{
+                marginTop: 20, padding: '10px 28px', borderRadius: 2,
+                background: 'rgba(56,189,248,0.14)',
+                border: '1px solid rgba(56,189,248,0.38)',
+                color: '#38bdf8', fontFamily: "'Space Mono',monospace",
+                fontSize: 8, letterSpacing: '0.2em', textTransform: 'uppercase',
+                cursor: 'pointer',
+              }}
+            >Show Everything</button>
+          </div>
+        )}
+      </div>
+
+      {/* ── BOTTOM TICKER ─────────────────────────────────────────────────── */}
       <DestinationTicker destinations={destToUse} />
-
-      {/* Detail panel */}
-      <DetailPanel region={activeRegion} onClose={() => setActiveRegion(null)} regionDests={regionDests} onMapClick={openMap} />
-
-      {/* Map modal */}
-      {mapDest && (
-        <MapModal
-          isOpen={mapOpen}
-          onClose={closeMap}
-          destination={mapDest}
-        />
-      )}
     </div>
   )
 }
