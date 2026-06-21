@@ -1,480 +1,495 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion'
-import { FiArrowRight, FiClock, FiUsers, FiMapPin, FiArrowDown, FiSun } from 'react-icons/fi'
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { FiArrowRight, FiArrowDown, FiCalendar, FiMapPin, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { GiCompass } from 'react-icons/gi'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CHOOSE YOUR INDIA — category data, image/description pairs verified to match
+// DESIGN TOKENS
+// ─────────────────────────────────────────────────────────────────────────────
+const T = {
+  cream: '#FDF6EC',
+  cream2: '#F7EDD8',
+  saffron: '#F4A228',
+  amber: '#C8531A',
+  emerald: '#0A5C3E',
+  emerald2: '#0D7A52',
+  mahogany: '#2C1204',
+  bronze: '#8B5E2A',
+  gold: '#D4922A',
+  mist: '#FAF3E6',
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MOCK TOURS (fallback while API loads)
+// ─────────────────────────────────────────────────────────────────────────────
+const MOCK_TOURS = [
+  {
+    _id: 'mock-1', slug: 'spiti-cold-desert-circuit',
+    title: 'The Spiti Cold Desert Circuit',
+    destination: { name: 'Spiti Valley, Himachal Pradesh' },
+    coverImage: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=600&q=70',
+    duration: 7, groupSize: { max: 10 }, difficulty: 'Demanding',
+    price: 48500, discountPrice: 42900,
+    highlights: ['Key Monastery at dawn', 'Camp at Chandratal Lake', 'Cross Kunzum Pass at 4,551m', "World's highest post office"],
+  },
+  {
+    _id: 'mock-2', slug: 'varanasi-ganges-immersion',
+    title: 'Varanasi: A Ganges Immersion',
+    destination: { name: 'Varanasi, Uttar Pradesh' },
+    coverImage: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=600&q=70',
+    duration: 4, groupSize: { max: 8 }, difficulty: 'Gentle',
+    price: 24000, discountPrice: null,
+    highlights: ['Sunrise boat ride past 84 ghats', 'Private Ganga Aarti seat', 'Silk weaving lane walk', 'Morning at Sarnath'],
+  },
+  {
+    _id: 'mock-3', slug: 'rajasthan-forts-and-deserts',
+    title: 'Rajasthan: Forts & Golden Sands',
+    destination: { name: 'Jaipur to Jaisalmer, Rajasthan' },
+    coverImage: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=600&q=70',
+    duration: 9, groupSize: { max: 12 }, difficulty: 'Moderate',
+    price: 67000, discountPrice: 59900,
+    highlights: ['Dawn entry to Amber Fort', 'Heritage haveli in Jaisalmer', 'Camel safari at Sam dunes', 'Blue-lane walk in Jodhpur'],
+  },
+]
+
+// ─────────────────────────────────────────────────────────────────────────────
+// JOURNEY CATEGORIES — updated imagery per directive
 // ─────────────────────────────────────────────────────────────────────────────
 const JOURNEYS = [
   {
-    id: 'heritage',
-    label: 'Heritage',
-    mark: 'I',
-    color: '#C8722C',
+    id: 'heritage', label: 'Heritage', mark: 'I',
+    color: T.amber,
     headline: 'Stone that remembers everything',
-    body: 'Mughal marble, Rajput sandstone, Dravidian temple towers carved over centuries. India\'s heritage isn\'t roped off behind glass — it\'s lived in, prayed in, and walked through daily.',
-    image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1400&q=85',
-    places: ['Taj Mahal, Agra', 'Amber Fort, Jaipur', 'Mehrangarh, Jodhpur', 'Khajjiar Nag Temple'],
+    body: "Mughal marble, Rajput sandstone, Dravidian temple towers carved over centuries. India's heritage isn't roped off behind glass — it's lived in, prayed in, and walked through daily.",
+    // Grand palace/monument architecture shot
+    image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1400&q=90',
+    places: ['Taj Mahal, Agra', 'Amber Fort, Jaipur', 'Mehrangarh, Jodhpur', 'Hampi Ruins, Karnataka'],
   },
   {
-    id: 'spiritual',
-    label: 'Spiritual',
-    mark: 'II',
-    color: '#B8924A',
+    id: 'spiritual', label: 'Spiritual', mark: 'II',
+    color: T.gold,
     headline: 'A stillness older than memory',
-    body: 'Lamps drift across the Ganges at dusk in Varanasi, smoke curling off the ghats as bells ring out over the water. Five thousand years of ritual, unbroken, waiting on the riverbank.',
-    image: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=1400&q=85',
-    places: ['Varanasi Ghats, UP', 'Golden Temple, Amritsar', 'Pushkar Lake, Rajasthan', 'Tsuglagkhang, McLeod Ganj'],
+    body: 'The ghats of Rishikesh at dawn — yoga mats on cool stone, the Ganga rushing green below, bells echoing off forested hills. India holds sacred space at a scale that changes people.',
+    // Rishikesh ghats / serene spiritual shot
+    image: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1400&q=90',
+    places: ['Rishikesh Ghats, Uttarakhand', 'Golden Temple, Amritsar', 'Pushkar Lake, Rajasthan', 'Auroville, Pondicherry'],
   },
   {
-    id: 'wilderness',
-    label: 'Wilderness',
-    mark: 'III',
-    color: '#5B7A52',
+    id: 'adventure', label: 'Adventure', mark: 'III',
+    color: T.emerald,
+    headline: 'The river does not negotiate',
+    body: 'Grade IV rapids on the Ganges through the gorge at Rishikesh — water white and cold, adrenaline absolute. Then silence, forest walls, a kingfisher on a rock. India earns its mountains.',
+    // Whitewater rafting action shot — Rishikesh
+    image: 'https://images.unsplash.com/photo-1530866495561-507c9faab2ed?w=1400&q=90',
+    places: ['Rishikesh Rafting, Uttarakhand', 'Spiti Valley, Himachal', 'Rohtang Pass, Manali', 'Dzukou Valley, Nagaland'],
+  },
+  {
+    id: 'wilderness', label: 'Wilderness', mark: 'IV',
+    color: '#3A7D44',
     headline: 'Wild at a scale that humbles',
-    body: 'Bengal tigers move unhurried through dry deciduous forest beneath the ruins of a 10th-century fort. Crocodiles bask in quiet lakes. The wild here has never needed an audience.',
-    image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1400&q=85',
-    places: ['Ranthambore, Rajasthan', 'Kalatop Sanctuary, HP', 'Great Himalayan NP', 'Pin Valley, Spiti'],
+    body: 'A Bengal tiger moves without sound through dry deciduous forest. Crocodiles bask in still lakes. The wild here has never needed an audience and is the richer for it.',
+    // Deep Indian jungle/tiger sanctuary shot
+    image: 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?w=1400&q=90',
+    places: ['Ranthambore, Rajasthan', 'Kaziranga, Assam', 'Sundarbans, West Bengal', 'Bandhavgarh, MP'],
+  },
+]
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TRAVEL PERSONA DATA — for Mood Selector widget
+// ─────────────────────────────────────────────────────────────────────────────
+const PERSONAS = [
+  {
+    id: 'soul',
+    pill: 'Soul Searcher 🧘‍♂️',
+    color: T.gold,
+    bg: 'rgba(212,146,42,0.12)',
+    title: 'The Inner India',
+    subtitle: 'Varanasi · Rishikesh · Auroville',
+    body: "You travel to be changed. You want sunrise on the Ganges, firelight meditation, a conversation with a sadhu at dusk. We plan the quiet moments everyone else rushes past.",
+    image: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=900&q=85',
+    tags: ['4–7 days', 'Small group', 'Slow pace'],
+    cta: 'Find your stillness',
   },
   {
-    id: 'adventure',
-    label: 'Adventure',
-    mark: 'IV',
-    color: '#A14E3B',
-    headline: 'The Himalaya keeps no promises easy',
-    body: 'Cross a 4,550-metre pass into a cold desert where monasteries cling to cliff faces. Camp beside a turquoise lake at the edge of the map. This is mountain travel with real stakes.',
-    image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=1400&q=85',
-    places: ['Spiti Valley, Himachal', 'Rohtang Pass, Manali', 'Chandratal Lake', 'Triund Trek, Dharamshala'],
+    id: 'thrill',
+    pill: 'Thrill Seeker 🌊',
+    color: T.emerald,
+    bg: 'rgba(10,92,62,0.12)',
+    title: 'India at Full Speed',
+    subtitle: 'Rishikesh · Spiti · Coorg',
+    body: "Grade IV rapids. 4,500-metre passes. Night treks through living root bridges. You're here for the moments that make your pulse reset. We build the logistics so you can focus on the edge.",
+    image: 'https://images.unsplash.com/photo-1530866495561-507c9faab2ed?w=900&q=85',
+    tags: ['7–14 days', 'Active daily', 'High altitude'],
+    cta: 'Choose your adventure',
+  },
+  {
+    id: 'royal',
+    pill: 'Royal Chronicler 🏰',
+    color: T.amber,
+    bg: 'rgba(200,83,26,0.10)',
+    title: 'The Palace Route',
+    subtitle: 'Jaipur · Udaipur · Jodhpur',
+    body: "Private dawn entry to Amber Fort. Dinner in a haveli that's been in one family for eleven generations. The India of durbar halls and silk bazaars, without the tourist rush.",
+    image: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=900&q=85',
+    tags: ['8–12 days', 'Heritage stays', 'Curated access'],
+    cta: 'Explore the palaces',
+  },
+  {
+    id: 'wild',
+    pill: 'Wild Explorer 🐅',
+    color: '#3A7D44',
+    bg: 'rgba(58,125,68,0.12)',
+    title: 'Into the Reserves',
+    subtitle: 'Ranthambore · Kaziranga · Sundarbans',
+    body: "Before breakfast, a tiger at 40 metres. By afternoon, a one-horned rhino in the grass. Evening: a fire, binoculars, silence. We know the park wardens, the naturalists, the best hides.",
+    image: 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?w=900&q=85',
+    tags: ['5–10 days', 'Expert guides', 'Dawn safaris'],
+    cta: 'Enter the wild',
   },
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SEASON DATA
 // ─────────────────────────────────────────────────────────────────────────────
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MONTHS_SHORT = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
+const MONTHS_FULL = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const SEASON_DATA = [
-  { region: 'Rajasthan & North Plains', icon: '🏰', color: '#C8722C', months: [2, 2, 2, 3, 4, 4, 4, 4, 3, 1, 1, 1], tip: 'Oct–Mar is ideal — cool desert nights and clear skies for fort exploration.' },
-  { region: 'Kerala & South Coast', icon: '🌴', color: '#0F6B4C', months: [1, 1, 2, 2, 3, 4, 4, 4, 3, 2, 1, 1], tip: 'Nov–Feb is perfect for backwaters and beaches before the monsoon arrives.' },
-  { region: 'Ladakh & High Himalaya', icon: '🏔️', color: '#A14E3B', months: [4, 4, 4, 4, 3, 2, 1, 1, 2, 3, 4, 4], tip: 'Jul–Sep is the window — roads open, skies clear, the high lakes at their most vivid.' },
-  { region: 'Himachal Hill Country', icon: '🌲', color: '#5B7A52', months: [4, 4, 2, 2, 1, 1, 3, 3, 1, 2, 3, 4], tip: 'Mar–Jun and Sep–Nov bring clear valley views before and after the monsoon.' },
-  { region: 'Northeast India', icon: '🌿', color: '#27613F', months: [2, 2, 1, 1, 2, 4, 4, 4, 3, 1, 1, 2], tip: 'Oct–Apr is when living root bridges are most accessible and skies clearest.' },
-  { region: 'Andaman Islands', icon: '🐠', color: '#2D6E8E', months: [1, 1, 1, 1, 2, 4, 4, 4, 3, 2, 1, 1], tip: 'Oct–May — dive season, bioluminescent nights, calm turquoise water.' },
+  { region: 'Rajasthan & North Plains', icon: '🏰', color: T.amber, months: [2, 2, 2, 3, 4, 4, 4, 4, 3, 1, 1, 1] },
+  { region: 'Kerala & South Coast', icon: '🌴', color: T.emerald, months: [1, 1, 2, 2, 3, 4, 4, 4, 3, 2, 1, 1] },
+  { region: 'Ladakh & High Himalaya', icon: '🏔️', color: '#A14E3B', months: [4, 4, 4, 4, 3, 2, 1, 1, 2, 3, 4, 4] },
+  { region: 'Northeast India', icon: '🌿', color: '#3A7D44', months: [2, 2, 1, 1, 2, 4, 4, 4, 3, 1, 1, 2] },
+  { region: 'Andaman Islands', icon: '🐠', color: '#2D6E8E', months: [1, 1, 1, 1, 2, 4, 4, 4, 3, 2, 1, 1] },
 ]
-const SEASON_COLORS = {
-  1: { bg: '#0F6B4C', label: 'Peak' },
-  2: { bg: '#C8722C', label: 'Good' },
+const SEASON_COLORS: Record<number, { bg: string; label: string }> = {
+  1: { bg: T.emerald, label: 'Peak' },
+  2: { bg: T.amber, label: 'Good' },
   3: { bg: '#D9C7A3', label: 'Fair' },
-  4: { bg: 'rgba(31,27,22,0.10)', label: 'Avoid' },
+  4: { bg: 'rgba(44,18,4,0.10)', label: 'Avoid' },
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MOCK TOURS — fallback itinerary dossiers, used until the API responds
+// TRIP BUILDER DATA
 // ─────────────────────────────────────────────────────────────────────────────
-const MOCK_TOURS = [
-  {
-    _id: 'mock-1',
-    slug: 'spiti-cold-desert-circuit',
-    title: 'The Spiti Cold Desert Circuit',
-    destination: { name: 'Spiti Valley, Himachal Pradesh' },
-    coverImage: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=1200&q=85',
-    duration: 7,
-    groupSize: { max: 10 },
-    difficulty: 'Demanding',
-    price: 48500,
-    discountPrice: 42900,
-    highlights: [
-      'Key Monastery at dawn, before the day-trippers arrive',
-      'Camp overnight on the shore of Chandratal Lake',
-      'Cross Kunzum Pass at 4,551 metres',
-      'Visit Hikkim, the world\'s highest post office',
-    ],
-  },
-  {
-    _id: 'mock-2',
-    slug: 'varanasi-ganges-immersion',
-    title: 'Varanasi: A Ganges Immersion',
-    destination: { name: 'Varanasi, Uttar Pradesh' },
-    coverImage: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=1200&q=85',
-    duration: 4,
-    groupSize: { max: 8 },
-    difficulty: 'Gentle',
-    price: 24000,
-    discountPrice: null,
-    highlights: [
-      'Sunrise boat ride past eighty-four ghats',
-      'Private seat at the evening Ganga Aarti',
-      'Walking tour of the silk weaving lanes',
-      'Morning at Sarnath, where the Buddha first taught',
-    ],
-  },
-  {
-    _id: 'mock-3',
-    slug: 'rajasthan-forts-and-deserts',
-    title: 'Rajasthan: Forts & Golden Sands',
-    destination: { name: 'Jaipur to Jaisalmer, Rajasthan' },
-    coverImage: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=1200&q=85',
-    duration: 9,
-    groupSize: { max: 12 },
-    difficulty: 'Moderate',
-    price: 67000,
-    discountPrice: 59900,
-    highlights: [
-      'Private dawn entry to Amber Fort, before the gates open to the public',
-      'Overnight in a heritage haveli inside the living fort of Jaisalmer',
-      'Camel safari into the Sam dunes for sunset',
-      'Blue-lane walking tour of old Jodhpur',
-    ],
-  },
-]
+const VIBES = ['All Culture', 'Wildlife First', 'Beach & Backwaters', 'Himalayan Peaks', 'Spiritual Depth', 'Festival Season']
+const BUDGETS = ['Budget Conscious', 'Mid-Range', 'Premium', 'Ultra Luxury']
+const PACES = ['Slow & Deep', 'Balanced', 'Action-Packed']
 
 // ─────────────────────────────────────────────────────────────────────────────
-// AMBIENT MOTIF CANVAS — quiet line-drawn compass rose, used once, in the hero
+// ANIMATED TRAVEL PATH — HERO SIGNATURE ELEMENT
+// A bezier path across the hero; plane, train, bus animate along it
 // ─────────────────────────────────────────────────────────────────────────────
-function CompassMotif({ color }: { color: string }) {
-  const ref = useRef<HTMLCanvasElement>(null)
-  const animRef = useRef<number>(0)
-  useEffect(() => {
-    const canvas = ref.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const W = 520
-    canvas.width = W
-    canvas.height = W
-    const cx = W / 2
-    const cy = W / 2
-    let t = 0
-    const hex = color.replace('#', '')
-    const r = parseInt(hex.slice(0, 2), 16)
-    const g = parseInt(hex.slice(2, 4), 16)
-    const b = parseInt(hex.slice(4, 6), 16)
+function TravelPathAnimation() {
+  // Three offset path descriptions for each vehicle
+  const pathD = "M -60,80 C 80,20 180,140 320,60 C 460,-20 560,120 700,55 C 840,-10 920,110 1080,60"
 
-    const draw = () => {
-      t += 0.0022
-      ctx.clearRect(0, 0, W, W)
-
-        // outer hairline rings
-        ;[226, 188, 150].forEach((rad, i) => {
-          ctx.beginPath()
-          ctx.arc(cx, cy, rad, 0, Math.PI * 2)
-          ctx.strokeStyle = `rgba(${r},${g},${b},${0.08 + i * 0.02})`
-          ctx.lineWidth = 0.6
-          ctx.stroke()
-        })
-
-      // rotating tick marks like a compass face
-      for (let i = 0; i < 36; i++) {
-        const a = (i / 36) * Math.PI * 2 + t
-        const inner = i % 9 === 0 ? 196 : 212
-        const outer = 226
-        const x1 = cx + inner * Math.cos(a)
-        const y1 = cy + inner * Math.sin(a)
-        const x2 = cx + outer * Math.cos(a)
-        const y2 = cy + outer * Math.sin(a)
-        ctx.beginPath()
-        ctx.moveTo(x1, y1)
-        ctx.lineTo(x2, y2)
-        ctx.strokeStyle = `rgba(${r},${g},${b},${i % 9 === 0 ? 0.5 : 0.18})`
-        ctx.lineWidth = i % 9 === 0 ? 1.3 : 0.6
-        ctx.stroke()
-      }
-
-      // slow needle
-      const a1 = t * 0.7
-      const a2 = a1 + Math.PI
-      ctx.beginPath()
-      ctx.moveTo(cx + 92 * Math.cos(a1), cy + 92 * Math.sin(a1))
-      ctx.lineTo(cx, cy)
-      ctx.lineTo(cx + 92 * Math.cos(a2), cy + 92 * Math.sin(a2))
-      ctx.strokeStyle = `rgba(${r},${g},${b},0.55)`
-      ctx.lineWidth = 1
-      ctx.stroke()
-
-      ctx.beginPath()
-      ctx.arc(cx, cy, 4, 0, Math.PI * 2)
-      ctx.fillStyle = `rgba(${r},${g},${b},0.8)`
-      ctx.fill()
-
-      animRef.current = requestAnimationFrame(draw)
-    }
-    draw()
-    return () => cancelAnimationFrame(animRef.current)
-  }, [color])
-  return <canvas ref={ref} style={{ width: '100%', height: '100%' }} />
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// HOVER-UNDERLINE LINK — shared micro-interaction for CTAs
-// ─────────────────────────────────────────────────────────────────────────────
-function UnderlineLink({
-  to,
-  children,
-  color = '#1F1B16',
-  size = 12,
-}: {
-  to: string
-  children: React.ReactNode
-  color?: string
-  size?: number
-}) {
-  const [hover, setHover] = useState(false)
   return (
-    <Link
-      to={to}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        position: 'relative',
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 10,
-        fontFamily: '"Inter",sans-serif',
-        fontSize: size,
-        letterSpacing: '0.18em',
-        textTransform: 'uppercase',
-        fontWeight: 600,
-        color,
-        textDecoration: 'none',
-        paddingBottom: 4,
-      }}
-    >
-      <span style={{ position: 'relative' }}>
-        {children}
-        <motion.span
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: hover ? 1 : 0 }}
-          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: -4,
-            height: 1,
-            background: color,
-            transformOrigin: 'left',
-          }}
-        />
-      </span>
-      <motion.span animate={{ x: hover ? 4 : 0 }} transition={{ duration: 0.25 }} style={{ display: 'flex' }}>
-        <FiArrowRight size={size} />
-      </motion.span>
-    </Link>
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 2 }}>
+      <svg
+        viewBox="0 0 1080 160"
+        preserveAspectRatio="xMidYMid slice"
+        style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: 220, opacity: 0.9 }}
+      >
+        {/* Dashed track line */}
+        <path d={pathD} fill="none" stroke={T.saffron} strokeWidth="1.5"
+          strokeDasharray="6 10" opacity="0.35" />
+
+        {/* ── AIRPLANE ── */}
+        <motion.g
+          style={{ transformOrigin: 'center' }}
+          initial={{ offsetDistance: '0%' }}
+          animate={{ offsetDistance: '100%' }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'linear', delay: 0 }}
+        >
+          <motion.path
+            d={pathD}
+            style={{
+              offsetPath: `path('${pathD}')`,
+              offsetRotate: 'auto',
+            } as any}
+          />
+          <AnimatedVehicle pathD={pathD} delay={0} duration={10} color={T.saffron} type="plane" />
+        </motion.g>
+
+        {/* ── TRAIN ── */}
+        <AnimatedVehicle pathD={pathD} delay={3.3} duration={10} color={T.emerald} type="train" />
+
+        {/* ── BUS ── */}
+        <AnimatedVehicle pathD={pathD} delay={6.6} duration={10} color={T.amber} type="bus" />
+      </svg>
+    </div>
+  )
+}
+
+function AnimatedVehicle({ pathD, delay, duration, color, type }: {
+  pathD: string; delay: number; duration: number; color: string; type: 'plane' | 'train' | 'bus'
+}) {
+  const pathRef = useRef<SVGPathElement>(null)
+  const dotRef = useRef<SVGGElement>(null)
+
+  useEffect(() => {
+    const path = pathRef.current
+    const dot = dotRef.current
+    if (!path || !dot) return
+    const length = path.getTotalLength()
+    let start: number | null = null
+    let raf: number
+
+    const animate = (ts: number) => {
+      if (!start) start = ts
+      const elapsed = (ts - start) / 1000
+      const progress = ((elapsed / duration + delay / duration) % 1)
+      const point = path.getPointAtLength(progress * length)
+      const tangentPoint = path.getPointAtLength(Math.min((progress + 0.01), 1) * length)
+      const angle = Math.atan2(tangentPoint.y - point.y, tangentPoint.x - point.x) * 180 / Math.PI
+      dot.setAttribute('transform', `translate(${point.x},${point.y}) rotate(${angle})`)
+      raf = requestAnimationFrame(animate)
+    }
+    raf = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(raf)
+  }, [delay, duration])
+
+  const size = type === 'plane' ? 22 : 18
+
+  return (
+    <>
+      <path ref={pathRef} d={pathD} fill="none" stroke="none" />
+      <g ref={dotRef}>
+        {/* glow halo */}
+        <circle r={size * 0.9} fill={color} opacity="0.12" />
+        {type === 'plane' && (
+          // ✈ airplane
+          <g transform={`translate(-${size / 2},-${size / 2})`}>
+            <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+              <path d="M21 16V14L13 9V3.5a1.5 1.5 0 0 0-3 0V9L2 14v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5L21 16z" />
+            </svg>
+          </g>
+        )}
+        {type === 'train' && (
+          // 🚂 train
+          <g>
+            <rect x={-size / 2} y={-size * 0.35} width={size} height={size * 0.7} rx="3" fill={color} opacity="0.9" />
+            <circle cx={-size * 0.3} cy={size * 0.35} r={3} fill={T.cream} />
+            <circle cx={size * 0.3} cy={size * 0.35} r={3} fill={T.cream} />
+            <rect x={-size * 0.38} y={-size * 0.28} width={size * 0.34} height={size * 0.3} rx="2" fill={T.cream} opacity="0.5" />
+            <rect x={size * 0.04} y={-size * 0.28} width={size * 0.34} height={size * 0.3} rx="2" fill={T.cream} opacity="0.5" />
+          </g>
+        )}
+        {type === 'bus' && (
+          // 🚌 bus
+          <g>
+            <rect x={-size / 2} y={-size * 0.3} width={size} height={size * 0.65} rx="4" fill={color} opacity="0.9" />
+            <circle cx={-size * 0.28} cy={size * 0.35} r={4} fill={T.cream} />
+            <circle cx={size * 0.28} cy={size * 0.35} r={4} fill={T.cream} />
+            {[-0.35, -0.1, 0.15, 0.35].map((x, i) => (
+              <rect key={i} x={size * x - 4} y={-size * 0.22} width={7} height={size * 0.26} rx="1.5" fill={T.cream} opacity="0.55" />
+            ))}
+          </g>
+        )}
+      </g>
+    </>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HERO — cinematic, minimal, no stat bar, no "Incredible India"
+// HERO SECTION
 // ─────────────────────────────────────────────────────────────────────────────
 function HeroSection() {
   const mouseX = useMotionValue(0.5)
   const mouseY = useMotionValue(0.5)
-  const springX = useSpring(mouseX, { stiffness: 26, damping: 20 })
-  const springY = useSpring(mouseY, { stiffness: 26, damping: 20 })
-  const pX = useTransform(springX, [0, 1], [-16, 16])
-  const pY = useTransform(springY, [0, 1], [-9, 9])
+  const sX = useSpring(mouseX, { stiffness: 22, damping: 18 })
+  const sY = useSpring(mouseY, { stiffness: 22, damping: 18 })
+  const pX = useTransform(sX, [0, 1], [-14, 14])
+  const pY = useTransform(sY, [0, 1], [-8, 8])
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-      mouseX.set((e.clientX - rect.left) / rect.width)
-      mouseY.set((e.clientY - rect.top) / rect.height)
-    },
-    [mouseX, mouseY]
-  )
+  const handleMouse = useCallback((e: React.MouseEvent) => {
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    mouseX.set((e.clientX - r.left) / r.width)
+    mouseY.set((e.clientY - r.top) / r.height)
+  }, [mouseX, mouseY])
 
   return (
     <section
-      onMouseMove={handleMouseMove}
+      onMouseMove={handleMouse}
       style={{
-        position: 'relative',
-        minHeight: '92vh',
-        display: 'flex',
-        alignItems: 'center',
+        position: 'relative', minHeight: '100vh',
+        display: 'flex', alignItems: 'center',
         overflow: 'hidden',
-        background: '#FDFBF7',
+        background: `linear-gradient(145deg, ${T.cream} 0%, ${T.mist} 45%, #F0E6CC 100%)`,
       }}
     >
-      {/* faint paper texture line */}
-      <div style={{ position: 'absolute', top: 56, left: 0, right: 0, height: 1, background: 'rgba(31,27,22,0.08)' }} />
+      {/* Subtle warm grain texture overlay */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(200,83,26,0.07) 1px, transparent 0)`,
+        backgroundSize: '32px 32px', pointerEvents: 'none', zIndex: 1,
+      }} />
 
-      {/* ambient compass motif, right side */}
-      <motion.div
-        style={{
-          position: 'absolute',
-          right: 'clamp(-6vw,-2vw,2vw)',
-          top: '50%',
-          translateY: '-50%',
-          width: 'clamp(360px,40vw,560px)',
-          height: 'clamp(360px,40vw,560px)',
-          x: pX,
-          y: pY,
-          opacity: 0.9,
-        }}
-      >
-        <CompassMotif color="#C8722C" />
+      {/* Large ambient circle — terracotta */}
+      <motion.div style={{
+        x: pX, y: pY, position: 'absolute', right: '-8vw', top: '50%', translateY: '-50%',
+        width: 'clamp(460px,46vw,700px)', height: 'clamp(460px,46vw,700px)',
+        borderRadius: '50%', zIndex: 1, pointerEvents: 'none',
+      }}>
+        <div style={{
+          width: '100%', height: '100%', borderRadius: '50%',
+          background: `radial-gradient(circle, rgba(244,162,40,0.18) 0%, rgba(200,83,26,0.08) 50%, transparent 75%)`,
+          border: `1px solid rgba(212,146,42,0.2)`,
+        }} />
+        {/* Inner rings */}
+        {[0.72, 0.52, 0.34].map((s, i) => (
+          <motion.div key={i}
+            animate={{ rotate: i % 2 === 0 ? 360 : -360 }}
+            transition={{ duration: 55 + i * 18, repeat: Infinity, ease: 'linear' }}
+            style={{
+              position: 'absolute', inset: `${(1 - s) * 50}%`, borderRadius: '50%',
+              border: `1px dashed rgba(200,83,26,${0.12 + i * 0.04})`,
+            }} />
+        ))}
+        {/* Compass GiCompass SVG */}
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%',
+          transform: 'translate(-50%,-50%)',
+          fontSize: 'clamp(100px,14vw,200px)',
+          color: T.saffron, opacity: 0.12,
+        }}>
+          <GiCompass />
+        </div>
       </motion.div>
 
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 2,
-          width: '100%',
-          maxWidth: 1320,
-          margin: '0 auto',
-          padding: '0 clamp(28px,6vw,96px)',
-        }}
-      >
+      {/* Tricolour stripe at very top */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, display: 'flex', zIndex: 10 }}>
+        <div style={{ flex: 1, background: '#FF9933' }} />
+        <div style={{ flex: 1, background: 'rgba(255,255,255,0.9)' }} />
+        <div style={{ flex: 1, background: '#138808' }} />
+      </div>
+
+      {/* Main copy */}
+      <div style={{
+        position: 'relative', zIndex: 5,
+        width: '100%', maxWidth: 1360, margin: '0 auto',
+        padding: '80px clamp(28px,6vw,96px) 140px',
+      }}>
         <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 30 }}
+          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65 }}
+          style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 28 }}
         >
-          <div style={{ width: 40, height: 1, background: '#C8722C' }} />
-          <span
-            style={{
-              fontFamily: '"Inter",sans-serif',
-              fontSize: 11,
-              letterSpacing: '0.42em',
-              textTransform: 'uppercase',
-              color: '#8A6A3D',
-              fontWeight: 600,
-            }}
-          >
-            Pavilion — A Travel Journal of India
+          <div style={{ width: 44, height: 2, background: T.amber, borderRadius: 2 }} />
+          <span style={{
+            fontFamily: '"Inter",sans-serif', fontSize: 11,
+            letterSpacing: '0.45em', textTransform: 'uppercase',
+            color: T.bronze, fontWeight: 700,
+          }}>
+            Pavilion · Curated Journeys Across India
           </span>
         </motion.div>
 
         <div style={{ overflow: 'hidden' }}>
           <motion.h1
-            initial={{ y: '110%' }}
-            animate={{ y: '0%' }}
-            transition={{ duration: 0.9, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ y: '110%' }} animate={{ y: '0%' }}
+            transition={{ duration: 0.9, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
             style={{
-              fontFamily: '"Fraunces",serif',
-              fontWeight: 480,
-              fontStyle: 'normal',
-              fontSize: 'clamp(2.6rem,6.2vw,5.6rem)',
-              lineHeight: 1.04,
-              letterSpacing: '-0.01em',
-              color: '#1F1B16',
-              margin: 0,
-              maxWidth: 920,
+              fontFamily: '"Fraunces",serif', fontWeight: 500,
+              fontSize: 'clamp(3rem,7.5vw,7.5rem)',
+              lineHeight: 0.96, letterSpacing: '-0.02em',
+              color: T.mahogany, margin: 0, maxWidth: 900,
             }}
           >
-            Journeys written slowly,
+            Journey into the
           </motion.h1>
         </div>
         <div style={{ overflow: 'hidden' }}>
           <motion.h1
-            initial={{ y: '110%' }}
-            animate={{ y: '0%' }}
-            transition={{ duration: 0.9, delay: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ y: '110%' }} animate={{ y: '0%' }}
+            transition={{ duration: 0.9, delay: 0.24, ease: [0.16, 1, 0.3, 1] }}
             style={{
-              fontFamily: '"Fraunces",serif',
-              fontWeight: 480,
+              fontFamily: '"Fraunces",serif', fontWeight: 500,
               fontStyle: 'italic',
-              fontSize: 'clamp(2.6rem,6.2vw,5.6rem)',
-              lineHeight: 1.04,
-              letterSpacing: '-0.01em',
-              color: '#C8722C',
-              margin: 0,
-              maxWidth: 920,
+              fontSize: 'clamp(3rem,7.5vw,7.5rem)',
+              lineHeight: 0.96, letterSpacing: '-0.02em',
+              color: T.amber, margin: 0, maxWidth: 900,
             }}
           >
-            across an old country.
+            soul of India.
           </motion.h1>
         </div>
 
         <motion.p
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.55 }}
+          initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.5 }}
           style={{
             fontFamily: '"Inter",sans-serif',
-            fontSize: 'clamp(15px,1.3vw,17px)',
-            lineHeight: 1.75,
-            color: 'rgba(31,27,22,0.62)',
-            maxWidth: 480,
-            margin: '28px 0 0',
+            fontSize: 'clamp(15px,1.4vw,18px)',
+            lineHeight: 1.8, color: `rgba(44,18,4,0.62)`,
+            maxWidth: 480, margin: '28px 0 0',
           }}
         >
-          No checklists. No crowds chasing the same photograph. Pavilion plans journeys
-          around the people, rituals, and landscapes that make each region of India
-          unmistakably itself.
+          Handcrafted itineraries built around local knowledge — not algorithms. Temples, tigers, high passes, sacred rivers. Every corner of this extraordinary country.
         </motion.p>
 
         <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.7 }}
-          style={{ display: 'flex', gap: 40, alignItems: 'center', marginTop: 44, flexWrap: 'wrap' }}
+          initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.68 }}
+          style={{ display: 'flex', gap: 16, alignItems: 'center', marginTop: 44, flexWrap: 'wrap' }}
         >
-          <Link
-            to="/destinations"
-            style={{
-              background: '#0F6B4C',
-              color: '#FDFBF7',
-              fontFamily: '"Inter",sans-serif',
-              fontSize: 12,
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              fontWeight: 600,
-              padding: '16px 34px',
-              borderRadius: 2,
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 10,
-              transition: 'transform 0.25s ease, box-shadow 0.25s ease',
-              boxShadow: '0 10px 28px rgba(15,107,76,0.22)',
-            }}
-            onMouseEnter={(e) => {
-              ; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'
-                ; (e.currentTarget as HTMLElement).style.boxShadow = '0 16px 36px rgba(15,107,76,0.3)'
-            }}
-            onMouseLeave={(e) => {
-              ; (e.currentTarget as HTMLElement).style.transform = 'none'
-                ; (e.currentTarget as HTMLElement).style.boxShadow = '0 10px 28px rgba(15,107,76,0.22)'
-            }}
+          <Link to="/destinations" style={{
+            background: T.emerald, color: T.cream,
+            fontFamily: '"Inter",sans-serif', fontSize: 12,
+            letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 700,
+            padding: '17px 38px', borderRadius: 2, textDecoration: 'none',
+            display: 'inline-flex', alignItems: 'center', gap: 10,
+            boxShadow: `0 12px 32px rgba(10,92,62,0.28)`,
+            transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+          }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLElement).style.boxShadow = `0 18px 44px rgba(10,92,62,0.36)` }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = `0 12px 32px rgba(10,92,62,0.28)` }}
           >
-            Begin a Journey
+            Explore Destinations <FiArrowRight size={14} />
           </Link>
+          <Link to="/tours" style={{
+            background: 'transparent', color: T.mahogany,
+            fontFamily: '"Inter",sans-serif', fontSize: 12,
+            letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 600,
+            padding: '17px 38px', borderRadius: 2, textDecoration: 'none',
+            display: 'inline-flex', alignItems: 'center', gap: 10,
+            border: `1.5px solid rgba(44,18,4,0.22)`,
+            transition: 'border-color 0.2s, color 0.2s',
+          }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = T.amber; (e.currentTarget as HTMLElement).style.color = T.amber }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(44,18,4,0.22)'; (e.currentTarget as HTMLElement).style.color = T.mahogany }}
+          >
+            Browse Itineraries
+          </Link>
+        </motion.div>
 
-          <UnderlineLink to="/tours">Read the Itineraries</UnderlineLink>
+        {/* Quick stats */}
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
+          style={{ display: 'flex', gap: 44, marginTop: 60, flexWrap: 'wrap' }}
+        >
+          {[['28+', 'States covered'], ['500+', 'Curated tours'], ['4.9★', 'Avg rating']].map(([v, l]) => (
+            <div key={l}>
+              <p style={{ fontFamily: '"Fraunces",serif', fontSize: 28, color: T.mahogany, margin: 0, lineHeight: 1 }}>{v}</p>
+              <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: T.bronze, margin: '4px 0 0' }}>{l}</p>
+            </div>
+          ))}
         </motion.div>
       </div>
 
-      {/* scroll cue */}
+      {/* ── ANIMATED TRAVEL PATH ── */}
+      <TravelPathAnimation />
+
+      {/* Scroll cue */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-        style={{
-          position: 'absolute',
-          bottom: 30,
-          left: 'clamp(28px,6vw,96px)',
-          zIndex: 2,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-        }}
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }}
+        style={{ position: 'absolute', bottom: 32, left: 'clamp(28px,6vw,96px)', zIndex: 6, display: 'flex', alignItems: 'center', gap: 10 }}
       >
-        <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}>
-          <FiArrowDown size={14} color="rgba(31,27,22,0.32)" />
+        <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+          <FiArrowDown size={14} color={`rgba(44,18,4,0.4)`} />
         </motion.div>
-        <span
-          style={{
-            fontFamily: '"Inter",sans-serif',
-            fontSize: 10,
-            letterSpacing: '0.3em',
-            textTransform: 'uppercase',
-            color: 'rgba(31,27,22,0.32)',
-          }}
-        >
-          Scroll to wander
+        <span style={{ fontFamily: '"Inter",sans-serif', fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: `rgba(44,18,4,0.38)` }}>
+          Scroll to explore
         </span>
       </motion.div>
     </section>
@@ -482,225 +497,98 @@ function HeroSection() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CHOOSE YOUR INDIA — quiet tabbed dossier, accurate image/copy per category
+// CHOOSE YOUR INDIA — Journey Explorer
 // ─────────────────────────────────────────────────────────────────────────────
 function JourneyExplorer() {
   const [active, setActive] = useState(0)
   const cur = JOURNEYS[active]
 
   return (
-    <section style={{ position: 'relative', background: '#FDFBF7', borderTop: '1px solid rgba(31,27,22,0.08)' }}>
-      <div style={{ maxWidth: 1320, margin: '0 auto', padding: '120px clamp(28px,6vw,96px)' }}>
-        <div style={{ marginBottom: 64, maxWidth: 620 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-            <div style={{ width: 40, height: 1, background: '#C8722C' }} />
-            <span
-              style={{
-                fontFamily: '"Inter",sans-serif',
-                fontSize: 11,
-                letterSpacing: '0.36em',
-                textTransform: 'uppercase',
-                color: '#8A6A3D',
-                fontWeight: 600,
-              }}
-            >
-              Four Ways to Travel
-            </span>
+    <section style={{
+      position: 'relative',
+      background: `linear-gradient(180deg, ${T.cream} 0%, ${T.cream2} 100%)`,
+      borderTop: `1px solid rgba(44,18,4,0.08)`,
+    }}>
+      <div style={{ maxWidth: 1360, margin: '0 auto', padding: '110px clamp(28px,6vw,96px)' }}>
+
+        {/* Header */}
+        <div style={{ marginBottom: 60, maxWidth: 640 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
+            <div style={{ width: 40, height: 2, background: T.amber, borderRadius: 2 }} />
+            <span style={{ fontFamily: '"Inter",sans-serif', fontSize: 11, letterSpacing: '0.4em', textTransform: 'uppercase', color: T.bronze, fontWeight: 700 }}>Four Ways to Travel</span>
           </div>
-          <h2
-            style={{
-              fontFamily: '"Fraunces",serif',
-              fontWeight: 480,
-              fontSize: 'clamp(2.4rem,4.6vw,4rem)',
-              lineHeight: 1.06,
-              color: '#1F1B16',
-              margin: 0,
-            }}
-          >
-            Choose your <span style={{ fontStyle: 'italic', color: '#C8722C' }}>India</span>
+          <h2 style={{ fontFamily: '"Fraunces",serif', fontWeight: 500, fontSize: 'clamp(2.4rem,4.8vw,4.2rem)', lineHeight: 1.05, color: T.mahogany, margin: 0 }}>
+            Choose your <span style={{ fontStyle: 'italic', color: T.amber }}>India</span>
           </h2>
-          <p
-            style={{
-              fontFamily: '"Inter",sans-serif',
-              fontSize: 16,
-              lineHeight: 1.8,
-              color: 'rgba(31,27,22,0.6)',
-              marginTop: 18,
-            }}
-          >
-            India is not one place. It is every place. These are the four lenses we
-            travel through most — pick the one that calls to you.
+          <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 16, lineHeight: 1.8, color: `rgba(44,18,4,0.58)`, marginTop: 18 }}>
+            Not one country but an entire continent of experiences. These are the four lenses Pavilion travels through.
           </p>
         </div>
 
-        {/* Tab row */}
-        <div
-          style={{
-            display: 'flex',
-            gap: 0,
-            borderTop: '1px solid rgba(31,27,22,0.12)',
-            borderBottom: '1px solid rgba(31,27,22,0.12)',
-            flexWrap: 'wrap',
-          }}
-        >
+        {/* Tab bar */}
+        <div style={{ display: 'flex', gap: 0, borderTop: `1px solid rgba(44,18,4,0.12)`, borderBottom: `1px solid rgba(44,18,4,0.12)`, flexWrap: 'wrap' }}>
           {JOURNEYS.map((j, i) => (
-            <button
-              key={j.id}
-              onClick={() => setActive(i)}
-              style={{
-                flex: '1 1 200px',
-                textAlign: 'left',
-                padding: '22px 22px',
-                background: active === i ? 'rgba(200,114,44,0.06)' : 'transparent',
-                border: 'none',
-                borderRight: '1px solid rgba(31,27,22,0.1)',
-                borderBottom: active === i ? `2px solid ${j.color}` : '2px solid transparent',
-                cursor: 'pointer',
-                transition: 'background 0.3s ease, border-color 0.3s ease',
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: '"Inter",sans-serif',
-                  fontSize: 10,
-                  letterSpacing: '0.2em',
-                  color: active === i ? j.color : 'rgba(31,27,22,0.3)',
-                  display: 'block',
-                  marginBottom: 6,
-                  fontWeight: 600,
-                }}
-              >
-                {j.mark}
-              </span>
-              <span
-                style={{
-                  fontFamily: '"Fraunces",serif',
-                  fontSize: 22,
-                  color: active === i ? '#1F1B16' : 'rgba(31,27,22,0.34)',
-                  display: 'block',
-                  transition: 'color 0.3s ease',
-                }}
-              >
-                {j.label}
-              </span>
+            <button key={j.id} onClick={() => setActive(i)} style={{
+              flex: '1 1 160px', textAlign: 'left', padding: '22px 24px',
+              background: active === i ? `${j.color}10` : 'transparent',
+              border: 'none',
+              borderRight: `1px solid rgba(44,18,4,0.1)`,
+              borderBottom: active === i ? `3px solid ${j.color}` : '3px solid transparent',
+              cursor: 'pointer', transition: 'background 0.3s',
+            }}>
+              <span style={{ fontFamily: '"Inter",sans-serif', fontSize: 10, letterSpacing: '0.2em', color: active === i ? j.color : `rgba(44,18,4,0.28)`, display: 'block', marginBottom: 6, fontWeight: 700 }}>{j.mark}</span>
+              <span style={{ fontFamily: '"Fraunces",serif', fontSize: 22, color: active === i ? T.mahogany : `rgba(44,18,4,0.32)`, display: 'block', transition: 'color 0.3s', fontStyle: active === i ? 'italic' : 'normal' }}>{j.label}</span>
             </button>
           ))}
         </div>
 
-        {/* Content panel */}
+        {/* Panel */}
         <AnimatePresence mode="wait">
-          <motion.div
-            key={active}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 0,
-              marginTop: 0,
-            }}
+          <motion.div key={active}
+            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}
           >
-            <div
-              style={{
-                padding: '54px 56px 54px 0',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-              }}
-            >
-              <h3
-                style={{
-                  fontFamily: '"Fraunces",serif',
-                  fontStyle: 'italic',
-                  fontSize: 'clamp(1.7rem,2.6vw,2.5rem)',
-                  lineHeight: 1.18,
-                  color: '#1F1B16',
-                  marginBottom: 18,
-                }}
-              >
+            {/* Text */}
+            <div style={{ padding: '52px 56px 52px 0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <h3 style={{ fontFamily: '"Fraunces",serif', fontStyle: 'italic', fontSize: 'clamp(1.7rem,2.7vw,2.6rem)', lineHeight: 1.18, color: T.mahogany, marginBottom: 18 }}>
                 {cur.headline}
               </h3>
-              <p
-                style={{
-                  fontFamily: '"Inter",sans-serif',
-                  fontSize: 16,
-                  lineHeight: 1.85,
-                  color: 'rgba(31,27,22,0.62)',
-                  marginBottom: 30,
-                }}
-              >
+              <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 16, lineHeight: 1.88, color: `rgba(44,18,4,0.6)`, marginBottom: 28 }}>
                 {cur.body}
               </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 36 }}>
-                {cur.places.map((p) => (
-                  <span
-                    key={p}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      fontFamily: '"Inter",sans-serif',
-                      fontSize: 11,
-                      letterSpacing: '0.03em',
-                      padding: '7px 14px',
-                      borderRadius: 100,
-                      background: `${cur.color}10`,
-                      border: `1px solid ${cur.color}38`,
-                      color: cur.color,
-                      fontWeight: 500,
-                    }}
-                  >
-                    <FiMapPin size={10} />
-                    {p}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 38 }}>
+                {cur.places.map(p => (
+                  <span key={p} style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    fontFamily: '"Inter",sans-serif', fontSize: 11, fontWeight: 500,
+                    padding: '7px 14px', borderRadius: 100,
+                    background: `${cur.color}12`, border: `1px solid ${cur.color}40`, color: cur.color,
+                  }}>
+                    <FiMapPin size={10} /> {p}
                   </span>
                 ))}
               </div>
-              <UnderlineLink to="/destinations" color={cur.color}>
-                Explore this path
-              </UnderlineLink>
+              <Link to="/destinations" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 10,
+                fontFamily: '"Inter",sans-serif', fontSize: 12,
+                letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700,
+                color: cur.color, textDecoration: 'none',
+                borderBottom: `1.5px solid ${cur.color}`, paddingBottom: 3,
+              }}>
+                Explore this path <FiArrowRight size={12} />
+              </Link>
             </div>
 
+            {/* Image */}
             <div style={{ position: 'relative', overflow: 'hidden', minHeight: 440 }}>
-              <motion.div
-                key={cur.image}
-                initial={{ scale: 1.08, opacity: 0.6 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundImage: `url(${cur.image})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                }}
+              <motion.div key={cur.image}
+                initial={{ scale: 1.07, opacity: 0.7 }} animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+                style={{ position: 'absolute', inset: 0, backgroundImage: `url(${cur.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
               />
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: `linear-gradient(135deg, ${cur.color}22 0%, transparent 55%)`,
-                }}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: 24,
-                  right: 28,
-                  fontFamily: '"Fraunces",serif',
-                  fontStyle: 'italic',
-                  fontSize: 15,
-                  letterSpacing: '0.04em',
-                  color: '#FDFBF7',
-                  background: 'rgba(31,27,22,0.45)',
-                  padding: '8px 16px',
-                  borderRadius: 2,
-                  backdropFilter: 'blur(6px)',
-                }}
-              >
-                {cur.label}
-              </div>
+              <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg,${cur.color}1A 0%, transparent 55%)` }} />
+              <div style={{ position: 'absolute', bottom: 24, right: 24, fontFamily: '"Fraunces",serif', fontStyle: 'italic', fontSize: 15, color: T.cream, background: 'rgba(44,18,4,0.48)', padding: '8px 18px', borderRadius: 2, backdropFilter: 'blur(6px)' }}>{cur.label}</div>
             </div>
           </motion.div>
         </AnimatePresence>
@@ -710,491 +598,494 @@ function JourneyExplorer() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ITINERARY DOSSIER CARD — for Featured Tours
+// TRAVEL PERSONA FINDER — replaces "Handpicked Itineraries"
 // ─────────────────────────────────────────────────────────────────────────────
-function ItineraryCard({ tour, index }: { tour: any; index: number }) {
-  const [hover, setHover] = useState(false)
-  const price = tour.discountPrice ?? tour.price
-  const hasDiscount = Boolean(tour.discountPrice) && tour.discountPrice < tour.price
+function PersonaFinder() {
+  const [active, setActive] = useState<string | null>(null)
+  const cur = PERSONAS.find(p => p.id === active) ?? null
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 32 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.08, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        background: '#FFFFFF',
-        border: '1px solid rgba(31,27,22,0.1)',
-        borderRadius: 4,
-        overflow: 'hidden',
-        transition: 'box-shadow 0.35s ease, transform 0.35s ease',
-        transform: hover ? 'translateY(-6px)' : 'none',
-        boxShadow: hover ? '0 22px 50px rgba(31,27,22,0.12)' : '0 2px 12px rgba(31,27,22,0.05)',
-      }}
-    >
-      {/* Image with dossier numbering */}
-      <div style={{ position: 'relative', height: 210, overflow: 'hidden' }}>
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `url(${tour.coverImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            transform: hover ? 'scale(1.06)' : 'scale(1)',
-            transition: 'transform 0.7s ease',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(to top, rgba(31,27,22,0.55) 0%, transparent 50%)',
-          }}
-        />
-        <span
-          style={{
-            position: 'absolute',
-            top: 16,
-            left: 16,
-            fontFamily: '"Fraunces",serif',
-            fontStyle: 'italic',
-            fontSize: 28,
-            color: 'rgba(253,251,247,0.85)',
-          }}
-        >
-          {String(index + 1).padStart(2, '0')}
-        </span>
-        <span
-          style={{
-            position: 'absolute',
-            bottom: 14,
-            left: 16,
-            fontFamily: '"Inter",sans-serif',
-            fontSize: 10,
-            letterSpacing: '0.2em',
-            textTransform: 'uppercase',
-            color: '#FDFBF7',
-            background: 'rgba(31,27,22,0.55)',
-            padding: '5px 11px',
-            borderRadius: 2,
-          }}
-        >
-          {tour.difficulty}
-        </span>
-      </div>
+    <section style={{
+      background: `linear-gradient(160deg, ${T.mahogany} 0%, #3D1A06 100%)`,
+      padding: '120px clamp(28px,6vw,96px)',
+      position: 'relative', overflow: 'hidden',
+    }}>
+      {/* Warm texture */}
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: `radial-gradient(ellipse at 30% 50%, rgba(244,162,40,0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(200,83,26,0.07) 0%, transparent 50%)`, pointerEvents: 'none' }} />
 
-      {/* Dossier body */}
-      <div style={{ padding: '26px 26px 28px' }}>
-        <p
-          style={{
-            fontFamily: '"Inter",sans-serif',
-            fontSize: 10,
-            letterSpacing: '0.22em',
-            textTransform: 'uppercase',
-            color: '#C8722C',
-            fontWeight: 600,
-            margin: '0 0 8px',
-          }}
-        >
-          {tour.destination?.name}
-        </p>
-        <h3
-          style={{
-            fontFamily: '"Fraunces",serif',
-            fontSize: 25,
-            lineHeight: 1.2,
-            color: '#1F1B16',
-            margin: '0 0 18px',
-          }}
-        >
-          {tour.title}
-        </h3>
-
-        {/* day-by-day highlight bullets */}
-        <ul style={{ listStyle: 'none', margin: '0 0 22px', padding: 0 }}>
-          {(tour.highlights || []).slice(0, 4).map((h: string, i: number) => (
-            <li
-              key={i}
-              style={{
-                display: 'flex',
-                gap: 12,
-                alignItems: 'flex-start',
-                marginBottom: 11,
-                fontFamily: '"Inter",sans-serif',
-                fontSize: 13.5,
-                lineHeight: 1.6,
-                color: 'rgba(31,27,22,0.68)',
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: '"JetBrains Mono",monospace',
-                  fontSize: 10,
-                  color: '#C8722C',
-                  paddingTop: 2,
-                  flexShrink: 0,
-                  width: 14,
-                }}
-              >
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <span>{h}</span>
-            </li>
-          ))}
-        </ul>
-
-        {/* metadata badges */}
-        <div
-          style={{
-            display: 'flex',
-            gap: 16,
-            paddingTop: 18,
-            borderTop: '1px solid rgba(31,27,22,0.1)',
-            marginBottom: 18,
-          }}
-        >
-          <span
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              fontFamily: '"Inter",sans-serif',
-              fontSize: 11.5,
-              color: 'rgba(31,27,22,0.55)',
-            }}
-          >
-            <FiClock size={12} color="#C8722C" /> {tour.duration} days
-          </span>
-          <span
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              fontFamily: '"Inter",sans-serif',
-              fontSize: 11.5,
-              color: 'rgba(31,27,22,0.55)',
-            }}
-          >
-            <FiUsers size={12} color="#C8722C" /> Max {tour.groupSize?.max}
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            {hasDiscount && (
-              <span
-                style={{
-                  display: 'block',
-                  fontFamily: '"Inter",sans-serif',
-                  fontSize: 11,
-                  color: 'rgba(31,27,22,0.35)',
-                  textDecoration: 'line-through',
-                }}
-              >
-                ₹{tour.price?.toLocaleString('en-IN')}
-              </span>
-            )}
-            <span
-              style={{
-                fontFamily: '"Fraunces",serif',
-                fontSize: 19,
-                color: '#0F6B4C',
-              }}
-            >
-              ₹{price?.toLocaleString('en-IN')}
-            </span>
+      <div style={{ maxWidth: 1360, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 60 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+            <div style={{ width: 32, height: 2, background: T.saffron, borderRadius: 2 }} />
+            <span style={{ fontFamily: '"Inter",sans-serif', fontSize: 11, letterSpacing: '0.4em', textTransform: 'uppercase', color: `rgba(253,246,236,0.5)`, fontWeight: 600 }}>Mood-Based Journey Selector</span>
+            <div style={{ width: 32, height: 2, background: T.saffron, borderRadius: 2 }} />
           </div>
-          <Link
-            to={`/tours/${tour.slug}`}
-            style={{
-              fontFamily: '"Inter",sans-serif',
-              fontSize: 11,
-              letterSpacing: '0.16em',
-              textTransform: 'uppercase',
-              fontWeight: 600,
-              color: '#1F1B16',
-              textDecoration: 'none',
-              borderBottom: '1px solid #1F1B16',
-              paddingBottom: 2,
-            }}
-          >
-            View Dossier
-          </Link>
+          <h2 style={{ fontFamily: '"Fraunces",serif', fontWeight: 500, fontSize: 'clamp(2.4rem,4.8vw,4.2rem)', lineHeight: 1.05, color: T.cream, margin: 0 }}>
+            Who are you <span style={{ fontStyle: 'italic', color: T.saffron }}>when you travel?</span>
+          </h2>
+          <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 17, lineHeight: 1.8, color: `rgba(253,246,236,0.5)`, marginTop: 18, maxWidth: 520, margin: '18px auto 0' }}>
+            Pick the mood that pulls at you right now. We'll show you what India looks like through that lens.
+          </p>
         </div>
+
+        {/* Mood pill row */}
+        <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 60 }}>
+          {PERSONAS.map(p => (
+            <motion.button key={p.id}
+              onClick={() => setActive(prev => prev === p.id ? null : p.id)}
+              whileHover={{ y: -3 }} whileTap={{ scale: 0.96 }}
+              style={{
+                padding: '14px 28px', borderRadius: 100, cursor: 'pointer',
+                fontFamily: '"Inter",sans-serif', fontSize: 14, fontWeight: 600,
+                letterSpacing: '0.02em',
+                background: active === p.id ? p.color : 'rgba(253,246,236,0.07)',
+                border: `2px solid ${active === p.id ? p.color : 'rgba(253,246,236,0.16)'}`,
+                color: active === p.id ? T.cream : `rgba(253,246,236,0.7)`,
+                boxShadow: active === p.id ? `0 8px 32px ${p.color}44` : 'none',
+                transition: 'all 0.28s ease',
+              }}
+            >
+              {p.pill}
+            </motion.button>
+          ))}
+        </div>
+
+        {/* Persona showcase */}
+        <AnimatePresence mode="wait">
+          {cur ? (
+            <motion.div key={cur.id}
+              initial={{ opacity: 0, y: 28, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -16, scale: 0.97 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0,
+                border: `1px solid ${cur.color}30`,
+                borderRadius: 4, overflow: 'hidden',
+                boxShadow: `0 32px 80px rgba(0,0,0,0.4), 0 0 0 1px ${cur.color}20`,
+              }}
+            >
+              {/* Text panel */}
+              <div style={{ background: `rgba(44,18,4,0.85)`, backdropFilter: 'blur(12px)', padding: '52px 52px 48px' }}>
+                {/* Accent line */}
+                <div style={{ width: 44, height: 3, background: cur.color, borderRadius: 2, marginBottom: 28 }} />
+                <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 11, letterSpacing: '0.3em', textTransform: 'uppercase', color: cur.color, fontWeight: 700, margin: '0 0 10px' }}>
+                  {cur.subtitle}
+                </p>
+                <h3 style={{ fontFamily: '"Fraunces",serif', fontWeight: 500, fontSize: 'clamp(1.9rem,3vw,2.9rem)', lineHeight: 1.1, color: T.cream, margin: '0 0 22px' }}>
+                  {cur.title}
+                </h3>
+                <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 16, lineHeight: 1.88, color: `rgba(253,246,236,0.64)`, margin: '0 0 32px' }}>
+                  {cur.body}
+                </p>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 40 }}>
+                  {cur.tags.map(tag => (
+                    <span key={tag} style={{
+                      fontFamily: '"Inter",sans-serif', fontSize: 11, fontWeight: 600,
+                      padding: '6px 14px', borderRadius: 100,
+                      background: `${cur.color}18`, border: `1px solid ${cur.color}45`, color: cur.color,
+                    }}>{tag}</span>
+                  ))}
+                </div>
+                <Link to="/tours" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 10,
+                  background: cur.color, color: T.mahogany,
+                  fontFamily: '"Inter",sans-serif', fontSize: 12,
+                  letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700,
+                  padding: '15px 30px', borderRadius: 2, textDecoration: 'none',
+                  boxShadow: `0 8px 24px ${cur.color}45`,
+                }}>
+                  {cur.cta} <FiArrowRight size={13} />
+                </Link>
+              </div>
+
+              {/* Image panel with micro-interaction */}
+              <div style={{ position: 'relative', overflow: 'hidden', minHeight: 440 }}>
+                <motion.div
+                  initial={{ scale: 1.06 }} animate={{ scale: 1 }}
+                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ position: 'absolute', inset: 0, backgroundImage: `url(${cur.image})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(0.72) saturate(1.1)' }}
+                />
+                <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to right, ${cur.color}20 0%, transparent 50%)` }} />
+                {/* floating persona tag */}
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                  style={{
+                    position: 'absolute', top: 28, right: 28,
+                    background: 'rgba(44,18,4,0.6)', backdropFilter: 'blur(10px)',
+                    border: `1px solid ${cur.color}40`, borderRadius: 3,
+                    padding: '10px 18px',
+                  }}
+                >
+                  <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: cur.color, fontWeight: 700, margin: 0 }}>{cur.pill}</p>
+                </motion.div>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              style={{ textAlign: 'center', padding: '60px 20px' }}
+            >
+              <p style={{ fontFamily: '"Fraunces",serif', fontStyle: 'italic', fontSize: 22, color: `rgba(253,246,236,0.3)` }}>
+                Select a mood above to reveal your journey
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </motion.div>
+    </section>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BEST TIME TO VISIT
+// TRIP BUILDER — interactive dashboard with calendar + preferences
 // ─────────────────────────────────────────────────────────────────────────────
-function BestTimeSection() {
-  const [activeMonth, setActiveMonth] = useState<number | null>(null)
-  const peakThisMonth =
-    activeMonth !== null ? SEASON_DATA.filter((r) => r.months[activeMonth] === 1).map((r) => r.region) : []
-  const goodThisMonth =
-    activeMonth !== null ? SEASON_DATA.filter((r) => r.months[activeMonth] === 2).map((r) => r.region) : []
+function TripBuilder() {
+  const today = new Date()
+  const [calYear, setCalYear] = useState(today.getFullYear())
+  const [calMonth, setCalMonth] = useState(today.getMonth())
+  const [startDay, setStartDay] = useState<number | null>(null)
+  const [endDay, setEndDay] = useState<number | null>(null)
+  const [selVibe, setSelVibe] = useState<string | null>(null)
+  const [selBudget, setSelBudget] = useState<string | null>(null)
+  const [selPace, setSelPace] = useState<string | null>(null)
+  const [submitted, setSubmitted] = useState(false)
+
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
+  const firstDow = new Date(calYear, calMonth, 1).getDay()
+  const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+  const inRange = (d: number) => {
+    if (!startDay || !endDay) return false
+    const lo = Math.min(startDay, endDay)
+    const hi = Math.max(startDay, endDay)
+    return d > lo && d < hi
+  }
+  const isStart = (d: number) => d === startDay
+  const isEnd = (d: number) => d === endDay
+
+  const handleDayClick = (d: number) => {
+    if (!startDay || (startDay && endDay)) { setStartDay(d); setEndDay(null) }
+    else { d < startDay ? (setEndDay(startDay), setStartDay(d)) : setEndDay(d) }
+  }
+
+  const duration = startDay && endDay ? Math.abs(endDay - startDay) + 1 : null
+  const ready = startDay && endDay && selVibe && selBudget && selPace
 
   return (
-    <section style={{ position: 'relative', padding: '120px clamp(28px,6vw,96px)', background: '#F7F1E6' }}>
-      <div style={{ maxWidth: 1140, margin: '0 auto' }}>
-        <div style={{ marginBottom: 56 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-            <FiSun size={16} color="#C8722C" />
-            <span
-              style={{
-                fontFamily: '"Inter",sans-serif',
-                fontSize: 11,
-                letterSpacing: '0.36em',
-                textTransform: 'uppercase',
-                color: '#8A6A3D',
-                fontWeight: 600,
-              }}
-            >
-              Plan Your Trip
-            </span>
+    <section style={{
+      background: `linear-gradient(170deg, ${T.cream2} 0%, ${T.mist} 100%)`,
+      padding: '120px clamp(28px,6vw,96px)',
+      borderTop: `1px solid rgba(44,18,4,0.08)`,
+    }}>
+      <div style={{ maxWidth: 1360, margin: '0 auto' }}>
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24, marginBottom: 56 }}>
+          <div style={{ maxWidth: 560 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
+              <div style={{ width: 40, height: 2, background: T.emerald, borderRadius: 2 }} />
+              <span style={{ fontFamily: '"Inter",sans-serif', fontSize: 11, letterSpacing: '0.4em', textTransform: 'uppercase', color: T.bronze, fontWeight: 700 }}>Plan Your Trip</span>
+            </div>
+            <h2 style={{ fontFamily: '"Fraunces",serif', fontWeight: 500, fontSize: 'clamp(2.3rem,4.5vw,4rem)', lineHeight: 1.06, color: T.mahogany, margin: 0 }}>
+              Build your <span style={{ fontStyle: 'italic', color: T.emerald }}>India itinerary</span>
+            </h2>
           </div>
-          <h2
+          {ready && !submitted && (
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ fontFamily: '"Inter",sans-serif', fontSize: 13, color: T.emerald, fontWeight: 600 }}>
+              ✓ {duration} days · {selVibe} · {selBudget} · {selPace}
+            </motion.p>
+          )}
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, alignItems: 'start' }}>
+
+          {/* ── LEFT: MINI CALENDAR ── */}
+          <div style={{
+            background: '#FFFFFF', borderRadius: 4,
+            border: `1px solid rgba(44,18,4,0.1)`,
+            boxShadow: '0 4px 24px rgba(44,18,4,0.07)',
+            overflow: 'hidden',
+          }}>
+            {/* Calendar header */}
+            <div style={{ background: T.emerald, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <button onClick={() => { const d = new Date(calYear, calMonth - 1); setCalYear(d.getFullYear()); setCalMonth(d.getMonth()); setStartDay(null); setEndDay(null) }}
+                style={{ background: 'none', border: `1px solid rgba(253,246,236,0.3)`, borderRadius: 2, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: T.cream }}>
+                <FiChevronLeft size={14} />
+              </button>
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ fontFamily: '"Fraunces",serif', fontSize: 18, color: T.cream, margin: 0 }}>{MONTH_NAMES[calMonth]}</p>
+                <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 11, letterSpacing: '0.15em', color: 'rgba(253,246,236,0.6)', margin: '2px 0 0', fontWeight: 600 }}>{calYear}</p>
+              </div>
+              <button onClick={() => { const d = new Date(calYear, calMonth + 1); setCalYear(d.getFullYear()); setCalMonth(d.getMonth()); setStartDay(null); setEndDay(null) }}
+                style={{ background: 'none', border: `1px solid rgba(253,246,236,0.3)`, borderRadius: 2, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: T.cream }}>
+                <FiChevronRight size={14} />
+              </button>
+            </div>
+
+            <div style={{ padding: '20px 22px 24px' }}>
+              {/* Day headers */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2, marginBottom: 8 }}>
+                {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
+                  <div key={d} style={{ textAlign: 'center', fontFamily: '"Inter",sans-serif', fontSize: 10, letterSpacing: '0.08em', fontWeight: 700, color: `rgba(44,18,4,0.35)`, padding: '4px 0' }}>{d}</div>
+                ))}
+              </div>
+              {/* Day cells */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 3 }}>
+                {Array.from({ length: firstDow }).map((_, i) => <div key={`e${i}`} />)}
+                {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(d => {
+                  const start = isStart(d)
+                  const end = isEnd(d)
+                  const range = inRange(d)
+                  const isPast = new Date(calYear, calMonth, d) < new Date(today.getFullYear(), today.getMonth(), today.getDate())
+                  return (
+                    <motion.button key={d}
+                      whileHover={!isPast ? { scale: 1.12 } : {}}
+                      whileTap={!isPast ? { scale: 0.95 } : {}}
+                      onClick={() => !isPast && handleDayClick(d)}
+                      style={{
+                        aspectRatio: '1', borderRadius: 4,
+                        border: 'none', cursor: isPast ? 'not-allowed' : 'pointer',
+                        fontFamily: '"Inter",sans-serif', fontSize: 12, fontWeight: 600,
+                        background: start || end ? T.emerald : range ? `${T.emerald}18` : 'transparent',
+                        color: start || end ? T.cream : isPast ? 'rgba(44,18,4,0.2)' : T.mahogany,
+                        outline: range ? `1px solid ${T.emerald}30` : 'none',
+                        transition: 'all 0.18s',
+                      }}
+                    >{d}</motion.button>
+                  )
+                })}
+              </div>
+
+              {/* Duration badge */}
+              <AnimatePresence>
+                {duration && (
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                    style={{ marginTop: 20, padding: '13px 18px', background: `${T.saffron}15`, border: `1px solid ${T.saffron}40`, borderRadius: 3, display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <FiCalendar size={14} color={T.amber} />
+                    <span style={{ fontFamily: '"Inter",sans-serif', fontSize: 13, fontWeight: 600, color: T.amber }}>
+                      {duration} {duration === 1 ? 'day' : 'days'} selected
+                    </span>
+                    <button onClick={() => { setStartDay(null); setEndDay(null) }}
+                      style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontFamily: '"Inter",sans-serif', fontSize: 11, color: `rgba(44,18,4,0.35)`, textDecoration: 'underline' }}>
+                      Clear
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* ── RIGHT: PREFERENCE FILTERS ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+            {/* Vibe filter */}
+            <FilterGroup
+              label="Travel Vibe"
+              options={VIBES}
+              selected={selVibe}
+              onSelect={setSelVibe}
+              color={T.amber}
+            />
+
+            {/* Budget filter */}
+            <FilterGroup
+              label="Budget Range"
+              options={BUDGETS}
+              selected={selBudget}
+              onSelect={setSelBudget}
+              color={T.emerald}
+            />
+
+            {/* Pace filter */}
+            <FilterGroup
+              label="Travel Pace"
+              options={PACES}
+              selected={selPace}
+              onSelect={setSelPace}
+              color={T.bronze}
+            />
+
+            {/* CTA */}
+            <AnimatePresence>
+              {!submitted ? (
+                <motion.button
+                  key="cta"
+                  onClick={() => ready && setSubmitted(true)}
+                  whileHover={ready ? { y: -2 } : {}}
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                  style={{
+                    padding: '18px', borderRadius: 2, border: 'none', cursor: ready ? 'pointer' : 'not-allowed',
+                    fontFamily: '"Inter",sans-serif', fontSize: 13,
+                    letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 700,
+                    background: ready
+                      ? `linear-gradient(135deg, ${T.emerald}, #0D7A52)`
+                      : `rgba(44,18,4,0.08)`,
+                    color: ready ? T.cream : `rgba(44,18,4,0.3)`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+                    transition: 'all 0.3s',
+                    boxShadow: ready ? `0 12px 32px rgba(10,92,62,0.28)` : 'none',
+                  }}
+                >
+                  {ready ? <><FiArrowRight size={16} /> Get My Itinerary</> : 'Complete all preferences above'}
+                </motion.button>
+              ) : (
+                <motion.div key="success"
+                  initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                  style={{ padding: '24px', borderRadius: 3, background: `${T.emerald}12`, border: `1px solid ${T.emerald}30`, textAlign: 'center' }}
+                >
+                  <p style={{ fontFamily: '"Fraunces",serif', fontSize: 20, color: T.emerald, margin: '0 0 8px', fontStyle: 'italic' }}>Your preferences are saved!</p>
+                  <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 13, color: `rgba(44,18,4,0.55)`, margin: '0 0 16px' }}>Our travel curators will reach out within 24 hours.</p>
+                  <Link to="/contact" style={{ fontFamily: '"Inter",sans-serif', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700, color: T.emerald, textDecoration: 'none', borderBottom: `1.5px solid ${T.emerald}`, paddingBottom: 2 }}>
+                    Talk to a human instead →
+                  </Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function FilterGroup({ label, options, selected, onSelect, color }: {
+  label: string; options: string[]; selected: string | null; onSelect: (v: string | null) => void; color: string
+}) {
+  return (
+    <div style={{ background: '#FFFFFF', borderRadius: 4, border: `1px solid rgba(44,18,4,0.1)`, padding: '24px', boxShadow: '0 2px 12px rgba(44,18,4,0.05)' }}>
+      <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 10, letterSpacing: '0.28em', textTransform: 'uppercase', color: T.bronze, fontWeight: 700, margin: '0 0 14px' }}>{label}</p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {options.map(opt => (
+          <motion.button key={opt}
+            onClick={() => onSelect(selected === opt ? null : opt)}
+            whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}
             style={{
-              fontFamily: '"Fraunces",serif',
-              fontWeight: 480,
-              fontSize: 'clamp(2.3rem,4.4vw,3.8rem)',
-              lineHeight: 1.08,
-              color: '#1F1B16',
-              margin: 0,
+              padding: '9px 16px', borderRadius: 100, cursor: 'pointer',
+              fontFamily: '"Inter",sans-serif', fontSize: 12, fontWeight: 500,
+              background: selected === opt ? color : 'transparent',
+              border: `1.5px solid ${selected === opt ? color : 'rgba(44,18,4,0.16)'}`,
+              color: selected === opt ? T.cream : T.mahogany,
+              transition: 'all 0.22s',
+              boxShadow: selected === opt ? `0 4px 16px ${color}30` : 'none',
             }}
-          >
-            Best time to <span style={{ fontStyle: 'italic', color: '#0F6B4C' }}>visit India</span>
+          >{opt}</motion.button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SEASON HEATMAP — Best Time to Visit
+// ─────────────────────────────────────────────────────────────────────────────
+function SeasonHeatmap() {
+  const [activeMonth, setActiveMonth] = useState<number | null>(null)
+  const peakNow = activeMonth !== null ? SEASON_DATA.filter(r => r.months[activeMonth] === 1).map(r => r.region) : []
+  const goodNow = activeMonth !== null ? SEASON_DATA.filter(r => r.months[activeMonth] === 2).map(r => r.region) : []
+
+  return (
+    <section style={{ background: `linear-gradient(180deg, ${T.cream} 0%, #EDE0C4 100%)`, padding: '120px clamp(28px,6vw,96px)', borderTop: `1px solid rgba(44,18,4,0.08)` }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        {/* Header */}
+        <div style={{ marginBottom: 52 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
+            <div style={{ width: 40, height: 2, background: T.saffron, borderRadius: 2 }} />
+            <span style={{ fontFamily: '"Inter",sans-serif', fontSize: 11, letterSpacing: '0.4em', textTransform: 'uppercase', color: T.bronze, fontWeight: 700 }}>Season Guide</span>
+          </div>
+          <h2 style={{ fontFamily: '"Fraunces",serif', fontWeight: 500, fontSize: 'clamp(2.3rem,4.5vw,4rem)', lineHeight: 1.06, color: T.mahogany, margin: 0 }}>
+            When to come, <span style={{ fontStyle: 'italic', color: T.amber }}>where to go</span>
           </h2>
-          <p
-            style={{
-              fontFamily: '"Inter",sans-serif',
-              fontSize: 16,
-              color: 'rgba(31,27,22,0.6)',
-              marginTop: 18,
-              maxWidth: 540,
-              lineHeight: 1.8,
-            }}
-          >
-            India's geography is vast enough that every month is perfect somewhere.
-            Tap a month to see where.
+          <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 16, color: `rgba(44,18,4,0.58)`, lineHeight: 1.8, marginTop: 18, maxWidth: 520 }}>
+            India's geography means every month is perfect somewhere. Tap any month to discover what's open.
           </p>
         </div>
 
-        {/* Month buttons */}
+        {/* Month pills */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 28, flexWrap: 'wrap' }}>
-          {MONTHS.map((m, i) => {
+          {MONTHS_FULL.map((m, i) => {
             const isActive = activeMonth === i
-            const peakCount = SEASON_DATA.filter((r) => r.months[i] === 1).length
+            const peakCount = SEASON_DATA.filter(r => r.months[i] === 1).length
             return (
-              <button
-                key={m}
+              <motion.button key={m}
                 onClick={() => setActiveMonth(isActive ? null : i)}
+                whileHover={{ y: -2 }} whileTap={{ scale: 0.96 }}
                 style={{
-                  position: 'relative',
-                  padding: '10px 17px',
-                  borderRadius: 2,
-                  fontFamily: '"Inter",sans-serif',
-                  fontSize: 11,
-                  letterSpacing: '0.08em',
-                  background: isActive ? '#0F6B4C' : '#FDFBF7',
-                  border: `1px solid ${isActive ? '#0F6B4C' : 'rgba(31,27,22,0.14)'}`,
-                  color: isActive ? '#FDFBF7' : '#1F1B16',
-                  cursor: 'pointer',
+                  position: 'relative', padding: '10px 18px', borderRadius: 2, cursor: 'pointer',
+                  fontFamily: '"Inter",sans-serif', fontSize: 11, fontWeight: isActive ? 700 : 400,
+                  background: isActive ? T.amber : '#FDFBF7',
+                  border: `1px solid ${isActive ? T.amber : 'rgba(44,18,4,0.14)'}`,
+                  color: isActive ? T.cream : T.mahogany,
                   transition: 'all 0.2s',
-                  fontWeight: isActive ? 600 : 400,
                 }}
               >
                 {m}
                 {peakCount > 0 && (
-                  <span
-                    style={{
-                      position: 'absolute',
-                      top: -6,
-                      right: -6,
-                      width: 16,
-                      height: 16,
-                      background: '#C8722C',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontFamily: '"JetBrains Mono",monospace',
-                      fontSize: 8,
-                      color: '#FDFBF7',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {peakCount}
-                  </span>
+                  <span style={{
+                    position: 'absolute', top: -7, right: -7,
+                    width: 16, height: 16, background: T.emerald, borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: '"Inter",sans-serif', fontSize: 8, color: T.cream, fontWeight: 700,
+                  }}>{peakCount}</span>
                 )}
-              </button>
+              </motion.button>
             )
           })}
           {activeMonth !== null && (
-            <button
-              onClick={() => setActiveMonth(null)}
-              style={{
-                padding: '10px 14px',
-                borderRadius: 2,
-                fontFamily: '"Inter",sans-serif',
-                fontSize: 10,
-                background: 'transparent',
-                border: '1px solid rgba(31,27,22,0.16)',
-                color: 'rgba(31,27,22,0.45)',
-                cursor: 'pointer',
-                letterSpacing: '0.05em',
-              }}
-            >
-              Clear
-            </button>
+            <button onClick={() => setActiveMonth(null)} style={{ padding: '10px 14px', borderRadius: 2, fontFamily: '"Inter",sans-serif', fontSize: 10, background: 'transparent', border: `1px solid rgba(44,18,4,0.16)`, color: `rgba(44,18,4,0.42)`, cursor: 'pointer' }}>Clear</button>
           )}
         </div>
 
+        {/* Highlight bar */}
         <AnimatePresence>
           {activeMonth !== null && (
-            <motion.div
-              key={activeMonth}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              style={{
-                marginBottom: 28,
-                padding: '18px 22px',
-                background: '#FDFBF7',
-                border: '1px solid rgba(200,114,44,0.28)',
-                borderRadius: 4,
-                display: 'flex',
-                gap: 36,
-                flexWrap: 'wrap',
-                alignItems: 'center',
-              }}
+            <motion.div key={activeMonth}
+              initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              style={{ marginBottom: 28, padding: '18px 24px', background: '#FDFBF7', border: `1px solid ${T.amber}40`, borderRadius: 4, display: 'flex', gap: 36, flexWrap: 'wrap' }}
             >
               <div>
-                <p
-                  style={{
-                    fontFamily: '"Inter",sans-serif',
-                    fontSize: 10,
-                    letterSpacing: '0.2em',
-                    textTransform: 'uppercase',
-                    color: 'rgba(31,27,22,0.4)',
-                    margin: '0 0 4px',
-                  }}
-                >
-                  Peak in {MONTHS[activeMonth]}
-                </p>
-                <p
-                  style={{
-                    fontFamily: '"Fraunces",serif',
-                    fontSize: 19,
-                    color: '#0F6B4C',
-                    margin: 0,
-                  }}
-                >
-                  {peakThisMonth.length > 0 ? peakThisMonth.join(' · ') : 'No peak regions this month'}
-                </p>
+                <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: `rgba(44,18,4,0.38)`, margin: '0 0 4px' }}>Peak in {MONTHS_FULL[activeMonth]}</p>
+                <p style={{ fontFamily: '"Fraunces",serif', fontSize: 19, color: T.emerald, margin: 0, fontStyle: 'italic' }}>{peakNow.length > 0 ? peakNow.join(' · ') : 'No peak regions this month'}</p>
               </div>
-              {goodThisMonth.length > 0 && (
+              {goodNow.length > 0 && (
                 <div>
-                  <p
-                    style={{
-                      fontFamily: '"Inter",sans-serif',
-                      fontSize: 10,
-                      letterSpacing: '0.2em',
-                      textTransform: 'uppercase',
-                      color: 'rgba(31,27,22,0.4)',
-                      margin: '0 0 4px',
-                    }}
-                  >
-                    Also good
-                  </p>
-                  <p
-                    style={{
-                      fontFamily: '"Fraunces",serif',
-                      fontSize: 16,
-                      color: '#C8722C',
-                      margin: 0,
-                    }}
-                  >
-                    {goodThisMonth.join(' · ')}
-                  </p>
+                  <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: `rgba(44,18,4,0.38)`, margin: '0 0 4px' }}>Also good</p>
+                  <p style={{ fontFamily: '"Fraunces",serif', fontSize: 17, color: T.amber, margin: 0, fontStyle: 'italic' }}>{goodNow.join(' · ')}</p>
                 </div>
               )}
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Season grid */}
-        <div style={{ overflowX: 'auto', marginBottom: 36 }}>
+        {/* Heatmap grid */}
+        <div style={{ overflowX: 'auto', marginBottom: 32 }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 700 }}>
             <thead>
               <tr>
-                <th
-                  style={{
-                    fontFamily: '"Inter",sans-serif',
-                    fontSize: 10,
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                    color: 'rgba(31,27,22,0.4)',
-                    textAlign: 'left',
-                    padding: '0 12px 18px 0',
-                    fontWeight: 500,
-                    width: 200,
-                  }}
-                >
-                  Region
-                </th>
-                {MONTHS.map((m, i) => (
-                  <th
-                    key={m}
-                    onClick={() => setActiveMonth(activeMonth === i ? null : i)}
-                    style={{
-                      fontFamily: '"Inter",sans-serif',
-                      fontSize: 11,
-                      color: activeMonth === i ? '#C8722C' : 'rgba(31,27,22,0.5)',
-                      padding: '0 0 18px',
-                      textAlign: 'center',
-                      fontWeight: activeMonth === i ? 700 : 400,
-                      cursor: 'pointer',
-                      width: 42,
-                    }}
-                  >
-                    {m}
-                  </th>
+                <th style={{ fontFamily: '"Inter",sans-serif', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: `rgba(44,18,4,0.38)`, textAlign: 'left', padding: '0 14px 18px 0', fontWeight: 500, width: 210 }}>Region</th>
+                {MONTHS_SHORT.map((m, i) => (
+                  <th key={m} onClick={() => setActiveMonth(activeMonth === i ? null : i)} style={{ fontFamily: '"Inter",sans-serif', fontSize: 11, color: activeMonth === i ? T.amber : `rgba(44,18,4,0.5)`, padding: '0 0 18px', textAlign: 'center', fontWeight: activeMonth === i ? 700 : 400, cursor: 'pointer', width: 44 }}>{m}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {SEASON_DATA.map((row) => (
-                <tr key={row.region} style={{ borderTop: '1px solid rgba(31,27,22,0.08)' }}>
-                  <td style={{ padding: '11px 12px 11px 0' }}>
+              {SEASON_DATA.map(row => (
+                <tr key={row.region} style={{ borderTop: `1px solid rgba(44,18,4,0.07)` }}>
+                  <td style={{ padding: '10px 14px 10px 0' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                       <span style={{ fontSize: 16 }}>{row.icon}</span>
-                      <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 12, color: '#1F1B16', margin: 0 }}>
-                        {row.region}
-                      </p>
+                      <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 12, color: T.mahogany, margin: 0 }}>{row.region}</p>
                     </div>
                   </td>
                   {row.months.map((rating, mi) => {
                     const sc = SEASON_COLORS[rating as keyof typeof SEASON_COLORS]
                     return (
-                      <td key={mi} style={{ padding: '11px 2px', textAlign: 'center' }}>
-                        <div
-                          title={`${row.region} in ${MONTHS[mi]}: ${sc.label}`}
-                          style={{
-                            width: 26,
-                            height: 26,
-                            borderRadius: 3,
-                            margin: '0 auto',
-                            background: sc.bg,
-                            border: activeMonth === mi ? '2px solid rgba(31,27,22,0.35)' : '2px solid transparent',
-                            transition: 'border 0.2s',
-                          }}
+                      <td key={mi} style={{ padding: '10px 3px', textAlign: 'center' }}>
+                        <motion.div whileHover={{ scale: 1.2 }}
+                          title={`${row.region} in ${MONTHS_FULL[mi]}: ${sc.label}`}
+                          style={{ width: 28, height: 28, borderRadius: 4, margin: '0 auto', background: sc.bg, border: activeMonth === mi ? `2px solid rgba(44,18,4,0.4)` : '2px solid transparent', transition: 'border 0.2s', cursor: 'default' }}
                         />
                       </td>
                     )
@@ -1207,23 +1098,11 @@ function BestTimeSection() {
 
         {/* Legend */}
         <div style={{ display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap' }}>
-          <span
-            style={{
-              fontFamily: '"Inter",sans-serif',
-              fontSize: 10,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              color: 'rgba(31,27,22,0.4)',
-            }}
-          >
-            Legend
-          </span>
-          {Object.entries(SEASON_COLORS).map(([k, v]) => (
-            <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-              <div style={{ width: 14, height: 14, borderRadius: 3, background: v.bg, border: '1px solid rgba(31,27,22,0.1)' }} />
-              <span style={{ fontFamily: '"Inter",sans-serif', fontSize: 11.5, color: 'rgba(31,27,22,0.55)' }}>
-                {v.label}
-              </span>
+          <span style={{ fontFamily: '"Inter",sans-serif', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: `rgba(44,18,4,0.38)` }}>Legend</span>
+          {Object.entries(SEASON_COLORS).map(([, v]) => (
+            <div key={v.label} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+              <div style={{ width: 14, height: 14, borderRadius: 3, background: v.bg, border: `1px solid rgba(44,18,4,0.12)` }} />
+              <span style={{ fontFamily: '"Inter",sans-serif', fontSize: 11.5, color: `rgba(44,18,4,0.55)` }}>{v.label}</span>
             </div>
           ))}
         </div>
@@ -1233,97 +1112,60 @@ function BestTimeSection() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FINAL CTA — warm, welcoming, no fake address grid
+// FINAL CTA
 // ─────────────────────────────────────────────────────────────────────────────
 function FinalCTA() {
   return (
-    <section
-      style={{
-        position: 'relative',
-        padding: '130px clamp(28px,6vw,96px)',
-        background: '#1F1B16',
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1600&q=80')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          opacity: 0.1,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 40%, rgba(200,114,44,0.1) 0%, transparent 65%)',
-        }}
-      />
+    <section style={{
+      position: 'relative', padding: '130px clamp(28px,6vw,96px)',
+      background: T.mahogany, overflow: 'hidden',
+    }}>
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: "url('https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1600&q=80')", backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.1 }} />
+      <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(ellipse at 50% 40%, ${T.amber}14 0%, transparent 65%)` }} />
+      {/* Tricolour strip */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, display: 'flex' }}>
+        <div style={{ flex: 1, background: '#FF9933' }} />
+        <div style={{ flex: 1, background: 'rgba(255,255,255,0.85)' }} />
+        <div style={{ flex: 1, background: '#138808' }} />
+      </div>
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: 700, margin: '0 auto', textAlign: 'center' }}>
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-        >
-          <GiCompass style={{ color: '#C8722C', fontSize: 36, marginBottom: 24 }} />
-          <h2
-            style={{
-              fontFamily: '"Fraunces",serif',
-              fontWeight: 480,
-              fontSize: 'clamp(2.4rem,5.5vw,4.6rem)',
-              lineHeight: 1.08,
-              color: '#FDFBF7',
-              margin: '0 0 22px',
-            }}
-          >
-            Come and see it <span style={{ fontStyle: 'italic', color: '#C8722C' }}>for yourself.</span>
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
+        <motion.div initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
+          <GiCompass style={{ color: T.saffron, fontSize: 38, marginBottom: 24 }} />
+          <h2 style={{ fontFamily: '"Fraunces",serif', fontWeight: 500, fontSize: 'clamp(2.5rem,5.5vw,4.8rem)', lineHeight: 1.07, color: T.cream, margin: '0 0 22px' }}>
+            Come and see it <span style={{ fontStyle: 'italic', color: T.saffron }}>for yourself.</span>
           </h2>
-          <p
-            style={{
-              fontFamily: '"Inter",sans-serif',
-              fontSize: 17,
-              lineHeight: 1.85,
-              color: 'rgba(253,251,247,0.6)',
-              maxWidth: 480,
-              margin: '0 auto 44px',
-            }}
-          >
-            Tell us a little about how you like to travel, and we'll plan a route
-            around it — real places, honest pacing, no tourist traps.
+          <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 17, lineHeight: 1.85, color: `rgba(253,246,236,0.58)`, maxWidth: 500, margin: '0 auto 48px' }}>
+            Tell us how you travel and we'll build an itinerary around it — real places, honest pacing, guides who've spent their whole lives in that single valley.
           </p>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link
-              to="/destinations"
-              style={{
-                background: '#0F6B4C',
-                color: '#FDFBF7',
-                fontFamily: '"Inter",sans-serif',
-                fontSize: 12,
-                letterSpacing: '0.18em',
-                textTransform: 'uppercase',
-                fontWeight: 600,
-                padding: '17px 38px',
-                borderRadius: 2,
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 12,
-                transition: 'transform 0.25s ease',
-              }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.transform = 'none')}
+            <Link to="/destinations" style={{
+              background: T.emerald, color: T.cream,
+              fontFamily: '"Inter",sans-serif', fontSize: 12,
+              letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700,
+              padding: '18px 40px', borderRadius: 2, textDecoration: 'none',
+              display: 'inline-flex', alignItems: 'center', gap: 12,
+              boxShadow: `0 12px 32px rgba(10,92,62,0.36)`,
+              transition: 'transform 0.25s ease',
+            }}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.transform = ''}
             >
               Explore Destinations <FiArrowRight size={14} />
             </Link>
-            <UnderlineLink to="/tours" color="#FDFBF7" size={12}>
-              See All Itineraries
-            </UnderlineLink>
+            <Link to="/contact" style={{
+              border: `1.5px solid rgba(253,246,236,0.25)`, color: `rgba(253,246,236,0.7)`,
+              fontFamily: '"Inter",sans-serif', fontSize: 12,
+              letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 600,
+              padding: '18px 40px', borderRadius: 2, textDecoration: 'none',
+              display: 'inline-flex', alignItems: 'center', gap: 12,
+              transition: 'border-color 0.25s, color 0.25s',
+            }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = T.saffron; (e.currentTarget as HTMLElement).style.color = T.saffron }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(253,246,236,0.25)'; (e.currentTarget as HTMLElement).style.color = 'rgba(253,246,236,0.7)' }}
+            >
+              Plan a custom trip
+            </Link>
           </div>
         </motion.div>
       </div>
@@ -1332,171 +1174,70 @@ function FinalCTA() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FOOTER — minimalist: wordmark, one gold email link, copyright. Nothing else.
+// FOOTER
 // ─────────────────────────────────────────────────────────────────────────────
 function Footer() {
   return (
-    <footer
-      style={{
-        background: '#FDFBF7',
-        borderTop: '1px solid rgba(31,27,22,0.1)',
-        padding: '56px clamp(28px,6vw,96px)',
-        textAlign: 'center',
-      }}
-    >
-      <p
-        style={{
-          fontFamily: '"Fraunces",serif',
-          fontStyle: 'italic',
-          fontSize: 22,
-          color: '#1F1B16',
-          margin: '0 0 16px',
-          letterSpacing: '0.01em',
-        }}
-      >
-        Pavilion
-      </p>
-      <a
-        href="mailto:explore@pavilion.in"
-        style={{
-          fontFamily: '"Inter",sans-serif',
-          fontSize: 13,
-          letterSpacing: '0.06em',
-          color: '#B8924A',
-          textDecoration: 'none',
-          borderBottom: '1px solid rgba(184,146,74,0.4)',
-          paddingBottom: 2,
-        }}
-      >
+    <footer style={{
+      background: T.mist, borderTop: `1px solid rgba(44,18,4,0.1)`,
+      padding: '56px clamp(28px,6vw,96px)', textAlign: 'center',
+    }}>
+      <p style={{ fontFamily: '"Fraunces",serif', fontStyle: 'italic', fontSize: 24, color: T.mahogany, margin: '0 0 14px' }}>Pavilion</p>
+      <a href="mailto:explore@pavilion.in" style={{ fontFamily: '"Inter",sans-serif', fontSize: 13, letterSpacing: '0.06em', color: T.bronze, textDecoration: 'none', borderBottom: `1px solid rgba(139,94,42,0.4)`, paddingBottom: 2 }}>
         explore@pavilion.in
       </a>
-      <p
-        style={{
-          fontFamily: '"Inter",sans-serif',
-          fontSize: 11,
-          color: 'rgba(31,27,22,0.4)',
-          margin: '22px 0 0',
-          letterSpacing: '0.03em',
-        }}
-      >
-        © {new Date().getFullYear()} Pavilion. A travel journal of India.
+      <p style={{ fontFamily: '"Inter",sans-serif', fontSize: 11, color: `rgba(44,18,4,0.38)`, margin: '22px 0 0', letterSpacing: '0.03em' }}>
+        © {new Date().getFullYear()} Pavilion. A travel journal of India. 🇮🇳
       </p>
     </footer>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MAIN PAGE
+// MAIN EXPORT
 // ─────────────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const [featuredTours, setFeaturedTours] = useState<any[]>([])
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/tours/featured')
-      .then((r) => r.json())
-      .then((data) => {
-        const tours = data.data?.tours || []
-        if (tours.length > 0) setFeaturedTours(tours.slice(0, 3))
-      })
-      .catch(() => {
-        // silent — MOCK_TOURS fallback handles this
-      })
+    // AbortController ensures we don't call setState on an unmounted component
+    const controller = new AbortController()
+    const { signal } = controller
+
+    fetch('http://localhost:5000/api/tours/featured', { signal })
+      .then(r => r.json())
+      .then(data => { if (data.data?.tours?.length) setFeaturedTours(data.data.tours.slice(0, 3)) })
+      .catch(err => { if (err.name !== 'AbortError') console.warn('Featured tours fetch failed:', err) })
+
+    return () => controller.abort()
   }, [])
 
-  const toursToShow = featuredTours.length > 0 ? featuredTours : MOCK_TOURS
+  // Stable reference — only recomputes when featuredTours changes
+  const toursToShow = useMemo(
+    () => featuredTours.length > 0 ? featuredTours : MOCK_TOURS,
+    [featuredTours]
+  )
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: '#FDFBF7',
-        color: '#1F1B16',
-        fontFamily: '"Inter",sans-serif',
-        overflowX: 'hidden',
-      }}
-    >
+    <div style={{ minHeight: '100vh', background: T.cream, color: T.mahogany, fontFamily: '"Inter",sans-serif', overflowX: 'hidden' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,480;0,9..144,560;1,9..144,400;1,9..144,480&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,480;0,9..144,560;1,9..144,400;1,9..144,480&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
         *,*::before,*::after { box-sizing:border-box; }
-        body { overflow-x:hidden; background:#FDFBF7; }
+        body { overflow-x:hidden; background:${T.cream}; }
         ::-webkit-scrollbar { width:4px; }
-        ::-webkit-scrollbar-track { background:#FDFBF7; }
-        ::-webkit-scrollbar-thumb { background:rgba(200,114,44,0.4); border-radius:2px; }
-        a { -webkit-tap-highlight-color: transparent; }
-        button:focus-visible, a:focus-visible { outline: 2px solid #C8722C; outline-offset: 3px; }
+        ::-webkit-scrollbar-track { background:${T.cream}; }
+        ::-webkit-scrollbar-thumb { background:rgba(200,83,26,0.35); border-radius:2px; }
+        button:focus-visible, a:focus-visible { outline:2px solid ${T.amber}; outline-offset:3px; }
         @media (prefers-reduced-motion: reduce) {
-          * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+          *{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;}
         }
       `}</style>
 
       <HeroSection />
       <JourneyExplorer />
-
-      {/* ── FEATURED ITINERARIES ── */}
-      <section
-        style={{
-          position: 'relative',
-          padding: '120px clamp(28px,6vw,96px)',
-          background: '#FDFBF7',
-          borderTop: '1px solid rgba(31,27,22,0.08)',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'space-between',
-            marginBottom: 52,
-            flexWrap: 'wrap',
-            gap: 20,
-          }}
-        >
-          <div style={{ maxWidth: 560 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-              <div style={{ width: 40, height: 1, background: '#C8722C' }} />
-              <span
-                style={{
-                  fontFamily: '"Inter",sans-serif',
-                  fontSize: 11,
-                  letterSpacing: '0.36em',
-                  textTransform: 'uppercase',
-                  color: '#8A6A3D',
-                  fontWeight: 600,
-                }}
-              >
-                Handpicked Itineraries
-              </span>
-            </div>
-            <h2
-              style={{
-                fontFamily: '"Fraunces",serif',
-                fontWeight: 480,
-                fontSize: 'clamp(2.3rem,4.4vw,3.8rem)',
-                lineHeight: 1.08,
-                color: '#1F1B16',
-                margin: 0,
-              }}
-            >
-              From the <span style={{ fontStyle: 'italic', color: '#C8722C' }}>field journal</span>
-            </h2>
-          </div>
-          <UnderlineLink to="/tours">All Itineraries</UnderlineLink>
-        </div>
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))',
-            gap: 26,
-          }}
-        >
-          {toursToShow.map((tour: any, i: number) => (
-            <ItineraryCard key={tour._id} tour={tour} index={i} />
-          ))}
-        </div>
-      </section>
-
-      <BestTimeSection />
+      <PersonaFinder />
+      <TripBuilder />
+      <SeasonHeatmap />
       <FinalCTA />
       <Footer />
     </div>

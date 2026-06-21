@@ -166,9 +166,10 @@ const bookingSchema = new mongoose.Schema(
 );
 
 // ── Indexes ────────────────────────────────────────────────────────
+// NOTE: bookingReference already has a unique index from `unique: true` on
+// the field definition. Adding schema.index() on top would be a duplicate.
 bookingSchema.index({ user: 1, status: 1 });
 bookingSchema.index({ travelDate: 1 });
-bookingSchema.index({ bookingReference: 1 });
 
 const Booking = mongoose.model('Booking', bookingSchema);
 export default Booking;
