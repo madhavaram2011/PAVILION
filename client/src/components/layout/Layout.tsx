@@ -14,11 +14,18 @@ export default function Layout() {
   const isAuthPage = authRoutes.includes(pathname)
 
   return (
-    <div className="min-h-screen flex flex-col">
+    // 🏛️ Force-injecting our unified Luxury Journal Palette right at the root layout wrapper
+    <div className="min-h-screen flex flex-col bg-[#fdfbf7] text-[#1c1917] font-sans antialiased">
+
       {!isAuthPage && <Navbar />}
-      <main className="flex-1">
+
+      {/* Ensuring the main dynamic slot acts as a strict light background mask.
+        This forces child routes like BookingPage or TourDetailPage to sit on top of our ivory cream base.
+      */}
+      <main className="flex-1 bg-[#fdfbf7]">
         <Outlet />
       </main>
+
       {!isAuthPage && <Footer />}
     </div>
   )

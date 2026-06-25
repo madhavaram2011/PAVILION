@@ -104,7 +104,7 @@ export default function TourDetailPage() {
   useEffect(() => { const onScroll = () => setScrollY(window.scrollY); window.addEventListener('scroll', onScroll, { passive: true }); return () => window.removeEventListener('scroll', onScroll) }, [])
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff' }}>
+      <div style={{ minHeight: '100vh', background: '#fdfbf7', color: '#fff' }}>
         {/* Hero skeleton */}
         <Skeleton height='95vh' borderRadius={0} />
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '80px clamp(20px,6vw,60px)' }}>
@@ -132,7 +132,7 @@ export default function TourDetailPage() {
 
   if (error || !tour) {
     return (
-      <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', background: '#fdfbf7', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center', padding: 60 }}>
           <p style={{ marginBottom: 24, color: '#fff' }}>Failed to load. Please try again.</p>
           <button onClick={() => window.location.reload()} style={{ padding: '12px 24px', background: '#f97316', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
@@ -146,8 +146,8 @@ export default function TourDetailPage() {
   const dc = DIFF_COLOR[tour.difficulty] || '#f97316'
 
   return (
-    <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff', fontFamily: '"Crimson Text",Georgia,serif', cursor: 'none' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Space+Mono&family=Bebas+Neue&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');*,*::before,*::after{box-sizing:border-box;cursor:none!important;}body{overflow-x:hidden;background:#06040f;}::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:#06040f;}::-webkit-scrollbar-thumb{background:rgba(249,115,22,0.4);border-radius:2px;}@keyframes spinSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+    <div style={{ minHeight: '100vh', background: '#fdfbf7', color: '#fff', fontFamily: '"Crimson Text",Georgia,serif', cursor: 'none' }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Space+Mono&family=Bebas+Neue&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');*,*::before,*::after{box-sizing:border-box;cursor:none!important;}body{overflow-x:hidden;background:#fdfbf7;}::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:#fdfbf7;}::-webkit-scrollbar-thumb{background:rgba(249,115,22,0.4);border-radius:2px;}@keyframes spinSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
       <StarCanvas /><AirplaneCursor />
 
       <motion.div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 2, zIndex: 9999, background: 'linear-gradient(90deg,#f97316,#fbbf24,#f97316)', transformOrigin: '0%', scaleX: scrollY / (document.documentElement.scrollHeight - window.innerHeight || 1) }} />
@@ -164,7 +164,7 @@ export default function TourDetailPage() {
       {/* HERO */}
       <div style={{ position: 'relative', height: '95vh', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${tour.coverImage || tour.cover || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600'})`, backgroundSize: 'cover', backgroundPosition: 'center', transform: `translateY(${scrollY * 0.35}px)`, filter: 'brightness(0.25) saturate(0.55)' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #06040f 0%, rgba(6,4,15,0.35) 50%, rgba(6,4,15,0.1) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #fdfbf7 0%, rgba(6,4,15,0.35) 50%, rgba(6,4,15,0.1) 100%)' }} />
 
         <Link to="/tours" style={{ position: 'absolute', top: 32, left: 'clamp(20px,6vw,100px)', display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', zIndex: 10, padding: '8px 16px', background: 'rgba(6,4,15,0.6)', backdropFilter: 'blur(8px)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 2 }}>
           <FiArrowLeft size={12} color="#f97316" /><span style={{ fontFamily: '"Space Mono",monospace', fontSize: 9, letterSpacing: '0.2em', color: '#f97316', textTransform: 'uppercase' }}>Back</span>

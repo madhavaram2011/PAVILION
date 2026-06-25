@@ -20,7 +20,7 @@ const CSS = `
     left: 0;
     width: 0;
     height: 1px;
-    background: #d2af78;
+    background: #b8892a;
     transition: width 0.3s;
   }
   .pav-nav-link:hover::after,
@@ -56,9 +56,10 @@ export default function Navbar() {
         height: solid ? 62 : 76,
         padding: '0 clamp(24px,5vw,80px)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: solid ? 'rgba(10,10,10,0.96)' : 'transparent',
+        background: solid ? 'rgba(253,251,247,0.97)' : 'transparent',
         backdropFilter: solid ? 'blur(20px)' : 'none',
-        borderBottom: solid ? '1px solid rgba(210,175,120,0.08)' : 'none',
+        borderBottom: solid ? '1px solid rgba(184,137,42,0.14)' : 'none',
+        boxShadow: solid ? '0 1px 0 rgba(184,137,42,0.06)' : 'none',
         transition: 'height 0.4s ease, background 0.4s ease, border-color 0.4s ease',
       }}>
 
@@ -66,17 +67,17 @@ export default function Navbar() {
         <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
           <div style={{
             width: 32, height: 32,
-            border: '1px solid rgba(210,175,120,0.45)',
+            border: '1px solid rgba(184,137,42,0.45)',
             borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             position: 'relative', flexShrink: 0,
           }}>
-            <div style={{ position: 'absolute', inset: 5, border: '1px solid rgba(210,175,120,0.2)', borderRadius: '50%' }} />
-            <div style={{ width: 5, height: 5, background: '#d2af78', borderRadius: '50%' }} />
+            <div style={{ position: 'absolute', inset: 5, border: '1px solid rgba(184,137,42,0.2)', borderRadius: '50%' }} />
+            <div style={{ width: 5, height: 5, background: '#b8892a', borderRadius: '50%' }} />
           </div>
           <div>
-            <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, letterSpacing: '0.18em', color: '#f2ede6', lineHeight: 1 }}>PAVILION</div>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 7, letterSpacing: '0.4em', color: 'rgba(210,175,120,0.5)', marginTop: 2, textTransform: 'uppercase' }}>India</div>
+            <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, letterSpacing: '0.18em', color: '#1c1917', lineHeight: 1 }}>PAVILION</div>
+            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 7, letterSpacing: '0.4em', color: 'rgba(184,137,42,0.6)', marginTop: 2, textTransform: 'uppercase' }}>India</div>
           </div>
         </Link>
 
@@ -87,7 +88,7 @@ export default function Navbar() {
             return (
               <Link key={path} to={path}
                 className={`pav-nav-link${active ? ' active' : ''}`}
-                style={{ color: active ? '#d2af78' : 'rgba(242,237,230,0.5)' }}>
+                style={{ color: active ? '#b8892a' : 'rgba(28,25,23,0.5)' }}>
                 {label}
               </Link>
             )
@@ -100,22 +101,22 @@ export default function Navbar() {
             <>
               <Link to="/my-bookings" style={{
                 fontFamily: 'DM Mono, monospace', fontSize: 10, letterSpacing: '0.18em',
-                textTransform: 'uppercase', color: 'rgba(242,237,230,0.45)',
+                textTransform: 'uppercase', color: 'rgba(28,25,23,0.45)',
                 textDecoration: 'none', transition: 'color 0.25s',
               }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#f2ede6'}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(242,237,230,0.45)'}>
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#1c1917'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(28,25,23,0.45)'}>
                 Bookings
               </Link>
               <Link to="/profile" style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 width: 32, height: 32, borderRadius: '50%',
-                background: 'rgba(210,175,120,0.15)', border: '1px solid rgba(210,175,120,0.3)',
-                fontFamily: 'DM Mono, monospace', fontSize: 11, color: '#d2af78',
+                background: 'rgba(184,137,42,0.1)', border: '1px solid rgba(184,137,42,0.3)',
+                fontFamily: 'DM Mono, monospace', fontSize: 11, color: '#b8892a',
                 textDecoration: 'none', transition: 'background 0.25s',
               }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(210,175,120,0.25)'}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(210,175,120,0.15)'}>
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(184,137,42,0.2)'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(184,137,42,0.1)'}>
                 {(user.name ?? 'U')[0].toUpperCase()}
               </Link>
             </>
@@ -123,17 +124,17 @@ export default function Navbar() {
             <>
               <Link to="/login" style={{
                 fontFamily: 'DM Mono, monospace', fontSize: 10, letterSpacing: '0.18em',
-                textTransform: 'uppercase', color: 'rgba(242,237,230,0.45)',
+                textTransform: 'uppercase', color: 'rgba(28,25,23,0.45)',
                 textDecoration: 'none', transition: 'color 0.25s',
               }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#f2ede6'}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(242,237,230,0.45)'}>
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#1c1917'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(28,25,23,0.45)'}>
                 Sign In
               </Link>
               <Link to="/register" style={{
                 fontFamily: 'DM Mono, monospace', fontSize: 10, letterSpacing: '0.18em',
-                textTransform: 'uppercase', color: '#0a0a0a',
-                background: '#d2af78', padding: '8px 18px', borderRadius: 2,
+                textTransform: 'uppercase', color: '#fdfbf7',
+                background: '#b8892a', padding: '8px 18px', borderRadius: 2,
                 textDecoration: 'none', transition: 'opacity 0.25s', whiteSpace: 'nowrap',
               }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '0.85'}

@@ -118,7 +118,7 @@ export default function BookingPage() {
 
   if (tourLoading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#06040f', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20, cursor: 'none' }}>
+      <div style={{ minHeight: '100vh', background: '#fdfbf7', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20, cursor: 'none' }}>
         <AirplaneCursor />
         <div style={{ width: 60, height: 60, border: '2px solid rgba(249,115,22,0.3)', borderTop: '2px solid #f97316', borderRadius: '50%', animation: 'spinSlow 0.8s linear infinite' }} />
         <p style={{ color: 'rgba(255,255,255,0.5)', fontFamily: '"Space Mono",monospace' }}>Loading tour details...</p>
@@ -128,7 +128,7 @@ export default function BookingPage() {
 
   if (!tour || tourError) {
     return (
-      <div style={{ minHeight: '100vh', background: '#06040f', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20, cursor: 'none' }}>
+      <div style={{ minHeight: '100vh', background: '#fdfbf7', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20, cursor: 'none' }}>
         <AirplaneCursor />
         <GiCompass style={{ color: '#f97316', fontSize: 64 }} />
         <h2 style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 40, letterSpacing: '0.05em', color: 'rgba(255,255,255,0.4)' }}>
@@ -202,8 +202,8 @@ export default function BookingPage() {
   const bookingRef = confirmedBooking?.bookingReference || 'PV-' + Date.now().toString().slice(-6)
 
   return (
-    <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff', fontFamily: '"Crimson Text",Georgia,serif', paddingTop: 80, cursor: 'none' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');*,*::before,*::after{box-sizing:border-box;cursor:none!important;}body{overflow-x:hidden;background:#06040f;}::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:#06040f;}::-webkit-scrollbar-thumb{background:rgba(249,115,22,0.4);border-radius:2px;}@keyframes spinSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.book-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);outline:none;padding:12px 16px;font-family:"Space Mono",monospace;font-size:10px;letter-spacing:0.06em;color:#fff;border-radius:2px;transition:border-color 0.3s,background 0.3s;resize:none;}.book-input::placeholder{color:rgba(255,255,255,0.18);}.book-input:focus{border-color:rgba(249,115,22,0.45);background:rgba(249,115,22,0.04);}`}</style>
+    <div style={{ minHeight: '100vh', background: '#fdfbf7', color: '#fff', fontFamily: '"Crimson Text",Georgia,serif', paddingTop: 80, cursor: 'none' }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');*,*::before,*::after{box-sizing:border-box;cursor:none!important;}body{overflow-x:hidden;background:#fdfbf7;}::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:#fdfbf7;}::-webkit-scrollbar-thumb{background:rgba(249,115,22,0.4);border-radius:2px;}@keyframes spinSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.book-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);outline:none;padding:12px 16px;font-family:"Space Mono",monospace;font-size:10px;letter-spacing:0.06em;color:#fff;border-radius:2px;transition:border-color 0.3s,background 0.3s;resize:none;}.book-input::placeholder{color:rgba(255,255,255,0.18);}.book-input:focus{border-color:rgba(249,115,22,0.45);background:rgba(249,115,22,0.04);}`}</style>
       <StarCanvas /><AirplaneCursor />
       <div style={{ position: 'fixed', width: 600, height: 600, top: -150, right: -100, borderRadius: '50%', background: 'radial-gradient(circle,rgba(249,115,22,0.06),transparent)', filter: 'blur(100px)', opacity: 1, pointerEvents: 'none', zIndex: 0 }} />
 

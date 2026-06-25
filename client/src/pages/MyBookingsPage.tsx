@@ -12,7 +12,7 @@ type BookingStatus = 'confirmed' | 'pending' | 'cancelled' | 'completed'
 
 const STATUS: Record<BookingStatus, { color: string; bg: string; border: string; label: string }> = {
   confirmed: { color: '#22c55e', bg: 'rgba(34,197,94,0.08)', border: 'rgba(34,197,94,0.2)', label: 'Confirmed' },
-  pending:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.2)', label: 'Pending' },
+  pending: { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.2)', label: 'Pending' },
   cancelled: { color: '#ef4444', bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.2)', label: 'Cancelled' },
   completed: { color: '#f97316', bg: 'rgba(249,115,22,0.08)', border: 'rgba(249,115,22,0.2)', label: 'Completed' },
 }
@@ -26,17 +26,17 @@ const FILTERS: { key: 'all' | BookingStatus; label: string }[] = [
 ]
 
 function AirplaneCursor() {
-  const planeRef  = useRef<HTMLDivElement>(null)
+  const planeRef = useRef<HTMLDivElement>(null)
   const trailRefs = useRef<(HTMLDivElement | null)[]>([])
-  const pos       = useRef({ x: 0, y: 0 })
-  const actual    = useRef({ x: 0, y: 0 })
-  const prevPos   = useRef({ x: 0, y: 0 })
-  const rafRef    = useRef<number>(0)
+  const pos = useRef({ x: 0, y: 0 })
+  const actual = useRef({ x: 0, y: 0 })
+  const prevPos = useRef({ x: 0, y: 0 })
+  const rafRef = useRef<number>(0)
   const [visible, setVisible] = useState(false)
   const TRAIL = 8
 
   useEffect(() => {
-    const move  = (e: MouseEvent) => { pos.current = { x: e.clientX, y: e.clientY }; setVisible(true) }
+    const move = (e: MouseEvent) => { pos.current = { x: e.clientX, y: e.clientY }; setVisible(true) }
     const leave = () => setVisible(false)
     window.addEventListener('mousemove', move)
     window.addEventListener('mouseleave', leave)
@@ -47,19 +47,19 @@ function AirplaneCursor() {
       const angle = Math.atan2(pos.current.y - prevPos.current.y, pos.current.x - prevPos.current.x) * (180 / Math.PI)
       prevPos.current = { ...actual.current }
       if (planeRef.current) {
-        planeRef.current.style.left      = actual.current.x + 'px'
-        planeRef.current.style.top       = actual.current.y + 'px'
+        planeRef.current.style.left = actual.current.x + 'px'
+        planeRef.current.style.top = actual.current.y + 'px'
         planeRef.current.style.transform = `translate(-50%,-50%) rotate(${angle + 45}deg)`
       }
       trailRefs.current.forEach((el, i) => {
         if (!el) return
         const lag = (i + 1) * 0.06
-        el.style.left    = (pos.current.x + (actual.current.x - pos.current.x) * lag) + 'px'
-        el.style.top     = (pos.current.y + (actual.current.y - pos.current.y) * lag) + 'px'
+        el.style.left = (pos.current.x + (actual.current.x - pos.current.x) * lag) + 'px'
+        el.style.top = (pos.current.y + (actual.current.y - pos.current.y) * lag) + 'px'
         el.style.opacity = String((1 - i / TRAIL) * 0.4)
-        const sz         = `${4 - i * 0.4}px`
-        el.style.width   = sz
-        el.style.height  = sz
+        const sz = `${4 - i * 0.4}px`
+        el.style.width = sz
+        el.style.height = sz
       })
       rafRef.current = requestAnimationFrame(animate)
     }
@@ -125,10 +125,10 @@ function StarCanvas() {
 }
 
 export default function MyBookingsPage() {
-  const [filter, setFilter]           = useState<'all' | BookingStatus>('all')
-  const [bookings, setBookings]       = useState<any[]>([])
-  const [loading, setLoading]         = useState(true)
-  const [error, setError]             = useState<string | null>(null)
+  const [filter, setFilter] = useState<'all' | BookingStatus>('all')
+  const [bookings, setBookings] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [cancellingId, setCancellingId] = useState<string | null>(null)
 
   // Fetch real bookings from API
@@ -173,13 +173,13 @@ export default function MyBookingsPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff', fontFamily: '"Crimson Text",Georgia,serif', paddingTop: 80, cursor: 'none' }}>
+    <div style={{ minHeight: '100vh', background: '#fdfbf7', color: '#fff', fontFamily: '"Crimson Text",Georgia,serif', paddingTop: 80, cursor: 'none' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
         *,*::before,*::after { box-sizing: border-box; cursor: none !important; }
-        body { background: #06040f; }
+        body { background: #fdfbf7; }
         ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-track { background: #06040f; }
+        ::-webkit-scrollbar-track { background: #fdfbf7; }
         ::-webkit-scrollbar-thumb { background: rgba(249,115,22,0.4); border-radius: 2px; }
         @keyframes spinSlow { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
       `}</style>
@@ -247,9 +247,9 @@ export default function MyBookingsPage() {
             {/* Stats */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 3, marginBottom: 36 }}>
               {[
-                { label: 'Total Trips',  val: bookings.length, color: '#f97316' },
-                { label: 'Upcoming',     val: bookings.filter(b => b.status === 'confirmed' || b.status === 'pending').length, color: '#22c55e' },
-                { label: 'Completed',    val: bookings.filter(b => b.status === 'completed').length, color: '#38bdf8' },
+                { label: 'Total Trips', val: bookings.length, color: '#f97316' },
+                { label: 'Upcoming', val: bookings.filter(b => b.status === 'confirmed' || b.status === 'pending').length, color: '#22c55e' },
+                { label: 'Completed', val: bookings.filter(b => b.status === 'completed').length, color: '#38bdf8' },
               ].map(({ label, val, color }, i) => (
                 <motion.div key={label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
                   style={{ border: `1px solid ${color}18`, borderTop: `2px solid ${color}`, background: `${color}06`, borderRadius: 2, padding: '18px', textAlign: 'center' }}>
@@ -262,7 +262,7 @@ export default function MyBookingsPage() {
             {/* Filter tabs */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 28 }}>
               {FILTERS.map(({ key, label }) => {
-                const count  = counts[key] ?? 0
+                const count = counts[key] ?? 0
                 const active = filter === key
                 return (
                   <motion.button key={key} onClick={() => setFilter(key)} whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}
@@ -281,18 +281,18 @@ export default function MyBookingsPage() {
               {filtered.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                   {filtered.map((booking, i) => {
-                    const status    = (booking.status ?? 'pending') as BookingStatus
-                    const st        = STATUS[status] ?? STATUS.pending
+                    const status = (booking.status ?? 'pending') as BookingStatus
+                    const st = STATUS[status] ?? STATUS.pending
                     const isCancelling = cancellingId === booking._id
                     const tourTitle = booking.tour?.title ?? 'Tour'
-                    const tourSlug  = booking.tour?.slug ?? ''
+                    const tourSlug = booking.tour?.slug ?? ''
                     const tourImage = booking.tour?.coverImage ?? ''
-                    const destName  = booking.destination?.name ?? (booking.tour?.destination?.name ?? '')
-                    const duration  = booking.tour?.duration ?? '—'
-                    const travDate  = booking.travelDate ? format(new Date(booking.travelDate), 'dd MMM yyyy') : '—'
-                    const guests    = (booking.guests?.adults ?? 0) + (booking.guests?.children ?? 0)
-                    const ref       = booking.bookingReference ?? '—'
-                    const price     = booking.totalPrice ?? 0
+                    const destName = booking.destination?.name ?? (booking.tour?.destination?.name ?? '')
+                    const duration = booking.tour?.duration ?? '—'
+                    const travDate = booking.travelDate ? format(new Date(booking.travelDate), 'dd MMM yyyy') : '—'
+                    const guests = (booking.guests?.adults ?? 0) + (booking.guests?.children ?? 0)
+                    const ref = booking.bookingReference ?? '—'
+                    const price = booking.totalPrice ?? 0
 
                     return (
                       <motion.div
@@ -345,10 +345,10 @@ export default function MyBookingsPage() {
                           {/* Meta info */}
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 16 }}>
                             {[
-                              destName  && { icon: <FiMapPin size={10} />,    text: destName },
-                              travDate  && { icon: <FiCalendar size={10} />,  text: travDate },
-                              duration  && { icon: <FiClock size={10} />,     text: `${duration} days` },
-                              guests    && { icon: <FiUsers size={10} />,     text: `${guests} travellers` },
+                              destName && { icon: <FiMapPin size={10} />, text: destName },
+                              travDate && { icon: <FiCalendar size={10} />, text: travDate },
+                              duration && { icon: <FiClock size={10} />, text: `${duration} days` },
+                              guests && { icon: <FiUsers size={10} />, text: `${guests} travellers` },
                             ].filter(Boolean).map((item: any) => (
                               <span key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 5, fontFamily: '"Space Mono",monospace', fontSize: 9, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.05em' }}>
                                 <span style={{ color: '#f97316' }}>{item.icon}</span>{item.text}

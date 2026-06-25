@@ -237,13 +237,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr', fontFamily: '"Crimson Text",Georgia,serif', background: '#06040f' }}>
+    <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr', fontFamily: '"Crimson Text",Georgia,serif', background: '#fdfbf7' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
         *, *::before, *::after { box-sizing: border-box; }
         body { cursor: default; }
         ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-track { background: #06040f; }
+        ::-webkit-scrollbar-track { background: #fdfbf7; }
         ::-webkit-scrollbar-thumb { background: rgba(20,184,166,0.4); border-radius: 2px; }
         @keyframes spinSlow { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
         .li {
@@ -278,7 +278,7 @@ export default function LoginPage() {
       </div>
 
       {/* ── RIGHT — Form Panel ──────────────────────────────────────────────── */}
-      <div style={{ background: '#06040f', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 28px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: '#fdfbf7', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 28px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', width: 500, height: 500, top: -150, right: -150, borderRadius: '50%', background: 'radial-gradient(circle,rgba(20,184,166,0.07),transparent)', filter: 'blur(80px)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', width: 400, height: 400, bottom: -100, left: -100, borderRadius: '50%', background: 'radial-gradient(circle,rgba(249,115,22,0.04),transparent)', filter: 'blur(80px)', pointerEvents: 'none' }} />
 

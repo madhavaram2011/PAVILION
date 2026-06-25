@@ -18,7 +18,11 @@
     overflow-x: hidden;
   }
 
-  h1, h2, h3, h4, h5 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
     font-family: 'Playfair Display', serif;
   }
 
@@ -41,6 +45,7 @@
 }
 
 @layer components {
+
   /* Buttons */
   .btn-primary {
     @apply bg-forest-600 hover:bg-forest-700 text-white font-accent font-semibold tracking-widest uppercase text-sm px-8 py-3 rounded-full transition-all duration-300 shadow-forest hover:shadow-glow hover:-translate-y-0.5 active:translate-y-0;
@@ -163,4 +168,59 @@
   opacity: 1;
   transform: translateY(0);
   transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* 🏛️ PAVILION GLOBAL JOURNAL LIGHT OVERRIDE */
+
+/* 1. Force light background on ALL wrapper elements that were using dark themes */
+div[style*="background-color: rgb(6, 4, 15)"],
+div[style*="background: rgb(6, 4, 15)"],
+div[style*="background-color: #06040f"],
+div[style*="background: #06040f"],
+div[style*="backgroundColor: '#06040f'"],
+section[style*="background-color: #06040f"],
+.min-h-screen,
+main {
+  background-color: #fdfbf7 !important;
+  /* Force Alabaster/Cream Journal color */
+}
+
+/* 2. Target Text Visibility: Force text to be dark stone charcol so it's readable on light bg */
+div[style*="color: rgb(255, 255, 255)"],
+div[style*="color: white"],
+span[style*="color: white"],
+p[style*="color: white"],
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #1c1917 !important;
+  /* Deep stone dark charcoal */
+}
+
+/* 3. Soften descriptions and subtext */
+p,
+.text-gray-400,
+.text-stone-400 {
+  color: #44403c !important;
+  /* Muted stone charcoal */
+}
+
+/* 4. Fix input fields so they don't look broken in light mode */
+input,
+textarea,
+select {
+  background-color: #faf6f0 !important;
+  color: #1c1917 !important;
+  border: 1px solid rgba(217, 119, 6, 0.2) !important;
+}
+
+/* 5. Ensure Star Canvas and Twinkling effects don't blind the user on white bg */
+canvas,
+#StarCanvas {
+  opacity: 0.15 !important;
+  /* Dims the star canvas so it blends subtly into the cream background */
+  mix-blend-mode: multiply !important;
 }

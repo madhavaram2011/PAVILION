@@ -20,7 +20,7 @@ const FALLBACK_TOURS = [
     thumb: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400&q=80',
     excerpt: 'Marvel at the Taj Mahal at sunrise, explore Mughal forts in Delhi, and lose yourself in the rose-pink bazaars of Jaipur. India\'s most iconic triangle awaits.',
     highlights: ['Taj Mahal sunrise', 'Red Fort Delhi', 'Amber Fort Jaipur'],
-    accent: '#c9a96e', accentDim: 'rgba(201,169,110,0.15)',
+    accent: '#b8892a', accentDim: 'rgba(184,137,42,0.1)',
     boardingCode: 'GT-01', departure: '06:00', status: 'ON TIME',
     featured: true,
   },
@@ -37,7 +37,7 @@ const FALLBACK_TOURS = [
     thumb: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=400&q=80',
     excerpt: 'Glide through shimmering emerald canals aboard a premium kettuvallam houseboat. Sunrise yoga on deck, candlelit dinners, and the timeless rhythm of village Kerala.',
     highlights: ['Luxury houseboat', 'Varkala cliff beach', 'Kathakali performance'],
-    accent: '#10b981', accentDim: 'rgba(16,185,129,0.15)',
+    accent: '#0d7a55', accentDim: 'rgba(13,122,85,0.08)',
     boardingCode: 'KL-02', departure: '07:30', status: 'ON TIME',
     featured: true,
   },
@@ -54,7 +54,7 @@ const FALLBACK_TOURS = [
     thumb: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=400&q=80',
     excerpt: 'A regal odyssey through India\'s royal heartland — golden deserts, lake palaces, blue cities, and a private dinner inside a 400-year-old haveli under a chandelier sky.',
     highlights: ['Desert camel safari', 'Lake Palace Udaipur', 'Mehrangarh Fort'],
-    accent: '#f59e0b', accentDim: 'rgba(245,158,11,0.15)',
+    accent: '#c07a10', accentDim: 'rgba(192,122,16,0.1)',
     boardingCode: 'RJ-03', departure: '07:00', status: 'FILLING',
     featured: true,
   },
@@ -75,7 +75,7 @@ const TOURS_PLACEHOLDER = [
     thumb: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=400&q=80',
     excerpt: 'Drift through emerald palm-fringed canals on a traditional kettuvallam houseboat. Dawn mists, village life, and cardamom-scented air.',
     highlights: ['Houseboat overnight', 'Spice garden walk', 'Village cooking class'],
-    accent: '#10b981', accentDim: 'rgba(16,185,129,0.15)',
+    accent: '#0d7a55', accentDim: 'rgba(13,122,85,0.08)',
     boardingCode: 'KL-01', departure: '06:00', status: 'ON TIME',
     featured: true,
   },
@@ -92,7 +92,7 @@ const TOURS_PLACEHOLDER = [
     thumb: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=400&q=80',
     excerpt: "From the Pink City's bazaars to Jaisalmer's golden fort rising from desert sands — a regal journey through India's royal heartland.",
     highlights: ['Palace dinner', 'Desert camel safari', 'Blue City walk'],
-    accent: '#f59e0b', accentDim: 'rgba(245,158,11,0.15)',
+    accent: '#c07a10', accentDim: 'rgba(192,122,16,0.1)',
     boardingCode: 'RJ-02', departure: '07:30', status: 'ON TIME',
     featured: true,
   },
@@ -109,7 +109,7 @@ const TOURS_PLACEHOLDER = [
     thumb: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400&q=80',
     excerpt: "White sands, Portuguese-era churches, spice-laden fish curries, and sunsets over the Arabian Sea.",
     highlights: ['Sunset cruise', 'Old Goa churches', 'Spice plantation'],
-    accent: '#06b6d4', accentDim: 'rgba(6,182,212,0.15)',
+    accent: '#0e7a8a', accentDim: 'rgba(14,122,138,0.08)',
     boardingCode: 'GA-03', departure: '09:00', status: 'ON TIME',
     featured: false,
   },
@@ -126,7 +126,7 @@ const TOURS_PLACEHOLDER = [
     thumb: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=400&q=80',
     excerpt: 'Cross ancient passes at 4,500m, sleep under skies ablaze with stars, walk ancient Spiti Valley trade routes.',
     highlights: ['Key Monastery', 'Chandratal Lake', 'Rohtang Pass'],
-    accent: '#38bdf8', accentDim: 'rgba(56,189,248,0.15)',
+    accent: '#1a5fa8', accentDim: 'rgba(26,95,168,0.08)',
     boardingCode: 'HP-04', departure: '05:00', status: 'LIMITED',
     featured: true,
   },
@@ -143,7 +143,7 @@ const TOURS_PLACEHOLDER = [
     thumb: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=400&q=80',
     excerpt: "Watch the Ganga Aarti illuminate sacred ghats at dusk. Follow pilgrims through ancient alleys. Witness India's most profound living ritual.",
     highlights: ['Dawn boat ride', 'Ganga Aarti ceremony', 'Sarnath ruins'],
-    accent: '#a78bfa', accentDim: 'rgba(167,139,250,0.15)',
+    accent: '#6d41b8', accentDim: 'rgba(109,65,184,0.08)',
     boardingCode: 'UP-05', departure: '04:30', status: 'ON TIME',
     featured: false,
   },
@@ -160,7 +160,7 @@ const TOURS_PLACEHOLDER = [
     thumb: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=400&q=80',
     excerpt: 'Cross living root bridges, track rhinos in Kaziranga, share firelight with Naga tribal communities.',
     highlights: ['Living root bridges', 'Kaziranga safari', 'Dzukou Valley trek'],
-    accent: '#34d399', accentDim: 'rgba(52,211,153,0.15)',
+    accent: '#1a7a52', accentDim: 'rgba(26,122,82,0.08)',
     boardingCode: 'NE-06', departure: '06:30', status: 'ON TIME',
     featured: true,
   },
@@ -177,7 +177,7 @@ const TOURS_PLACEHOLDER = [
     thumb: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
     excerpt: "The world's highest motorable passes, turquoise lakes mirroring Himalayan peaks, monasteries perched on clifftops.",
     highlights: ['Pangong Lake sunrise', 'Nubra Valley', 'Khardung La pass'],
-    accent: '#60a5fa', accentDim: 'rgba(96,165,250,0.15)',
+    accent: '#1a5fa8', accentDim: 'rgba(26,95,168,0.08)',
     boardingCode: 'LA-07', departure: '05:30', status: 'FILLING',
     featured: false,
   },
@@ -194,7 +194,7 @@ const TOURS_PLACEHOLDER = [
     thumb: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&q=80',
     excerpt: "Asia's finest beach at Radhanagar, coral gardens alive with colour, and bioluminescent plankton lighting the surf.",
     highlights: ['Radhanagar Beach', 'Coral snorkelling', 'Bioluminescent kayak'],
-    accent: '#22d3ee', accentDim: 'rgba(34,211,238,0.15)',
+    accent: '#0e7a8a', accentDim: 'rgba(14,122,138,0.08)',
     boardingCode: 'AN-08', departure: '08:00', status: 'ON TIME',
     featured: false,
   },
@@ -211,7 +211,7 @@ const TOURS_PLACEHOLDER = [
     thumb: 'https://images.unsplash.com/photo-1523978591478-c753949ff840?w=400&q=80',
     excerpt: "Under a full moon, the Rann transforms into a white infinity mirror. By day, meet master craftsmen of Kutch's legendary embroidery villages.",
     highlights: ['Full moon night walk', 'Kutch embroidery', 'Wild ass sanctuary'],
-    accent: '#fbbf24', accentDim: 'rgba(251,191,36,0.15)',
+    accent: '#b8892a', accentDim: 'rgba(184,137,42,0.1)',
     boardingCode: 'GJ-09', departure: '07:00', status: 'ON TIME',
     featured: false,
   },
@@ -228,7 +228,7 @@ const TOURS_PLACEHOLDER = [
     thumb: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400&q=80',
     excerpt: "Navigate the world's largest mangrove delta by boat, listening for Royal Bengal tigers at the water's edge.",
     highlights: ['Tiger boat safari', 'Mangrove forest walk', 'Village homestay'],
-    accent: '#f472b6', accentDim: 'rgba(244,114,182,0.15)',
+    accent: '#a03060', accentDim: 'rgba(160,48,96,0.08)',
     boardingCode: 'WB-10', departure: '06:00', status: 'ON TIME',
     featured: false,
   },
@@ -245,7 +245,7 @@ const TOURS_PLACEHOLDER = [
     thumb: 'https://images.unsplash.com/photo-1609766418204-94aae0ecfdfc?w=400&q=80',
     excerpt: "The Golden Temple glows at dawn like a jewel set in still water. Share langar with pilgrims, then watch the electric Wagah ceremony.",
     highlights: ['Golden Temple dawn', 'Langar experience', 'Wagah ceremony'],
-    accent: '#fb923c', accentDim: 'rgba(251,146,60,0.15)',
+    accent: '#b8892a', accentDim: 'rgba(184,137,42,0.1)',
     boardingCode: 'PB-11', departure: '04:00', status: 'ON TIME',
     featured: false,
   },
@@ -262,7 +262,7 @@ const TOURS_PLACEHOLDER = [
     thumb: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80',
     excerpt: 'Wander the ruins of the Vijayanagara empire — a boulder-strewn dreamscape of ancient temples at golden hour.',
     highlights: ['Virupaksha Temple', 'Matanga Hill sunrise', 'Badami caves'],
-    accent: '#f97316', accentDim: 'rgba(249,115,22,0.15)',
+    accent: '#c05a18', accentDim: 'rgba(192,90,24,0.08)',
     boardingCode: 'KA-12', departure: '06:30', status: 'ON TIME',
     featured: false,
   },
@@ -276,37 +276,21 @@ const REGION_FLAGS: Record<string, string> = {
 }
 
 const STATUS_STYLE: Record<string, { color: string; pulse: boolean }> = {
-  'ON TIME': { color: '#22c55e', pulse: false },
-  'LIMITED': { color: '#f97316', pulse: true },
-  'FILLING': { color: '#f59e0b', pulse: true },
+  'ON TIME': { color: '#1a7a3c', pulse: false },
+  'LIMITED': { color: '#c05a18', pulse: true },
+  'FILLING': { color: '#b8892a', pulse: true },
 }
 
-// ─── STAR CANVAS ──────────────────────────────────────────────────────────────
-function StarCanvas() {
-  const ref = useRef<HTMLCanvasElement>(null)
-  useEffect(() => {
-    const canvas = ref.current; if (!canvas) return
-    const ctx = canvas.getContext('2d')!; let raf: number
-    const stars = Array.from({ length: 180 }, () => ({
-      x: Math.random(), y: Math.random(), r: Math.random() * 1.1 + 0.2,
-      a: Math.random(), speed: Math.random() * 0.003 + 0.001,
-    }))
-    const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight }
-    resize(); window.addEventListener('resize', resize)
-    let t = 0
-    const draw = () => {
-      t += 0.004; ctx.clearRect(0, 0, canvas.width, canvas.height)
-      stars.forEach(s => {
-        const f = s.a * (0.3 + 0.5 * Math.abs(Math.sin(t * s.speed + s.a * 8)))
-        ctx.beginPath(); ctx.arc(s.x * canvas.width, s.y * canvas.height, s.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(255,255,255,${f})`; ctx.fill()
-      })
-      raf = requestAnimationFrame(draw)
-    }
-    draw()
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize) }
-  }, [])
-  return <canvas ref={ref} style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }} />
+// ─── STAR CANVAS — removed for light theme, replaced by paper texture overlay ──
+function PaperOverlay() {
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E")`,
+      backgroundRepeat: 'repeat',
+      opacity: 0.6,
+    }} />
+  )
 }
 
 // ─── BOARDING PREVIEW (full-screen cinematic panel) ──────────────────────────
@@ -339,7 +323,7 @@ function BoardingPreview({ tour, onClose }: { tour: any; onClose: () => void }) 
           transition={{ duration: 0.3 }}
           style={{
             position: 'fixed', inset: 0, zIndex: 500,
-            background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(20px)',
+            background: 'rgba(28,25,23,0.7)', backdropFilter: 'blur(20px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: 'clamp(20px,4vw,60px)',
           }}
@@ -357,7 +341,7 @@ function BoardingPreview({ tour, onClose }: { tour: any; onClose: () => void }) 
               width: '100%', maxWidth: 1100, borderRadius: 4,
               overflow: 'hidden', position: 'relative',
               border: `1px solid ${tour.accent}40`,
-              boxShadow: `0 0 120px ${tour.accent}25`,
+              boxShadow: `0 0 80px ${tour.accent}18, 0 24px 64px rgba(28,25,23,0.18)`,
               rotateX, rotateY,
               transformStyle: 'preserve-3d',
             }}
@@ -374,26 +358,26 @@ function BoardingPreview({ tour, onClose }: { tour: any; onClose: () => void }) 
                   backgroundSize: 'cover', backgroundPosition: 'center',
                 }}
               />
-              {/* Multi-layer gradient */}
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)' }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(6,4,15,1) 0%, transparent 60%)' }} />
+              {/* Multi-layer gradient — keeps image readable */}
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.25) 50%, rgba(0,0,0,0.08) 100%)' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,8,5,0.98) 0%, transparent 55%)' }} />
 
               {/* Top bar — boarding pass strip */}
               <div style={{
                 position: 'absolute', top: 0, left: 0, right: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '20px 28px',
-                background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)',
+                background: 'rgba(253,251,247,0.12)', backdropFilter: 'blur(8px)',
                 borderBottom: `1px solid ${tour.accent}30`,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 9, letterSpacing: '0.3em', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase' }}>Pavilion Expeditions</span>
-                  <span style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.15)', display: 'inline-block' }} />
+                  <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 9, letterSpacing: '0.3em', color: 'rgba(253,251,247,0.6)', textTransform: 'uppercase' }}>Pavilion Expeditions</span>
+                  <span style={{ width: 1, height: 12, background: 'rgba(253,251,247,0.2)', display: 'inline-block' }} />
                   <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 9, letterSpacing: '0.25em', color: tour.accent }}>BOARDING PASS · {tour.boardingCode}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>Departure {tour.departure}</span>
-                  <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(255,255,255,0.6)' }}>
+                  <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.2em', color: 'rgba(253,251,247,0.4)', textTransform: 'uppercase' }}>Departure {tour.departure}</span>
+                  <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(253,251,247,0.1)', border: '1px solid rgba(253,251,247,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(253,251,247,0.7)' }}>
                     <FiX size={13} />
                   </button>
                 </div>
@@ -410,7 +394,7 @@ function BoardingPreview({ tour, onClose }: { tour: any; onClose: () => void }) 
                   {tour.title}
                 </motion.h2>
                 <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                  style={{ fontFamily: '"Crimson Text",serif', fontStyle: 'italic', fontSize: 18, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6 }}>
+                  style={{ fontFamily: '"Crimson Text",serif', fontStyle: 'italic', fontSize: 18, color: 'rgba(253,251,247,0.7)', lineHeight: 1.6 }}>
                   {tour.excerpt}
                 </motion.p>
               </div>
@@ -420,7 +404,7 @@ function BoardingPreview({ tour, onClose }: { tour: any; onClose: () => void }) 
                 style={{
                   position: 'absolute', bottom: 28, right: 28,
                   display: 'flex', flexDirection: 'column', gap: 6,
-                  background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)',
+                  background: 'rgba(253,251,247,0.92)', backdropFilter: 'blur(12px)',
                   border: `1px solid ${tour.accent}25`, borderRadius: 3, padding: '14px 18px',
                 }}>
                 {[
@@ -433,8 +417,8 @@ function BoardingPreview({ tour, onClose }: { tour: any; onClose: () => void }) 
                 ].map(item => (
                   <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ color: tour.accent }}>{item.icon}</span>
-                    <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.35)', minWidth: 68 }}>{item.label}</span>
-                    <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 9, color: 'rgba(255,255,255,0.75)' }}>{item.val}</span>
+                    <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.12em', color: 'rgba(28,25,23,0.4)', minWidth: 68 }}>{item.label}</span>
+                    <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 9, color: '#1c1917' }}>{item.val}</span>
                   </div>
                 ))}
               </motion.div>
@@ -442,7 +426,7 @@ function BoardingPreview({ tour, onClose }: { tour: any; onClose: () => void }) 
 
             {/* Bottom strip — highlights + CTA */}
             <div style={{
-              background: 'linear-gradient(135deg,rgba(6,4,15,0.98),rgba(10,8,25,0.98))',
+              background: '#faf6f0',
               borderTop: `2px solid ${tour.accent}`,
               padding: '22px 32px',
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap',
@@ -460,16 +444,16 @@ function BoardingPreview({ tour, onClose }: { tour: any; onClose: () => void }) 
               {/* Price + CTA */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexShrink: 0 }}>
                 <div>
-                  <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.3)', margin: 0, textTransform: 'uppercase' }}>From</p>
-                  <p style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 38, background: `linear-gradient(135deg,${tour.accent},#fff)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1, margin: 0 }}>₹{tour.price.toLocaleString('en-IN')}</p>
+                  <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.2em', color: 'rgba(28,25,23,0.4)', margin: 0, textTransform: 'uppercase' }}>From</p>
+                  <p style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 38, color: tour.accent, lineHeight: 1, margin: 0 }}>₹{tour.price.toLocaleString('en-IN')}</p>
                 </div>
                 <Link to={`/booking/${tour.slug}`} style={{
                   display: 'inline-flex', alignItems: 'center', gap: 10,
-                  background: `linear-gradient(135deg,${tour.accent},${tour.accent}cc)`,
-                  color: '#06040f', fontFamily: '"Space Mono",monospace', fontSize: 10,
+                  background: tour.accent,
+                  color: '#fdfbf7', fontFamily: '"Space Mono",monospace', fontSize: 10,
                   letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 700,
                   padding: '14px 26px', borderRadius: 2, textDecoration: 'none',
-                  boxShadow: `0 8px 32px ${tour.accent}45`,
+                  boxShadow: `0 8px 32px ${tour.accent}30`,
                 }}>
                   Board Now <FiArrowRight size={12} />
                 </Link>
@@ -478,7 +462,7 @@ function BoardingPreview({ tour, onClose }: { tour: any; onClose: () => void }) 
           </motion.div>
 
           {/* ESC hint */}
-          <p style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.3em', color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase' }}>ESC to close</p>
+          <p style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.3em', color: 'rgba(28,25,23,0.35)', textTransform: 'uppercase' }}>ESC to close</p>
         </motion.div>
       )}
     </AnimatePresence>
@@ -500,14 +484,14 @@ function DepartureRow({ tour, index, onBoard }: { tour: any; index: number; onBo
       onMouseLeave={() => setHovered(false)}
       style={{
         position: 'relative', overflow: 'hidden',
-        borderBottom: `1px solid rgba(255,255,255,${hovered ? '0.1' : '0.04'})`,
+        borderBottom: `1px solid rgba(28,25,23,${hovered ? '0.12' : '0.06'})`,
         transition: 'all 0.3s ease',
         background: hovered ? `${tour.accentDim}` : 'transparent',
         cursor: 'pointer',
       }}
       onClick={onBoard}
     >
-      {/* Hover image bleed — subtle */}
+      {/* Hover image bleed — very subtle on light bg */}
       <AnimatePresence>
         {hovered && (
           <motion.div
@@ -517,7 +501,8 @@ function DepartureRow({ tour, index, onBoard }: { tour: any; index: number; onBo
               position: 'absolute', inset: 0,
               backgroundImage: `url(${tour.thumb})`,
               backgroundSize: 'cover', backgroundPosition: 'center',
-              filter: 'brightness(0.07) saturate(0.5)',
+              filter: 'brightness(0.92) saturate(0.35)',
+              opacity: 0.06,
               zIndex: 0,
             }}
           />
@@ -545,39 +530,39 @@ function DepartureRow({ tour, index, onBoard }: { tour: any; index: number; onBo
         {/* Boarding code */}
         <div>
           <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 11, letterSpacing: '0.15em', color: tour.accent, margin: 0, fontWeight: 700 }}>{tour.boardingCode}</p>
-          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.2)', margin: '2px 0 0', textTransform: 'uppercase' }}>{tour.departure}</p>
+          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.2em', color: 'rgba(28,25,23,0.35)', margin: '2px 0 0', textTransform: 'uppercase' }}>{tour.departure}</p>
         </div>
 
         {/* Destination */}
-        <div style={{ paddingLeft: 8, borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ paddingLeft: 8, borderLeft: '1px solid rgba(28,25,23,0.1)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
             <span style={{ fontSize: 14 }}>{REGION_FLAGS[tour.region]}</span>
-            <span style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 24, letterSpacing: '0.05em', color: hovered ? '#fff' : 'rgba(240,235,224,0.8)', lineHeight: 1, transition: 'color 0.3s' }}>{tour.title}</span>
-            {tour.featured && <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 6, letterSpacing: '0.2em', padding: '2px 7px', background: 'rgba(201,169,110,0.15)', border: '1px solid rgba(201,169,110,0.4)', color: '#c9a96e', borderRadius: 100, textTransform: 'uppercase' }}>FEATURED</span>}
+            <span style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 24, letterSpacing: '0.05em', color: hovered ? '#1c1917' : '#292524', lineHeight: 1, transition: 'color 0.3s' }}>{tour.title}</span>
+            {tour.featured && <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 6, letterSpacing: '0.2em', padding: '2px 7px', background: 'rgba(184,137,42,0.1)', border: '1px solid rgba(184,137,42,0.35)', color: '#b8892a', borderRadius: 100, textTransform: 'uppercase' }}>FEATURED</span>}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <FiMapPin size={8} color="rgba(201,169,110,0.4)" />
-            <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.3)' }}>{tour.location}</span>
+            <FiMapPin size={8} color="rgba(184,137,42,0.5)" />
+            <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.08em', color: 'rgba(28,25,23,0.4)' }}>{tour.location}</span>
           </div>
         </div>
 
         {/* Region + Type */}
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.15em', padding: '3px 9px', background: `${tour.accent}15`, border: `1px solid ${tour.accent}35`, color: tour.accent, borderRadius: 100, textTransform: 'uppercase' }}>{tour.region}</span>
-          <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.15em', padding: '3px 9px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.35)', borderRadius: 100, textTransform: 'uppercase' }}>{tour.type}</span>
+          <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.15em', padding: '3px 9px', background: `${tour.accent}12`, border: `1px solid ${tour.accent}35`, color: tour.accent, borderRadius: 100, textTransform: 'uppercase' }}>{tour.region}</span>
+          <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.15em', padding: '3px 9px', background: 'rgba(28,25,23,0.05)', border: '1px solid rgba(28,25,23,0.12)', color: 'rgba(28,25,23,0.5)', borderRadius: 100, textTransform: 'uppercase' }}>{tour.type}</span>
         </div>
 
         {/* Duration */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <FiClock size={10} color="rgba(255,255,255,0.2)" />
-          <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 9, color: 'rgba(255,255,255,0.45)' }}>{tour.duration} days</span>
+          <FiClock size={10} color="rgba(28,25,23,0.3)" />
+          <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 9, color: 'rgba(28,25,23,0.55)' }}>{tour.duration} days</span>
         </div>
 
         {/* Rating */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <FiStar size={10} color="#fbbf24" style={{ fill: '#fbbf24' }} />
-          <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 10, color: '#fff', fontWeight: 700 }}>{tour.rating}</span>
-          <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, color: 'rgba(255,255,255,0.2)' }}>({tour.reviews})</span>
+          <FiStar size={10} color="#c07a10" style={{ fill: '#c07a10' }} />
+          <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 10, color: '#1c1917', fontWeight: 700 }}>{tour.rating}</span>
+          <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, color: 'rgba(28,25,23,0.3)' }}>({tour.reviews})</span>
         </div>
 
         {/* Status */}
@@ -585,7 +570,7 @@ function DepartureRow({ tour, index, onBoard }: { tour: any; index: number; onBo
           <motion.div
             animate={st.pulse ? { scale: [1, 1.4, 1], opacity: [1, 0.5, 1] } : {}}
             transition={{ duration: 1.5, repeat: Infinity }}
-            style={{ width: 6, height: 6, borderRadius: '50%', background: st.color, boxShadow: `0 0 6px ${st.color}` }}
+            style={{ width: 6, height: 6, borderRadius: '50%', background: st.color, boxShadow: `0 0 6px ${st.color}60` }}
           />
           <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.15em', color: st.color, textTransform: 'uppercase' }}>{tour.status}</span>
         </div>
@@ -593,7 +578,7 @@ function DepartureRow({ tour, index, onBoard }: { tour: any; index: number; onBo
         {/* Price + action */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end' }}>
           <div style={{ textAlign: 'right' }}>
-            <p style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 22, background: `linear-gradient(135deg,${tour.accent},#f0ebe0)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1, margin: 0 }}>₹{(tour.price / 1000).toFixed(0)}k</p>
+            <p style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 22, color: tour.accent, lineHeight: 1, margin: 0 }}>₹{(tour.price / 1000).toFixed(0)}k</p>
           </div>
           <motion.div
             animate={{ x: hovered ? 0 : -4, opacity: hovered ? 1 : 0.4 }}
@@ -610,11 +595,11 @@ function DepartureRow({ tour, index, onBoard }: { tour: any; index: number; onBo
 // ─── REGION ORBIT SELECTOR ────────────────────────────────────────────────────
 function RegionOrbit({ active, onSelect }: { active: string; onSelect: (r: string) => void }) {
   const regions = [
-    { id: 'North', angle: 270, emoji: '🏔️', color: '#38bdf8', label: 'North' },
-    { id: 'South', angle: 90, emoji: '🌴', color: '#34d399', label: 'South' },
-    { id: 'West', angle: 180, emoji: '🏖️', color: '#fb923c', label: 'West' },
-    { id: 'East', angle: 0, emoji: '🐯', color: '#f472b6', label: 'East' },
-    { id: 'Northeast', angle: 315, emoji: '🌿', color: '#a78bfa', label: 'NE' },
+    { id: 'North', angle: 270, emoji: '🏔️', color: '#1a5fa8', label: 'North' },
+    { id: 'South', angle: 90, emoji: '🌴', color: '#0d7a55', label: 'South' },
+    { id: 'West', angle: 180, emoji: '🏖️', color: '#c05a18', label: 'West' },
+    { id: 'East', angle: 0, emoji: '🐯', color: '#a03060', label: 'East' },
+    { id: 'Northeast', angle: 315, emoji: '🌿', color: '#6d41b8', label: 'NE' },
   ]
 
   return (
@@ -623,7 +608,7 @@ function RegionOrbit({ active, onSelect }: { active: string; onSelect: (r: strin
       {[60, 88].map((r, i) => (
         <div key={r} style={{
           position: 'absolute', width: r * 2, height: r * 2,
-          border: '1px solid rgba(255,255,255,0.06)',
+          border: '1px solid rgba(28,25,23,0.1)',
           borderRadius: '50%', top: '50%', left: '50%',
           transform: 'translate(-50%,-50%)',
           animation: `orbitSpin ${30 + i * 15}s linear infinite ${i % 2 ? 'reverse' : ''}`,
@@ -636,10 +621,10 @@ function RegionOrbit({ active, onSelect }: { active: string; onSelect: (r: strin
         style={{
           position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
           width: 50, height: 50, borderRadius: '50%', cursor: 'pointer',
-          background: active === 'All' ? 'rgba(201,169,110,0.2)' : 'rgba(255,255,255,0.04)',
-          border: `1.5px solid ${active === 'All' ? '#c9a96e' : 'rgba(255,255,255,0.12)'}`,
+          background: active === 'All' ? 'rgba(184,137,42,0.15)' : 'rgba(28,25,23,0.04)',
+          border: `1.5px solid ${active === 'All' ? '#b8892a' : 'rgba(28,25,23,0.14)'}`,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          boxShadow: active === 'All' ? '0 0 20px rgba(201,169,110,0.3)' : 'none',
+          boxShadow: active === 'All' ? '0 0 20px rgba(184,137,42,0.2)' : 'none',
           transition: 'all 0.3s',
           fontSize: 18,
         }}
@@ -662,10 +647,10 @@ function RegionOrbit({ active, onSelect }: { active: string; onSelect: (r: strin
               position: 'absolute',
               left: cx, top: cy,
               width: 36, height: 36, borderRadius: '50%', cursor: 'pointer',
-              background: isActive ? `${reg.color}25` : 'rgba(255,255,255,0.04)',
-              border: `1.5px solid ${isActive ? reg.color : 'rgba(255,255,255,0.1)'}`,
+              background: isActive ? `${reg.color}18` : 'rgba(28,25,23,0.04)',
+              border: `1.5px solid ${isActive ? reg.color : 'rgba(28,25,23,0.12)'}`,
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              boxShadow: isActive ? `0 0 16px ${reg.color}60` : 'none',
+              boxShadow: isActive ? `0 0 16px ${reg.color}40` : 'none',
               transform: `translate(-50%,-50%) scale(${isActive ? 1.2 : 1})`,
               transition: 'all 0.3s',
               fontSize: 14,
@@ -739,16 +724,17 @@ export default function ToursPage() {
       if (!title.includes(q) && !location.includes(q) && !state.includes(q)) return false
     }
     return true
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [tours, regionFilter, typeFilter, search])
+
   // Show loading state only while genuinely loading and no data is available yet
   if (loading && tours.length === 0) {
     return (
-      <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', background: '#fdfbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-          <div style={{ width: 60, height: 60, border: '3px solid rgba(249,115,22,0.2)', borderTop: '3px solid #f97316', borderRadius: '50%', margin: '0 auto 20px', animation: 'spin 0.8s linear infinite' }} />
-          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>Loading tours...</p>
+          <div style={{ width: 60, height: 60, border: '3px solid rgba(184,137,42,0.15)', borderTop: '3px solid #b8892a', borderRadius: '50%', margin: '0 auto 20px', animation: 'spin 0.8s linear infinite' }} />
+          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 14, color: 'rgba(28,25,23,0.4)' }}>Loading tours...</p>
         </div>
       </div>
     )
@@ -758,26 +744,27 @@ export default function ToursPage() {
   // (this branch is intentionally left as a safety net but will rarely be reached)
   if (error && tours.length === 0) {
     return (
-      <div style={{ minHeight: '100vh', background: '#06040f', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', background: '#fdfbf7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
-          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 14, color: '#ef4444', marginBottom: 20 }}>{error}</p>
-          <button onClick={() => window.location.reload()} style={{ padding: '10px 20px', background: '#f97316', color: '#fff', border: 'none', borderRadius: 2, cursor: 'pointer', fontFamily: '"Space Mono",monospace' }}>
+          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 14, color: '#b83232', marginBottom: 20 }}>{error}</p>
+          <button onClick={() => window.location.reload()} style={{ padding: '10px 20px', background: '#b8892a', color: '#fdfbf7', border: 'none', borderRadius: 2, cursor: 'pointer', fontFamily: '"Space Mono",monospace' }}>
             Retry
           </button>
         </div>
       </div>
     )
   }
+
   return (
-    <div style={{ minHeight: '100vh', background: '#06040f', color: '#f0ebe0', fontFamily: '"Crimson Text",Georgia,serif', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#fdfbf7', color: '#1c1917', fontFamily: '"Crimson Text",Georgia,serif', overflowX: 'hidden' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
         *, *::before, *::after { box-sizing: border-box; }
-        body { background: #06040f; overflow-x: hidden; }
+        body { background: #fdfbf7; overflow-x: hidden; }
         ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-track { background: #06040f; }
-        ::-webkit-scrollbar-thumb { background: rgba(201,169,110,0.3); border-radius: 2px; }
-        input::placeholder { color: rgba(240,235,224,0.2); }
+        ::-webkit-scrollbar-track { background: #fdfbf7; }
+        ::-webkit-scrollbar-thumb { background: rgba(184,137,42,0.25); border-radius: 2px; }
+        input::placeholder { color: rgba(28,25,23,0.35); }
         input:focus { outline: none; }
         @keyframes orbitSpin { from{transform:translate(-50%,-50%) rotate(0deg)} to{transform:translate(-50%,-50%) rotate(360deg)} }
         @keyframes tickerScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
@@ -789,18 +776,14 @@ export default function ToursPage() {
         }
       `}</style>
 
-      <StarCanvas />
-
-      {/* Atmospheric nebula */}
-      <div style={{ position: 'fixed', width: 800, height: 800, top: -200, left: -300, borderRadius: '50%', background: 'radial-gradient(circle,rgba(249,115,22,0.06),transparent)', filter: 'blur(120px)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', width: 600, height: 600, bottom: -200, right: -200, borderRadius: '50%', background: 'radial-gradient(circle,rgba(16,185,129,0.05),transparent)', filter: 'blur(100px)', pointerEvents: 'none', zIndex: 0 }} />
+      <PaperOverlay />
 
       {/* Scroll progress — tricolour */}
       <motion.div style={{
         position: 'fixed', top: 0, left: 0, right: 0, height: 2, zIndex: 9999,
         transformOrigin: '0%',
         scaleX: scrollY / (document.documentElement.scrollHeight - window.innerHeight || 1),
-        background: 'linear-gradient(90deg,#ff9933 33%,#f0ebe0 33% 66%,#138808 66%)',
+        background: 'linear-gradient(90deg,#ff9933 33%,rgba(28,25,23,0.4) 33% 66%,#138808 66%)',
       }} />
 
       {/* Boarding preview modal */}
@@ -825,27 +808,23 @@ export default function ToursPage() {
             <div key={i} style={{
               backgroundImage: `url(${src})`,
               backgroundSize: 'cover', backgroundPosition: 'center',
-              filter: 'brightness(0.18) saturate(0.4)',
+              filter: 'brightness(0.45) saturate(0.6)',
               transform: `translateY(${scrollY * (0.1 + i * 0.03)}px)`,
               transition: 'transform 0.05s linear',
             }} />
           ))}
         </div>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(6,4,15,0.3) 0%, rgba(6,4,15,0.7) 50%, rgba(6,4,15,1) 100%)' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(6,4,15,0.8) 0%, transparent 40%, transparent 60%, rgba(6,4,15,0.8) 100%)' }} />
+        {/* Gradient overlay — lighter fade to warm white */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(253,251,247,0.15) 0%, rgba(253,251,247,0.5) 50%, rgba(253,251,247,1) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(253,251,247,0.55) 0%, transparent 35%, transparent 65%, rgba(253,251,247,0.55) 100%)' }} />
 
         {/* Tricolour strip */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, display: 'flex' }}>
-          <div style={{ flex: 1, background: '#ff9933' }} /><div style={{ flex: 1, background: 'rgba(240,235,224,0.7)' }} /><div style={{ flex: 1, background: '#138808' }} />
+          <div style={{ flex: 1, background: '#ff9933' }} /><div style={{ flex: 1, background: 'rgba(28,25,23,0.35)' }} /><div style={{ flex: 1, background: '#138808' }} />
         </div>
 
-        {/* Scanline effect */}
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', opacity: 0.015 }}>
-          <div style={{ position: 'absolute', left: 0, right: 0, height: '30%', background: 'linear-gradient(to bottom,transparent,rgba(255,255,255,0.3),transparent)', animation: 'scanline 8s linear infinite' }} />
-        </div>
-
-        {/* Grid lines */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px)', backgroundSize: '80px 80px', pointerEvents: 'none' }} />
+        {/* Grid lines — very subtle on light */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(28,25,23,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(28,25,23,0.025) 1px,transparent 1px)', backgroundSize: '80px 80px', pointerEvents: 'none' }} />
 
         <div style={{ position: 'relative', zIndex: 1, width: '100%', paddingBottom: 60 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 240px', gap: 40, alignItems: 'end', maxWidth: 1300, margin: '0 auto' }}>
@@ -853,30 +832,30 @@ export default function ToursPage() {
               {/* Terminal label */}
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
-                <GiCompass style={{ color: '#c9a96e', fontSize: 14 }} />
-                <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.4em', textTransform: 'uppercase', color: 'rgba(201,169,110,0.7)' }}>PAVILION DEPARTURE TERMINAL · INDIA</span>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e', animation: 'departureFade 2s ease-in-out infinite' }} />
+                <GiCompass style={{ color: '#b8892a', fontSize: 14 }} />
+                <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.4em', textTransform: 'uppercase', color: 'rgba(184,137,42,0.8)' }}>PAVILION DEPARTURE TERMINAL · INDIA</span>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#1a7a3c', boxShadow: '0 0 8px rgba(26,122,60,0.6)', animation: 'departureFade 2s ease-in-out infinite' }} />
               </motion.div>
 
               <motion.h1 initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 'clamp(4rem,9vw,11rem)', letterSpacing: '0.02em', lineHeight: 0.88, color: '#f0ebe0', marginBottom: 20 }}>
+                style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 'clamp(4rem,9vw,11rem)', letterSpacing: '0.02em', lineHeight: 0.88, color: '#1c1917', marginBottom: 20 }}>
                 ALL<br />
-                <span style={{ WebkitTextStroke: '1px rgba(201,169,110,0.4)', color: 'transparent' }}>DEPARTURES</span><br />
-                <span style={{ color: '#c9a96e' }}>NOW OPEN</span>
+                <span style={{ WebkitTextStroke: '1px rgba(184,137,42,0.4)', color: 'transparent' }}>DEPARTURES</span><br />
+                <span style={{ color: '#b8892a' }}>NOW OPEN</span>
               </motion.h1>
 
               <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                style={{ fontFamily: '"Crimson Text",serif', fontStyle: 'italic', fontSize: 19, color: 'rgba(240,235,224,0.45)', maxWidth: 500, lineHeight: 1.65, marginBottom: 32 }}>
+                style={{ fontFamily: '"Crimson Text",serif', fontStyle: 'italic', fontSize: 19, color: 'rgba(28,25,23,0.6)', maxWidth: 500, lineHeight: 1.65, marginBottom: 32 }}>
                 {tours.length} handcrafted expeditions across every corner of Incredible India. Select your route. Board your journey.
               </motion.p>
 
               {/* Search */}
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 12, border: '1px solid rgba(201,169,110,0.2)', padding: '12px 18px', borderRadius: 2, background: 'rgba(6,4,15,0.8)', backdropFilter: 'blur(12px)', minWidth: 360 }}>
-                <FiSearch size={13} color="rgba(201,169,110,0.5)" />
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 12, border: '1px solid rgba(184,137,42,0.3)', padding: '12px 18px', borderRadius: 2, background: 'rgba(253,251,247,0.9)', backdropFilter: 'blur(12px)', minWidth: 360 }}>
+                <FiSearch size={13} color="rgba(184,137,42,0.6)" />
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search destination, state, type..."
-                  style={{ background: 'none', border: 'none', fontFamily: '"Space Mono",monospace', fontSize: 11, letterSpacing: '0.1em', color: '#f0ebe0', width: 280 }} />
-                {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}><FiX size={12} color="rgba(255,255,255,0.3)" /></button>}
+                  style={{ background: 'none', border: 'none', fontFamily: '"Space Mono",monospace', fontSize: 11, letterSpacing: '0.1em', color: '#1c1917', width: 280 }} />
+                {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}><FiX size={12} color="rgba(28,25,23,0.4)" /></button>}
               </motion.div>
             </div>
 
@@ -884,7 +863,7 @@ export default function ToursPage() {
             <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
               <RegionOrbit active={regionFilter} onSelect={setRegionFilter} />
-              <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', textAlign: 'center' }}>Select Region</p>
+              <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(28,25,23,0.35)', textAlign: 'center' }}>Select Region</p>
             </motion.div>
           </div>
         </div>
@@ -896,9 +875,9 @@ export default function ToursPage() {
         {/* Board header */}
         <div style={{
           position: 'sticky', top: 0, zIndex: 100,
-          background: 'rgba(6,4,15,0.96)', backdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(255,255,255,0.04)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          background: 'rgba(250,246,240,0.97)', backdropFilter: 'blur(20px)',
+          borderTop: '1px solid rgba(28,25,23,0.06)',
+          borderBottom: '1px solid rgba(28,25,23,0.08)',
         }}>
           {/* Column headers */}
           <div style={{
@@ -908,7 +887,7 @@ export default function ToursPage() {
             gap: 12, alignItems: 'center',
           }}>
             {['FLIGHT', 'DESTINATION', 'REGION / TYPE', 'DURATION', 'RATING', 'STATUS', 'FARE'].map((col, i) => (
-              <span key={col} style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', paddingLeft: i === 1 ? 8 : 0 }}>{col}</span>
+              <span key={col} style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(28,25,23,0.35)', paddingLeft: i === 1 ? 8 : 0 }}>{col}</span>
             ))}
           </div>
 
@@ -916,20 +895,20 @@ export default function ToursPage() {
           <div style={{
             display: 'flex', alignItems: 'center', gap: 6,
             padding: '8px clamp(20px,4vw,60px)',
-            borderTop: '1px solid rgba(255,255,255,0.04)',
+            borderTop: '1px solid rgba(28,25,23,0.06)',
           }}>
-            <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.3em', color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', marginRight: 4 }}>TYPE</span>
+            <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.3em', color: 'rgba(28,25,23,0.3)', textTransform: 'uppercase', marginRight: 4 }}>TYPE</span>
             {TYPES.map(t => {
-              const colors: Record<string, string> = { Adventure: '#38bdf8', Cultural: '#c9a96e', Beach: '#22d3ee', Spiritual: '#a78bfa', All: '#fff' }
+              const colors: Record<string, string> = { Adventure: '#1a5fa8', Cultural: '#b8892a', Beach: '#0e7a8a', Spiritual: '#6d41b8', All: '#1c1917' }
               const active = typeFilter === t
               return (
                 <motion.button key={t} onClick={() => setTypeFilter(t)} whileTap={{ scale: 0.95 }}
                   style={{
                     padding: '4px 12px', borderRadius: 100, cursor: 'pointer',
                     fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.15em', textTransform: 'uppercase',
-                    background: active ? `${colors[t] || '#fff'}18` : 'transparent',
-                    border: `1px solid ${active ? (colors[t] || '#fff') + '60' : 'rgba(255,255,255,0.07)'}`,
-                    color: active ? colors[t] || '#fff' : 'rgba(255,255,255,0.3)',
+                    background: active ? `${colors[t] || '#1c1917'}14` : 'transparent',
+                    border: `1px solid ${active ? (colors[t] || '#1c1917') + '60' : 'rgba(28,25,23,0.1)'}`,
+                    color: active ? colors[t] || '#1c1917' : 'rgba(28,25,23,0.35)',
                     transition: 'all 0.2s', outline: 'none',
                   }}>{t}</motion.button>
               )
@@ -938,13 +917,13 @@ export default function ToursPage() {
             {/* Results count */}
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
               <motion.span key={filtered.length} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 28, background: 'linear-gradient(135deg,#c9a96e,#f0d99b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1 }}>
+                style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 28, color: '#b8892a', lineHeight: 1 }}>
                 {filtered.length}
               </motion.span>
-              <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.25em', color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase' }}>departures</span>
+              <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.25em', color: 'rgba(28,25,23,0.3)', textTransform: 'uppercase' }}>departures</span>
               {(regionFilter !== 'All' || typeFilter !== 'All' || search) && (
                 <button onClick={() => { setRegionFilter('All'); setTypeFilter('All'); setSearch('') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 100, padding: '3px 10px', cursor: 'pointer', fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.15em', color: 'rgba(239,68,68,0.6)', textTransform: 'uppercase' }}>
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: '1px solid rgba(180,32,32,0.25)', borderRadius: 100, padding: '3px 10px', cursor: 'pointer', fontFamily: '"Space Mono",monospace', fontSize: 7, letterSpacing: '0.15em', color: 'rgba(180,32,32,0.55)', textTransform: 'uppercase' }}>
                   <FiX size={8} /> Clear
                 </button>
               )}
@@ -956,11 +935,11 @@ export default function ToursPage() {
         <AnimatePresence mode="wait">
           {filtered.length === 0 ? (
             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              style={{ textAlign: 'center', padding: '80px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+              style={{ textAlign: 'center', padding: '80px 0', borderBottom: '1px solid rgba(28,25,23,0.06)' }}>
               <p style={{ fontSize: 48, marginBottom: 12 }}>🗺️</p>
-              <p style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 28, color: 'rgba(240,235,224,0.3)', letterSpacing: '0.05em', marginBottom: 20 }}>No departures match your route</p>
+              <p style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 28, color: 'rgba(28,25,23,0.3)', letterSpacing: '0.05em', marginBottom: 20 }}>No departures match your route</p>
               <button onClick={() => { setRegionFilter('All'); setTypeFilter('All'); setSearch('') }}
-                style={{ padding: '10px 24px', borderRadius: 2, cursor: 'pointer', background: 'rgba(201,169,110,0.08)', border: '1px solid rgba(201,169,110,0.25)', color: '#c9a96e', fontFamily: '"Space Mono",monospace', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                style={{ padding: '10px 24px', borderRadius: 2, cursor: 'pointer', background: 'rgba(184,137,42,0.08)', border: '1px solid rgba(184,137,42,0.3)', color: '#b8892a', fontFamily: '"Space Mono",monospace', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
                 Show All Departures
               </button>
             </motion.div>
@@ -974,11 +953,11 @@ export default function ToursPage() {
         </AnimatePresence>
 
         {/* Bottom hint */}
-        <div style={{ textAlign: 'center', padding: '36px', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.15)' }}>
+        <div style={{ textAlign: 'center', padding: '36px', borderTop: '1px solid rgba(28,25,23,0.06)' }}>
+          <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(28,25,23,0.25)' }}>
             Hover any departure to preview · Click to board
           </p>
-          <p style={{ fontFamily: '"Crimson Text",serif', fontStyle: 'italic', fontSize: 14, color: 'rgba(255,255,255,0.15)', marginTop: 6 }}>
+          <p style={{ fontFamily: '"Crimson Text",serif', fontStyle: 'italic', fontSize: 14, color: 'rgba(28,25,23,0.3)', marginTop: 6 }}>
             More destinations launching as we expand across every state of India
           </p>
         </div>
@@ -988,33 +967,35 @@ export default function ToursPage() {
       <section style={{
         margin: '0 clamp(20px,5vw,80px)', marginBottom: 80,
         position: 'relative', overflow: 'hidden', borderRadius: 3,
-        border: '1px solid rgba(201,169,110,0.12)',
+        border: '1px solid rgba(184,137,42,0.18)',
         padding: 'clamp(40px,6vw,72px)',
       }}>
         <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: 'url(https://images.unsplash.com/photo-1519058082700-08a0b56da9b4?w=1400&q=70)',
           backgroundSize: 'cover', backgroundPosition: 'center',
-          filter: 'brightness(0.06) saturate(0.3)',
+          filter: 'brightness(0.08) saturate(0.3)',
         }} />
+        {/* Warm light wash over image */}
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(253,251,247,0.88)' }} />
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, display: 'flex' }}>
-          <div style={{ flex: 1, background: '#ff9933' }} /><div style={{ flex: 1, background: 'rgba(240,235,224,0.7)' }} /><div style={{ flex: 1, background: '#138808' }} />
+          <div style={{ flex: 1, background: '#ff9933' }} /><div style={{ flex: 1, background: 'rgba(28,25,23,0.3)' }} /><div style={{ flex: 1, background: '#138808' }} />
         </div>
         <div style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center' }}>
           <div>
-            <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 9, letterSpacing: '0.3em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 14 }}>Private Expeditions</p>
-            <h2 style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 'clamp(2.5rem,4vw,5rem)', letterSpacing: '0.03em', color: '#f0ebe0', lineHeight: 0.92, marginBottom: 16 }}>
-              NO DEPARTURE<br />THAT FITS?<br /><span style={{ color: '#c9a96e' }}>CHARTER YOUR OWN.</span>
+            <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 9, letterSpacing: '0.3em', textTransform: 'uppercase', color: '#b8892a', marginBottom: 14 }}>Private Expeditions</p>
+            <h2 style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 'clamp(2.5rem,4vw,5rem)', letterSpacing: '0.03em', color: '#1c1917', lineHeight: 0.92, marginBottom: 16 }}>
+              NO DEPARTURE<br />THAT FITS?<br /><span style={{ color: '#b8892a' }}>CHARTER YOUR OWN.</span>
             </h2>
-            <p style={{ fontFamily: '"Crimson Text",serif', fontStyle: 'italic', fontSize: 17, color: 'rgba(240,235,224,0.45)', lineHeight: 1.65, marginBottom: 28 }}>
+            <p style={{ fontFamily: '"Crimson Text",serif', fontStyle: 'italic', fontSize: 17, color: 'rgba(28,25,23,0.55)', lineHeight: 1.65, marginBottom: 28 }}>
               Every destination in India is reachable. Tell us where you want to go and we'll design the entire itinerary around you.
             </p>
             <Link to="/contact" style={{
               display: 'inline-flex', alignItems: 'center', gap: 10,
-              background: '#c9a96e', color: '#06040f',
+              background: '#b8892a', color: '#fdfbf7',
               fontFamily: '"Space Mono",monospace', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 700,
               padding: '13px 26px', textDecoration: 'none', borderRadius: 2,
-              boxShadow: '0 8px 28px rgba(201,169,110,0.3)',
+              boxShadow: '0 8px 28px rgba(184,137,42,0.25)',
             }}>
               Plan My Journey <FiArrowRight size={12} />
             </Link>
@@ -1026,10 +1007,10 @@ export default function ToursPage() {
               { n: '100%', label: 'Local Guides', sub: 'born in each region' },
               { n: '24/7', label: 'On-Ground Support', sub: 'always reachable' },
             ].map(item => (
-              <div key={item.label} style={{ border: '1px solid rgba(255,255,255,0.06)', borderRadius: 2, padding: '20px 18px', background: 'rgba(255,255,255,0.02)' }}>
-                <p style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 34, background: 'linear-gradient(135deg,#c9a96e,#f0d99b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1, margin: '0 0 4px' }}>{item.n}</p>
-                <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(240,235,224,0.5)', margin: '0 0 2px' }}>{item.label}</p>
-                <p style={{ fontFamily: '"Crimson Text",serif', fontStyle: 'italic', fontSize: 12, color: 'rgba(255,255,255,0.2)', margin: 0 }}>{item.sub}</p>
+              <div key={item.label} style={{ border: '1px solid rgba(184,137,42,0.14)', borderRadius: 2, padding: '20px 18px', background: 'rgba(253,251,247,0.7)' }}>
+                <p style={{ fontFamily: '"Bebas Neue",sans-serif', fontSize: 34, color: '#b8892a', lineHeight: 1, margin: '0 0 4px' }}>{item.n}</p>
+                <p style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(28,25,23,0.55)', margin: '0 0 2px' }}>{item.label}</p>
+                <p style={{ fontFamily: '"Crimson Text",serif', fontStyle: 'italic', fontSize: 12, color: 'rgba(28,25,23,0.35)', margin: 0 }}>{item.sub}</p>
               </div>
             ))}
           </div>
@@ -1038,14 +1019,14 @@ export default function ToursPage() {
 
       {/* Ticker — safe even when tours is empty */}
       {tours.length > 0 && (
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.04)', padding: '14px 0', overflow: 'hidden', zIndex: 1, position: 'relative' }}>
+        <div style={{ borderTop: '1px solid rgba(28,25,23,0.07)', padding: '14px 0', overflow: 'hidden', zIndex: 1, position: 'relative', background: '#faf6f0' }}>
           <div style={{ display: 'flex', animation: 'tickerScroll 50s linear infinite', width: 'max-content' }}>
             {[...tours, ...tours].map((t, i) => t && (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 28px', borderRight: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>
-                <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.12em', color: t?.accent ?? '#c9a96e' }}>{t?.boardingCode ?? '—'}</span>
-                <span style={{ width: 4, height: 4, borderRadius: '50%', background: t?.accent ?? '#c9a96e', flexShrink: 0 }} />
-                <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, color: 'rgba(240,235,224,0.35)', letterSpacing: '0.08em' }}>{t?.title ?? 'Tour'}</span>
-                <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, color: 'rgba(255,255,255,0.2)' }}>₹{((t?.price ?? 0) / 1000).toFixed(0)}k</span>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 28px', borderRight: '1px solid rgba(28,25,23,0.07)', whiteSpace: 'nowrap' }}>
+                <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, letterSpacing: '0.12em', color: t?.accent ?? '#b8892a' }}>{t?.boardingCode ?? '—'}</span>
+                <span style={{ width: 4, height: 4, borderRadius: '50%', background: t?.accent ?? '#b8892a', flexShrink: 0 }} />
+                <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 8, color: 'rgba(28,25,23,0.5)', letterSpacing: '0.08em' }}>{t?.title ?? 'Tour'}</span>
+                <span style={{ fontFamily: '"Space Mono",monospace', fontSize: 7, color: 'rgba(28,25,23,0.3)' }}>₹{((t?.price ?? 0) / 1000).toFixed(0)}k</span>
               </div>
             ))}
           </div>

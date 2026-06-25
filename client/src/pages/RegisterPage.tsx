@@ -264,13 +264,13 @@ export default function RegisterPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr', fontFamily: '"Crimson Text",Georgia,serif', background: '#06040f' }}>
+    <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr', fontFamily: '"Crimson Text",Georgia,serif', background: '#fdfbf7' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
         *, *::before, *::after { box-sizing: border-box; }
         body { cursor: default; }
         ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-track { background: #06040f; }
+        ::-webkit-scrollbar-track { background: #fdfbf7; }
         ::-webkit-scrollbar-thumb { background: rgba(20,184,166,0.4); border-radius: 2px; }
         @keyframes spinSlow { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
         @keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
@@ -295,7 +295,7 @@ export default function RegisterPage() {
       `}</style>
 
       {/* ── LEFT — Form ────────────────────────────────────────────────────── */}
-      <div style={{ background: '#06040f', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 28px', overflowY: 'auto', position: 'relative' }}>
+      <div style={{ background: '#fdfbf7', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 28px', overflowY: 'auto', position: 'relative' }}>
         <div style={{ position: 'absolute', width: 500, height: 500, top: -160, left: -160, borderRadius: '50%', background: 'radial-gradient(circle,rgba(20,184,166,0.06),transparent)', filter: 'blur(90px)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', width: 400, height: 400, bottom: -100, right: -80, borderRadius: '50%', background: 'radial-gradient(circle,rgba(167,139,250,0.05),transparent)', filter: 'blur(80px)', pointerEvents: 'none' }} />
 
@@ -507,7 +507,7 @@ export default function RegisterPage() {
       </div>
 
       {/* ── RIGHT — Visual Panel ─────────────────────────────────────────────── */}
-      <div className="reg-visual" style={{ background: 'linear-gradient(160deg,#06040f 0%,#080a18 50%,#04110a 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '48px 44px', position: 'relative', overflow: 'hidden' }}>
+      <div className="reg-visual" style={{ background: 'linear-gradient(160deg,#fdfbf7 0%,#080a18 50%,#04110a 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '48px 44px', position: 'relative', overflow: 'hidden' }}>
         <StarCanvas />
 
         {/* Atmospheric glows */}
